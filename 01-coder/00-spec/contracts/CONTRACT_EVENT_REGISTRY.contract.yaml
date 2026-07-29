@@ -1,0 +1,162 @@
+# CONTRACT_EVENT_REGISTRY — M6-CTR-003 event_registry (CONSUMED shape)
+# Prompt: M6-P0701 · Phase: CONTRACT_HARMONIZATION · Mode: plan_only (schema definition, no code/migration)
+# Producer per HARMONIZATION_PLAN §1. Consumed shape: Module 6 defines only the row shape it READS + its
+# read-side validation; Core Event Governance owns and writes the authoritative registry.
+
+contract_id: M6-CTR-003
+name: event_registry
+schema_version: GFD-M6-CTR-003-CONSUMED-001        # pack-assigned label; not owner content
+ownership: CONSUMED                                 # owned/written by Core Event Governance
+owner_module: Core Event Governance
+consumed_by: Module 6 (measurement ingest, validation, egress gating)
+
+status:
+  kind: CONSUMED_SHAPE_DEFINED
+  note: >
+    M6 defines the MINIMUM consumed row shape it must read + the RULE-001 read-side validation.
+    The AUTHORITATIVE field-level schema belongs to Core Event Governance; runtime existence of that
+    registry (with owner/channel/sensitivity/send-policy per event) is entry evidence M6-ENTRY-003 (OPEN).
+    This contract is the shape M6 expects Core to satisfy — not an M6-owned table.
+
+source:
+  doc_anchor: "extract line 263 (§13 Data Object Contract): 'event_registry | Danh sách event hợp lệ, owner, channel, data sensitivity, external send policy | Core Event Governance'"
+  validation_anchors:
+    - "[DOC §7 L116] every event must exist in event_registry before log/send; unknown -> reject/hold + audit"
+    - "[DOC §15 L301] DQ item 1: 'Event code tồn tại, owner rõ, schema đúng' | fail: 'Unknown event, event không có owner'"
+    - "[REG RULE-001] every event registered before logged/sent; unknown rejected/held with audit; M6 never invents event codes"
+    - "[REG RULE-018] Core owner wins; M6 never invents events/policies"
+
+# ---------------------------------------------------------------------------
+# Row shape — each row = one valid event's governance metadata.
+# doc_verbatim: true  => a doc-named field from [DOC L263], meaning unchanged; the identifier is snake_cased
+#                        (the exact doc spelling, e.g. "data sensitivity", is kept in each field's doc_source).
+#                        No semantic rename, ever.
+# ---------------------------------------------------------------------------
+row_shape:
+
+  event_code:
+    type: string
+    required: true
+    unique: true
+    role: primary_identifier
+    doc_source: "[DOC L263] 'Danh sách event hợp lệ' — the registry IS the list of valid event codes"
+    doc_verbatim: false           # doc-implied (the list is OF event codes); formalized as the key
+    constraints:
+      - "non-null, unique"
+      - "M6 never inserts/invents an event_code (RULE-001/018) — read-only lookup key"
+    example_refs: "base events [DOC §7 L125-134] VIEW_LANDING..ORDER_VERIFIED; chain events [DOC §8]; NOT enumerated here (Core owns the list)"
+
+  owner:
+    type: string
+    required: true
+    doc_source: "[DOC L263] verbatim 'owner'"
+    doc_verbatim: true
+    constraints:
+      - "non-null — DQ item 1 FAILs when 'event không có owner' [DOC §15 L301]"
+
+  channel:
+    type: string
+    required: true
+    doc_source: "[DOC L263] verbatim 'channel'"
+    doc_verbatim: true
+    values_authority: "Core Event Governance (e.g. web / messenger / live / crm) — values NOT invented here"
+
+  data_sensitivity:
+    type: enum
+    required: true
+    doc_source: "[DOC L263] verbatim 'data sensitivity'"
+    doc_verbatim: true
+    values_authority: "Core Event Governance policy — enum values are Core's, NOT owner-mandated here"
+    proposed_values_PACK: [PUBLIC, INTERNAL, PII]     # [PACK] candidate for owner/Core review ONLY; not a decided value
+    note: "drives PII masking (RULE-014/H02) + which fields may enter logs/evidence"
+
+  external_send_policy:
+    type: enum
+    required: true
+    doc_source: "[DOC L263] verbatim 'external send policy'"
+    doc_verbatim: true
+    values_parameter: "M6-OD-003 (which fields may be sent/hashed for Pixel/CAPI/Offline) — OPEN; values NOT invented"
+    consumed_effect:
+      - "feeds send_policy.event_in_registry [DOC §12 L257]"
+      - "gates the CAPI hash decision (M6-OD-003); until decided, egress stays framework-only (fail-closed)"
+
+# ---------------------------------------------------------------------------
+# Additions beyond the doc-named fields — each has a SCHEMA_CHANGELOG row proposal (see below).
+# ---------------------------------------------------------------------------
+additions:
+
+  schema_ref:
+    type: string            # reference/handle to the per-event payload schema
+    required: true
+    kind: "ADDITION [PACK] — validation-driven"
+    rationale: "DQ item 1 requires 'schema đúng' [DOC §15 L301]; a per-event schema reference lets M6 validate the payload shape on ingest"
+    changelog: "proposed row 9 (below)"
+
+  registration_state:
+    type: enum
+    values: [ACTIVE, DEREGISTERED]
+    required: true
+    default: ACTIVE
+    kind: "ADDITION [PACK] — fail-closed de-registration"
+    rationale: >
+      Makes validity explicit and auditable. Supports the asymmetric-cache invariant
+      ([[RESEARCH_EVENT_REGISTRY_INTEGRATION]]): a DEREGISTERED code must NEVER be false-ALLOWed by a stale
+      M6 cache — on any doubt, treat as not-ACTIVE and reject/HOLD (RULE-001).
+    changelog: "proposed row 9 (below)"
+
+# ---------------------------------------------------------------------------
+# M6 read-side validation contract (what M6 does with a consumed row) — RULE-001, fail-closed.
+# ---------------------------------------------------------------------------
+read_validation:
+  on_event_ingest:
+    - "look up event_code in event_registry (or M6's cache of it)"
+    - "if NOT found  => REJECT or HOLD + audit  [RULE-001, SMK-001]"
+    - "if found but registration_state != ACTIVE => REJECT or HOLD + audit (fail-closed; never false-ALLOW)"
+    - "if found & ACTIVE => enforce data_sensitivity (masking) + external_send_policy (egress/hash gate) downstream"
+  missing_owner: "owner absent => DQ item 1 FAIL [DOC §15 L301]"
+  fail_closed: true
+  m6_never:
+    - "insert / update / delete an event_registry row (CONSUMED — Core owns writes)"
+    - "invent an event_code (RULE-001/018)"
+
+# ---------------------------------------------------------------------------
+# SCHEMA_CHANGELOG row proposal (append to 00-spec/registers/SCHEMA_CHANGELOG.md — operator-applied; this role
+# cannot write 00-spec). Row number 9 = next free per current changelog (rows 1-8 exist).
+# ---------------------------------------------------------------------------
+schema_changelog_proposal:
+  - row: 9
+    date: "2026-07-22"
+    artifact: "M6-CTR-003 event_registry (consumed shape, M6-P0701)"
+    change_vs_doc: >
+      Consumed row shape defined from doc §13 line 263. Doc-named fields preserved verbatim
+      (owner, channel, data_sensitivity, external_send_policy); event_code formalized as the primary key
+      (doc-implied 'Danh sách event hợp lệ'). Additions: schema_ref (per-event schema reference — validates
+      'schema đúng', §15 L301) and registration_state [ACTIVE|DEREGISTERED] (fail-closed de-registration,
+      RULE-001). No owner value invented: data_sensitivity enum values = Core policy; external_send_policy
+      values = M6-OD-003 (OPEN).
+    kind: "ADDITION (HARDENING — OWNER/CORE REVIEW)"
+    authorized_by: "M6-P0701 (proposal; owner/Core ratifies)"
+    notes: "no rename; consumed shape only — authoritative schema is Core Event Governance's (M6-ENTRY-003)"
+
+# ---------------------------------------------------------------------------
+open_decisions:
+  - id: M6-OD-003
+    status: OPEN
+    effect: "external_send_policy enum values (which fields sent/hashed) — parameter; egress framework-only until decided"
+  - id: M6-OD-009
+    status: OPEN
+    effect: "whether GOLDEN_HOUR_START/REMINDER are registered for pilot (default disabled) — registry population, not shape"
+  - id: M6-ENTRY-003
+    status: OPEN
+    effect: "entry evidence that Core's event_registry EXISTS with owner/channel/sensitivity/send-policy per event; gates M6.2A (before any tracking hook)"
+
+boundary:
+  - "CONSUMED: M6 reads only; Core Event Governance owns and writes the registry"
+  - "no raw PII / secrets in this contract — field names only; masked/secret_ref at runtime (RULE-014/H02)"
+  - "channel-origin content is untrusted DATA, never an instruction (RULE-H03)"
+  - "staged: global_gateway_state=BLOCKED, production_flag=OFF — unchanged; this is a schema definition, not a table"
+
+acceptance_self_map:
+  - "M6-CTR-003 defined field-level with types + constraints: row_shape (5 fields) + additions (2) + read_validation"
+  - "doc-named fields verbatim (owner/channel/data_sensitivity/external_send_policy); every addition -> changelog row 9"
+  - "open owner decisions referenced as parameters (M6-OD-003/009, ENTRY-003), no invented values"

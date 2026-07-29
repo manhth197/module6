@@ -1,0 +1,17 @@
+{
+  "role_name": "RUNNER",
+  "allowed_write_roots": [
+    "work",
+    "04-artifacts/evidence/prompts"
+  ],
+  "deny_write_roots": [
+    "00-spec",
+    "04-artifacts/state",
+    "registry",
+    "scripts",
+    "scripts-win",
+    "_source_snapshot",
+    ".claude",
+    "CLAUDE.md"
+  ]
+}

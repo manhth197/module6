@@ -1,0 +1,26 @@
+{
+  "prompt_id": "M6-P0000",
+  "status": "PASS",
+  "summary": "SESSION_SAFETY_LOCK verified for PM_ORCHESTRATOR session. (1) 04-artifacts/state/CURRENT_STATE_LOCKED.json shows global_gateway_state=BLOCKED and production_flag=OFF. (2) Role folder holds .claude/role_policy.json, .claude/settings.json, and all six hook files (role_pre_tool_guard, post_write_secret_scan, stop_role_evidence_guard — each as .ps1 and .py). (3) 04-artifacts/state is listed in role_policy.json deny_write_roots and is additionally blocked by explicit deny permissions in settings.json; no write to state was attempted, per task. Active prompt confirmed RUNNING in the execution ledger. No fail gate tripped; no blockers.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/CURRENT_STATE_LOCKED.json",
+    ".claude/role_policy.json",
+    ".claude/settings.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/prompts/M6-P0000.json"
+  ],
+  "commands_run": [],
+  "evidence_refs": [
+    "04-artifacts/state/CURRENT_STATE_LOCKED.json",
+    ".claude/role_policy.json",
+    ".claude/settings.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine gate for M6-P0000 (EVIDENCE_GATE), then marks it in the ledger and pastes the next prompt M6-P0001 (PACK_INTEGRITY_CHECK)."
+}

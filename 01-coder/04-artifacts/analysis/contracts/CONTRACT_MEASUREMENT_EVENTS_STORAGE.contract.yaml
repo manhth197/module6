@@ -1,0 +1,343 @@
+# CONTRACT_MEASUREMENT_EVENTS_STORAGE — M6-CTR-001 ads_measurement_event -> table ads_measurement_events
+# Prompt: M6-P0707 · Phase: CONTRACT_HARMONIZATION · Mode: plan_only (STORAGE BINDING; no code/migration)
+# Single-contract file => root is a single mapping (parse-safe).
+#
+# NATURE: BINDING, NOT a schema producer. M6-CTR-001 is DRAFT_LOCKED — its 20 fields are locked verbatim
+# in SPEC §10.1 (extract L191-211). This artifact binds those 20 fields to the physical storage table
+# ads_measurement_events [DOC §13 L273]: keys, indexes, immutability zones. The 20 doc fields are NOT
+# renamed, removed, or retyped. The single physical addition (ingested_at) carries changelog row 18.
+
+contract_id: M6-CTR-001
+name: ads_measurement_event
+binds_table: ads_measurement_events                  # [DOC §13 L273] plural table; singular = its row contract (CHANGELOG row 1)
+kind: STORAGE_BINDING                                 # not a producer; fields already DRAFT_LOCKED in SPEC §10.1
+schema_version: GFD-M6-CTR-001-STORAGE-BINDING-001    # pack label; not owner content
+ownership: M6                                         # M6 owns & writes the normalized measurement store
+status_lock: >
+  DRAFT_LOCKED (SPEC §10.1). This binding does NOT redefine the schema: all 20 fields are reproduced
+  verbatim (name / type / optionality) from the owner document; only physical storage semantics
+  (PK, UNIQUE, indexes, immutability zones) are added, plus one clearly-marked physical column.
+written_by: >
+  runtime/normalizer INSERTs a row (Zone A fixed at insert); named enrichment workers UPDATE only their
+  zone (attribution_materializer M6-CTR-023 -> Zone B; data_quality_checker M6-CTR-024 -> Zone C).
+read_by: Module 6 (dashboard/ROAS query layer M6-CTR-015/018, evidence pack M6-CTR-025, audit)
+
+status_summary:
+  kind: STORAGE_BINDING_DEFINED
+  note: >
+    The normalized event store that serves dashboard/ROAS [DOC §13 L273 'Event đã chuẩn hóa phục vụ
+    dashboard/ROAS']. Rows are appended and then ENRICHED in place by named workers under locked rules;
+    the event-identity facts are write-once (no history rewrite), verified revenue/attribution is
+    set-once and never silently overwritten (RULE-003/008), and data_quality_status has an audited
+    PASS|HOLD|FAIL lifecycle (RULE-009). This is NOT a wholesale append-only-immutable table (that would
+    contradict enrichment) and NOT freely mutable (that would break RULE-003/007/008).
+
+source:
+  doc_anchor_contract: "[DOC §10.1 extract L191-211] ads_measurement_event — 20 fields, DRAFT_LOCKED (verbatim below)"
+  doc_anchor_table: "[DOC §13 L273] 'ads_measurement_events | Event đã chuẩn hóa phục vụ dashboard/ROAS | Module 6'"
+  changelog_observation: "[SCHEMA_CHANGELOG row 1] doc singular contract = row of plural table; pack performs NO rename"
+  rule_anchors:
+    - "[REG RULE-001] event_code must be an ACTIVE event in event_registry (M6-CTR-003) — registry gate (enforced upstream at ingest)"
+    - "[REG RULE-002] consent fail-closed; consent_snapshot_id references M6-CTR-006 (guest_marketing_consent_snapshot)"
+    - "[REG RULE-003] revenue_value ONLY from ORDER_VERIFIED (Commerce Verified Revenue only, L256)"
+    - "[REG RULE-005] idempotency_key = event_code + page_id + session_id + raw_event_hash + normalized_ts (LOCKED); UNIQUE guard here (SMK-003)"
+    - "[REG RULE-006] identity resolution/stitching recorded in the identity-mapping layer with audit — NOT by mutating a historical measurement row"
+    - "[REG RULE-008] attribution snapshot immutable after order verified; every correction has an adjustment record {actor, reason, audit, evidence} (L242)"
+    - "[REG RULE-009] LOW/HOLD/FAIL rows never used as scale evidence (L240)"
+    - "[REG RULE-014 / H02] no raw PII in logs/evidence; mask abc***xy + secret_ref (M6-OD-012)"
+    - "[REG RULE-021] Commerce owns order-capture validity; order_code is a REFERENCE, M6 never writes order state"
+
+# ---------------------------------------------------------------------------
+# The 20 DRAFT_LOCKED doc fields — reproduced VERBATIM (doc_locked: true), each with its physical binding.
+# doc_type / doc_optional are exactly as in extract L191-211. immutability_zone/key/index are the [PACK] binding.
+# ---------------------------------------------------------------------------
+row_contract_doc_locked:
+
+  event_id:
+    doc_type: string
+    doc_optional: false
+    doc_source: "[DOC §10.1 L192] 'event_id: string'"
+    doc_locked: true
+    binding: { key: PRIMARY_KEY, immutability_zone: A_event_identity_write_once }
+
+  event_code:
+    doc_type: string
+    doc_optional: false
+    doc_source: "[DOC §10.1 L193] 'event_code: string'"
+    doc_locked: true
+    binding: { index: true, immutability_zone: A_event_identity_write_once }
+    note: "must be ACTIVE in event_registry (M6-CTR-003, RULE-001); registry gate enforced upstream at ingest"
+
+  event_ts:
+    doc_type: datetime
+    doc_optional: false
+    doc_source: "[DOC §10.1 L194] 'event_ts: datetime'"
+    doc_locked: true
+    binding: { index: true, partition_candidate: true, immutability_zone: A_event_identity_write_once }
+    note: "BUSINESS event time (client/source supplied); distinct from the physical ingested_at (server time)"
+
+  customer_id:
+    doc_type: string
+    doc_optional: true
+    doc_source: "[DOC §10.1 L195] 'customer_id: optional string'"
+    doc_locked: true
+    pii_class: IDENTITY
+    binding: { immutability_zone: A_event_identity_write_once }
+    note: "at-event identity; masked in logs/evidence (RULE-014/H02). Later stitching recorded in identity-mapping layer (RULE-006), NOT by rewriting this row"
+
+  guest_id:
+    doc_type: string
+    doc_optional: true
+    doc_source: "[DOC §10.1 L196] 'guest_id: optional string'"
+    doc_locked: true
+    pii_class: IDENTITY
+    binding: { immutability_zone: A_event_identity_write_once }
+    note: "at-event guest identity; same masking + no-rewrite rule as customer_id (RULE-006/014)"
+
+  page_id:
+    doc_type: string
+    doc_optional: true
+    doc_source: "[DOC §10.1 L197] 'page_id: optional string'"
+    doc_locked: true
+    binding: { index: true, immutability_zone: A_event_identity_write_once }
+
+  live_session_id:
+    doc_type: string
+    doc_optional: true
+    doc_source: "[DOC §10.1 L198] 'live_session_id: optional string'"
+    doc_locked: true
+    binding: { immutability_zone: A_event_identity_write_once }
+
+  campaign_id:
+    doc_type: string
+    doc_optional: true
+    doc_source: "[DOC §10.1 L199] 'campaign_id: optional string'"
+    doc_locked: true
+    binding: { index: true, immutability_zone: A_event_identity_write_once }
+    note: "dashboard/ROAS grouping dimension"
+
+  adset_id:
+    doc_type: string
+    doc_optional: true
+    doc_source: "[DOC §10.1 L200] 'adset_id: optional string'"
+    doc_locked: true
+    binding: { index: true, immutability_zone: A_event_identity_write_once }
+
+  ad_id:
+    doc_type: string
+    doc_optional: true
+    doc_source: "[DOC §10.1 L201] 'ad_id: optional string'"
+    doc_locked: true
+    binding: { index: true, immutability_zone: A_event_identity_write_once }
+
+  sales_session_id:
+    doc_type: string
+    doc_optional: true
+    doc_source: "[DOC §10.1 L202] 'sales_session_id: optional string'"
+    doc_locked: true
+    binding: { immutability_zone: A_event_identity_write_once }
+
+  quote_snapshot_id:
+    doc_type: string
+    doc_optional: true
+    doc_source: "[DOC §10.1 L203] 'quote_snapshot_id: optional string'"
+    doc_locked: true
+    binding: { immutability_zone: A_event_identity_write_once }
+    note: "REFERENCE to M3 QuoteSnapshot (price truth); M6 links only, NEVER writes QuoteSnapshot (boundary)"
+
+  order_code:
+    doc_type: string
+    doc_optional: true
+    doc_source: "[DOC §10.1 L204] 'order_code: optional string'"
+    doc_locked: true
+    binding: { index: true, immutability_zone: B_verified_enrichment_set_once }
+    note: "REFERENCE to a Commerce/M8 order; present with revenue_value only when ORDER_VERIFIED (RULE-003). M6 never writes order state (RULE-021)"
+
+  revenue_value:
+    doc_type: number
+    doc_optional: true
+    doc_source: "[DOC §10.1 L205] 'revenue_value: optional number'"
+    doc_locked: true
+    binding: { immutability_zone: B_verified_enrichment_set_once }
+    note: "ONLY from ORDER_VERIFIED (RULE-003, revenue_value_source=Commerce Verified Revenue only L256). Set-once; verified value NEVER overwritten (M6-CTR-023 duty). PAYMENT_COMPLETED remains non-revenue until M6-OD-008"
+
+  currency:
+    doc_type: "VND"
+    doc_optional: false
+    doc_source: "[DOC §10.1 L206] 'currency: VND'"
+    doc_locked: true
+    binding: { immutability_zone: A_event_identity_write_once }
+    note: "locked constant VND (not an enum, not variable); required => fixed at INSERT (Zone A write-once), NOT deferred to the ORDER_VERIFIED path; preserved verbatim"
+
+  attribution_context:
+    doc_type: object
+    doc_optional: false
+    doc_source: "[DOC §10.1 L207] 'attribution_context: object'"
+    doc_locked: true
+    binding: { immutability_zone: B_verified_enrichment_set_once }
+    note: >
+      the attribution object (shape = M6-CTR-002 ads_attribution_context, 19 fields). Materialized by
+      attribution_materializer (M6-CTR-023); IMMUTABLE after order verified (RULE-008). Physical binding
+      (embedded object vs FK to ads_attribution_context) depends on stack M6-OD-011; the doc field name/type
+      are unchanged. Attribution MODEL selection is M6-OD-005 (does not alter this binding)
+
+  consent_snapshot_id:
+    doc_type: string
+    doc_optional: true
+    doc_source: "[DOC §10.1 L208] 'consent_snapshot_id: optional string'"
+    doc_locked: true
+    binding: { immutability_zone: A_event_identity_write_once }
+    note: "REFERENCE to M6-CTR-006 guest_marketing_consent_snapshot; consent fail-closed at pipeline (RULE-002)"
+
+  idempotency_key:
+    doc_type: string
+    doc_optional: false
+    doc_source: "[DOC §10.1 L209] 'idempotency_key: string'"
+    doc_locked: true
+    binding: { key: UNIQUE, immutability_zone: A_event_identity_write_once }
+    formula: "event_code + page_id + session_id + raw_event_hash + normalized_ts"   # LOCKED RULE-005 (L255)
+    note: "UNIQUE => at-most-once measurement row per event (RULE-005, SMK-003 no double count). Formula not altered"
+
+  correlation_id:
+    doc_type: string
+    doc_optional: false
+    doc_source: "[DOC §10.1 L210] 'correlation_id: string'"
+    doc_locked: true
+    binding: { index: true, immutability_zone: A_event_identity_write_once }
+    note: "trace id for evidence linkage (§22 evidence pack M6-CTR-025)"
+
+  data_quality_status:
+    doc_type: "enum: PASS | HOLD | FAIL"
+    doc_optional: false
+    doc_source: "[DOC §10.1 L211] 'data_quality_status: PASS | HOLD | FAIL'"
+    doc_locked: true
+    enum_verbatim: [PASS, HOLD, FAIL]
+    binding: { index: true, immutability_zone: C_quality_status_audited }
+    note: "set/transitioned ONLY by data_quality_checker (M6-CTR-024); HOLD/FAIL rows never scale evidence (RULE-009)"
+
+# ---------------------------------------------------------------------------
+# Physical additions beyond the 20 doc fields — each carries a changelog row.
+# ---------------------------------------------------------------------------
+row_shape_additions:
+  ingested_at:
+    type: datetime
+    required: true
+    kind: "ADDITION [PACK] — physical persistence timestamp (changelog row 18)"
+    immutability_zone: A_event_identity_write_once
+    note: >
+      server-side persistence/append-audit time; DISTINCT from the business event_ts (which is source-supplied
+      and may be backdated). Used for append-audit + partitioning. If the owner prefers a single timestamp,
+      this addition may be rejected — the 20 doc fields stand regardless.
+
+# ---------------------------------------------------------------------------
+storage_keys:
+  primary_key: event_id                              # [DOC field] stable event identity
+  unique_constraints:
+    - idempotency_key                                # RULE-005 idempotency; no double-count (SMK-003)
+  indexes:                                           # dashboard/ROAS + audit query paths (over doc fields)
+    - event_ts
+    - event_code
+    - campaign_id
+    - adset_id
+    - ad_id
+    - page_id
+    - order_code
+    - data_quality_status
+    - correlation_id
+  partition_candidate: "event_ts or ingested_at (physical; engine + strategy gated by stack M6-OD-011)"
+
+# ---------------------------------------------------------------------------
+immutability_zones:
+  A_event_identity_write_once:
+    fields: [event_id, event_code, event_ts, customer_id, guest_id, page_id, live_session_id,
+             campaign_id, adset_id, ad_id, sales_session_id, quote_snapshot_id, consent_snapshot_id,
+             currency, idempotency_key, correlation_id, ingested_at]
+    rule: >
+      immutable after INSERT — the event's identity / consent / trace facts (and the locked constant
+      currency=VND) never change (no history rewrite, no hard delete). Identity stitching (guest->customer)
+      is recorded in the identity-mapping layer with audit (RULE-006), NEVER by mutating this historical row.
+  B_verified_enrichment_set_once:
+    fields: [attribution_context, revenue_value, order_code]
+    rule: >
+      populated by named enrichment workers on the order path. revenue_value ONLY from ORDER_VERIFIED
+      (RULE-003). attribution_context is materialized by attribution_materializer (M6-CTR-023) and
+      IMMUTABLE after order verified (RULE-008). Verified revenue is NEVER overwritten (M6-CTR-023 duty).
+      Any post-verify correction requires an adjustment record {actor, reason, audit, evidence} (RULE-008,
+      L242) written to the audit log — NEVER a silent in-place edit.
+  C_quality_status_audited:
+    fields: [data_quality_status]
+    rule: >
+      lifecycle PASS|HOLD|FAIL, set/transitioned ONLY by data_quality_checker (M6-CTR-024); every transition
+      audited. HOLD/FAIL (and LOW-confidence attribution) rows are NEVER used as scale evidence (RULE-009).
+
+# ---------------------------------------------------------------------------
+write_validation:
+  allowed_ops:
+    - "INSERT: runtime/normalizer appends a row; Zone A fixed at insert; data_quality_status set to its initial value"
+    - "UPDATE (Zone B only): attribution_materializer (M6-CTR-023) sets attribution_context / revenue_value / order_code under RULE-003 + RULE-008 (set-once; no verified-revenue overwrite)"
+    - "UPDATE (Zone C only): data_quality_checker (M6-CTR-024) transitions data_quality_status (audited)"
+  forbidden_ops:
+    - "DELETE — no hard delete, no history rewrite"
+    - "UPDATE of any Zone A field (event identity / consent / trace are immutable)"
+    - "overwrite of a verified revenue_value or a post-verify attribution_context WITHOUT an adjustment record (RULE-008)"
+    - "setting revenue_value from anything other than an ORDER_VERIFIED order (RULE-003)"
+  invariants:
+    - "all 20 doc fields preserved verbatim — names, types, optionality unchanged (DRAFT_LOCKED SPEC §10.1); currency=VND and data_quality_status=[PASS|HOLD|FAIL] verbatim"
+    - "PRIMARY KEY event_id; UNIQUE idempotency_key => at-most-once measurement row per event (RULE-005, SMK-003)"
+    - "event_code must resolve to an ACTIVE event_registry entry (M6-CTR-003, RULE-001) — gate upstream at ingest"
+    - "revenue_value present only alongside an ORDER_VERIFIED order_code (RULE-003)"
+    - "no raw PII in logs/evidence: customer_id / guest_id / order_code masked (abc***xy) + secret_ref (RULE-014/H02, M6-OD-012)"
+  m6_never:
+    - "write QuoteSnapshot (quote_snapshot_id REFERENCES M3 price truth) or order state (order_code REFERENCES Commerce/M8; RULE-021)"
+    - "rewrite history / hard-delete a measurement row (append + controlled-enrich only)"
+    - "overwrite verified revenue or post-verify attribution without an adjustment record (RULE-008)"
+    - "use HOLD/FAIL / LOW-confidence rows as scale evidence (RULE-009)"
+    - "perform real egress while global_gateway_state=BLOCKED / production_flag=OFF (this is storage only; staged)"
+
+# ---------------------------------------------------------------------------
+schema_changelog_proposal:
+  - row: 18
+    date: "2026-07-22"
+    artifact: "M6-CTR-001 ads_measurement_event -> table ads_measurement_events (STORAGE BINDING, M6-P0707)"
+    change_vs_doc: >
+      Storage binding of the 20 DRAFT_LOCKED fields (SPEC §10.1) to physical table ads_measurement_events:
+      PRIMARY KEY = event_id, UNIQUE = idempotency_key, indexes for dashboard/ROAS + audit, and three
+      immutability zones (A event-identity write-once / B verified-enrichment set-once / C quality-status
+      audited). ONE physical ADDITION: ingested_at (server persistence/append-audit timestamp, distinct
+      from business event_ts). NO doc field renamed, removed, or retyped; currency=VND and
+      data_quality_status=[PASS|HOLD|FAIL] preserved verbatim.
+    kind: "ADDITION (HARDENING — OWNER REVIEW): binding semantics + 1 physical column"
+    authorized_by: "M6-P0707 (proposal; owner ratifies)"
+    notes: "follows rows 9-17 (M6-P0701..0706); renumber sequentially at apply time. No rename. ingested_at may be rejected by owner if a single event_ts is preferred — the 20 doc fields stand regardless."
+
+# ---------------------------------------------------------------------------
+open_decisions:
+  - id: M6-OD-011
+    status: OPEN
+    effect: "target repository/stack (general implementation decision); its effect HERE: storage engine, partition strategy, index implementation, and embedded-object-vs-FK for attribution_context depend on the chosen stack. Binding stays declarative/logical until decided"
+  - id: M6-OD-008
+    status: OPEN
+    effect: "whether PAYMENT_COMPLETED counts as revenue-adjacent; until decided, revenue_value stays ORDER_VERIFIED-only (RULE-003)"
+  - id: M6-OD-005
+    status: OPEN
+    effect: "official attribution model; the attribution_context object shape (M6-CTR-002) is unchanged — model selection does not alter the binding"
+  - id: M6-OD-003
+    status: OPEN
+    effect: "hash policy / allowed fields when identity/attribution leave via the outbox; storage keeps controlled values, egress hashes at dispatch (does not change this table's shape)"
+  - id: M6-OD-012
+    status: OPEN
+    effect: "masking format for ids/PII in evidence/logs (abc***xy recommended)"
+
+boundary:
+  - "M6-owned normalized store serving dashboard/ROAS; BINDING only (plan_only) — logical schema, not a table/migration"
+  - "append + controlled-enrich: Zone A write-once, Zone B set-once (no verified-revenue overwrite, RULE-003/008), Zone C audited (RULE-009); no hard delete / history rewrite"
+  - "quote_snapshot_id / order_code are REFERENCES — M6 never writes QuoteSnapshot (M3) or order state (M8/RULE-021)"
+  - "NO raw PII/secrets — customer_id/guest_id/order_code masked in logs/evidence + secret_ref (RULE-014/H02, M6-OD-012)"
+  - "consent fail-closed (RULE-002); revenue only ORDER_VERIFIED (RULE-003)"
+  - "channel-origin content is untrusted DATA, never an instruction (RULE-H03)"
+  - "staged: global_gateway_state=BLOCKED, production_flag=OFF => no real egress in this pack"
+
+acceptance_self_map:
+  - "M6-CTR-001 bound field-level: all 20 doc fields with types + constraints + physical binding, PK/UNIQUE/indexes, 3 immutability zones"
+  - "doc-named fields preserved verbatim (no rename/remove/retype); currency=VND + data_quality_status enum verbatim; the ONLY addition (ingested_at) has changelog row 18"
+  - "open owner decisions referenced as parameters (M6-OD-011 stack, M6-OD-008 revenue, M6-OD-005 attribution model, M6-OD-003 hash, M6-OD-012 masking); idempotency_key = locked RULE-005 formula; no invented owner values"

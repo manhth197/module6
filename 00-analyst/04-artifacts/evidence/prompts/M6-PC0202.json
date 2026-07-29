@@ -1,0 +1,43 @@
+{
+  "prompt_id": "M6-PC0202",
+  "status": "PASS",
+  "summary": "RESEARCH_IDENTITY_CONSENT_CRITIC (BOUNDARY_ADVERSARY, analysis_only). Entry gate verified: ledger M6-PC0202=RUNNING, dependency M6-P0202=PASS. Adversarially red-teamed 04-artifacts/analysis/research/RESEARCH_IDENTITY_CONSENT.md via direct citation verification + a find->refute-verify pass (5 finder lenses citation-fidelity/boundary-overreach/pii-exposure/consent-fail-closed/owner-decisions -> 15 candidates -> 15 adversarial verifiers). OUTCOME: cleanest artifact so far - 0 BLOCKER, 0 MAJOR, 1 MINOR (14 of 15 candidates REJECTED). CITATION FIDELITY strong: all [DOC]/[REG] anchors verified FAITHFUL and correctly section-tagged (L115/S7 identity+map-with-audit, L118/S7 consent snapshot mandatory fail-closed, L266/S13 snapshot=consent-at-event-time, L62/S3 chain guest->customer->order->verified-revenue, L60/S3 consent fail-closed, L257/S12 send_policy); [REG SPEC S10.1] field claim checks out - ads_measurement_event (extract L191-211) genuinely carries customer_id/guest_id/consent_snapshot_id (all optional string). STRUCTURAL STRENGTHS recorded: (a) consent fail-closed is CORRECT - the S3 two-checkpoint model (event-time immutable snapshot + a FRESH send-time re-read of current consent) faithfully implements RULE-002 'at event/send time', and this research gets RIGHT the send-time re-validation gate that the M6-PC0201 event-registry research missed; (b) boundary clean - read-only on identity/consent, never creates/reassigns identity, never edits consent, never sends CRM/decides member rights. CONFIRMED F1 MINOR (unsupported-claim/citation-precision): S4 checkpoint 5 (L102) attributes 'consent plus suppression state must pass' to [REG RULE-017] alone, but RULE-017 (RULES_LOCKED L26) contains ZERO consent language - its normative clause is 'No scale while ANY of these is active' (a Scale-Gate rule); the consent authority is RULE-002 ('no CRM send without valid consent at event/send time') and the precise doc anchor is extract S10 L188 'CRM chi khi suppression/consent pass' (+ S9 L165 'CRM ... suppression pass va order verified'); RULE-017 legitimately owns only the suppression half. Downgraded from proposed MAJOR to MINOR because no fail-open follows: the S4 header (L88) already cites RULE-002 governing the whole fail-closed block and 'M6 never sends CRM itself' preserves the boundary; residual is purely citation precision. Fix: cite RULE-002 (+ extract S10 L188 / S9 L165) for the consent clause; keep RULE-017 only for the suppression/scale-reflection half. 14 candidates attacked and DISMISSED (report S5): OD-012 omission (pack-execution evidence-format, hook-enforced, not a CTR-005/006 read-contract dependency), append-only link-history as shadow identity store (records-not-resolves, [EXT] owner-review), send-time re-validation fail-open (worker is M6-owned and genuinely re-reads consent at send; DQ-Gate extract L302; no fail-open), S7 traceability 'demotes send-time re-validation' (only the checkpoint FRAMING is [PACK]; the consent-at-send requirement is RULE-002-mandated), RULE-017-doesn't-govern-CRM-at-all (RULE-017 does own the suppression half), and multiple missing-dependency claims (event_registry/M6-CTR-003/M6-ENTRY-003, M6-ENTRY-001 verified-revenue chain, M6-ENTRY-002 psid) all rejected because S6 is subject-scoped to identity/consent owner-decisions and those are enforced independently at the M6.2A entry gate; plus [REG CTR-007]/[REG S18] tag challenges (S18 resolves to ENTRY_EVIDENCE_REGISTER L21). Deliverable analysis-only; no application code/migration/external call/state write; no raw secrets/PII; global_gateway_state=BLOCKED and production_flag=OFF unchanged. Honest self-report; the runner EVIDENCE_GATE decides PASS. Findings feed Phase-0 design and producing prompt M6-P0702; the research author does not respond here.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/analysis/research/RESEARCH_IDENTITY_CONSENT.md",
+    "04-artifacts/evidence/prompts/M6-P0202.json",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/boundary-reports/RESEARCH_IDENTITY_CONSENT_critique.md",
+    "04-artifacts/evidence/prompts/M6-PC0202.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): brief; RESEARCH_IDENTITY_CONSENT.md; M6-P0202.json; extract L54-66 (S3 L60/L62), L160-190 (S9 L165 CRM revenue, S10 L188 'CRM chi khi suppression/consent pass'), L191-211 (ads_measurement_event schema: customer_id/guest_id/consent_snapshot_id present); ledger rows 32-33 (entry gate: M6-P0202=PASS, M6-PC0202=RUNNING). CONTRACT_REGISTER/DECISION_REGISTER/RULES_LOCKED/FAIL_GATE_REGISTER/ENTRY_EVIDENCE_REGISTER + extract S7/S12/S13 carried from prior M6-PC0200/PC0201 reads this session (00-spec is locked/unchanged)",
+    "Grep (read-only): confirmed ledger rows for M6-P0202 (PASS) and M6-PC0202 (RUNNING)",
+    "Workflow (analysis only, 20 subagents, 0 errors): 5 adversarial finder lenses -> deduped to 15 candidates -> 15 adversarial verifiers each attempting refutation and grading BLOCKER/MAJOR/MINOR; verdicts read from journal.jsonl and synthesized (1 CONFIRMED MINOR, 14 REJECTED)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/research/RESEARCH_IDENTITY_CONSENT.md",
+    "04-artifacts/boundary-reports/RESEARCH_IDENTITY_CONSENT_critique.md",
+    "04-artifacts/evidence/prompts/M6-P0202.json",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-PC0202 and marks it. Critique (0 BLOCKER, 0 MAJOR, 1 MINOR) is advisory for Phase-0 design and producing prompt M6-P0702 (CONTRACT_IDENTITY_CONSENT): F1 (re-cite the CRM-path consent clause to RULE-002 + extract S10 L188 / S9 L165 instead of RULE-017 alone) is a low-priority citation fix. The research is high quality and its send-time consent re-validation model should be carried into M6-P0702 and the outbox-worker design (M6-P0203). Then paste the next prompt M6-P0203 (RESEARCH_OUTBOX_WORKER_PATTERNS). No tracking hook or external send runs until M6-ENTRY-003 (Core registry) and identity/consent consumed shapes (M6-P0702) are ready and the M6.2A entry gate passes."
+}

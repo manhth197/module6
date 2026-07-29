@@ -1,0 +1,242 @@
+# CONTRACT_KPI_EVIDENCE_BINDING — M6-CTR-015 Dashboard KPI (threshold binding) + M6-CTR-025 Evidence package
+# Prompt: M6-P0714 · Phase: CONTRACT_HARMONIZATION · Mode: plan_only (BINDING; no code/migration)
+# TWO contracts => nested under a top-level 'contracts:' key so the root is a SINGLE mapping (parse-safe).
+#
+# BOTH contracts are DRAFT_LOCKED. This is the FINAL harmonization binder:
+#  - M6-CTR-015: the 14 KPI formulas are locked VERBATIM in MONITORING_REGISTER §14 (doc §14). This binding
+#    attaches NAMED threshold parameters; the numeric VALUES await M6-OD-002 — none invented (register L52-54:
+#    "The pack does not invent thresholds").
+#  - M6-CTR-025: the 10 evidence categories + required content are locked in doc §22. This binding defines the
+#    pack file FORMAT (HARDENING) with correlation_id + evidence_id trace ids (doc §22 L430).
+# No formula, no category is renamed/removed; every addition carries a changelog row.
+
+contracts:
+
+  # =========================================================================
+  # M6-CTR-015 Dashboard KPI contract — 14 locked formulas + parameterized thresholds
+  # =========================================================================
+  - contract_id: M6-CTR-015
+    name: dashboard_kpi_contract
+    kind: THRESHOLD_BINDING                            # formulas DRAFT_LOCKED; this binds named thresholds
+    schema_version: GFD-M6-CTR-015-BINDING-001
+    ownership: M6
+    status_lock: >
+      DRAFT_LOCKED (formulas). The 14 KPI formulas are locked VERBATIM in MONITORING_REGISTER §14 (doc §14,
+      extract L282-295) and are NOT redefined here — only referenced. This binding adds the named threshold
+      parameter layer; VALUES = M6-OD-002 (owner-set, per stage), never invented.
+    read_by: dashboard endpoint (M6-CTR-018), Scale Gate funnel/dashboard conditions (M6-CTR-013), evidence pack (M6-CTR-025)
+
+    source:
+      doc_anchor: "[REG MONITORING_REGISTER §14 = doc §14 L280-295] Dashboard KPI Contract, 14 metrics with formula/source (verbatim)"
+      threshold_anchor: "[REG MONITORING_REGISTER L52-54] all numeric alert thresholds => M6-OD-002; pack invents none"
+      rule_anchors:
+        - "[REG RULE-003] Revenue/ROAS from ORDER_VERIFIED only (Revenue Verified, ROAS, CPA, AOV, Verified Rate all use verified revenue/orders)"
+
+    # The 14 locked KPIs — name + formula VERBATIM from MONITORING_REGISTER §14 (referenced, not re-derived).
+    kpis:
+      - name: "Ads Spend"
+        formula: "Từ Ads platform / approved spend import"
+        formula_source: "[MONITORING_REGISTER L282]"
+      - name: "Revenue Verified"
+        formula: "SUM(verified_revenue)"
+        formula_source: "[MONITORING_REGISTER L283]"
+        note: "Chỉ ORDER_VERIFIED (RULE-003)"
+      - name: "ROAS"
+        formula: "Revenue Verified / Ads Spend"
+        formula_source: "[MONITORING_REGISTER L284]"
+        threshold_param: roas_threshold
+      - name: "CPA"
+        formula: "Ads Spend / number_of_ORDER_VERIFIED"
+        formula_source: "[MONITORING_REGISTER L285]"
+        threshold_param: cpa_threshold
+      - name: "AOV"
+        formula: "Revenue Verified / verified_orders"
+        formula_source: "[MONITORING_REGISTER L286]"
+        threshold_param: aov_threshold
+      - name: "Boxes per Order"
+        formula: "Verified boxes / verified_orders"
+        formula_source: "[MONITORING_REGISTER L287]"
+      - name: "Comment Rate"
+        formula: "LIVE_COMMENT / LIVE_VIEW"
+        formula_source: "[MONITORING_REGISTER L288]"
+      - name: "Inbox Rate"
+        formula: "MESSENGER_STARTED / LIVE_COMMENT"
+        formula_source: "[MONITORING_REGISTER L289]"
+      - name: "Quote Rate"
+        formula: "QUOTE_SENT / MESSENGER_STARTED"
+        formula_source: "[MONITORING_REGISTER L290]"
+      - name: "Order Rate"
+        formula: "ORDER_CREATED / QUOTE_SENT"
+        formula_source: "[MONITORING_REGISTER L291]"
+      - name: "Verified Rate"
+        formula: "ORDER_VERIFIED / ORDER_CREATED"
+        formula_source: "[MONITORING_REGISTER L292]"
+        threshold_param: verified_rate_threshold
+      - name: "COD Fail Rate"
+        formula: "COD fail / COD orders"
+        formula_source: "[MONITORING_REGISTER L293]"
+      - name: "CRM Revenue"
+        formula: "Verified revenue từ CRM attribution"
+        formula_source: "[MONITORING_REGISTER L294]"
+      - name: "Diamond Revenue"
+        formula: "Verified revenue từ referral/Diamond attribution"
+        formula_source: "[MONITORING_REGISTER L295]"
+
+    # Named threshold parameters — NAMES only; VALUES = M6-OD-002 (owner-set, per stage). None invented.
+    threshold_bindings:
+      - param: roas_threshold
+        applies_to: "ROAS"
+        per_stage: true
+        value: "M6-OD-002 (OPEN, owner-set per stage) — NOT invented"
+      - param: cpa_threshold
+        applies_to: "CPA"
+        per_stage: true
+        value: "M6-OD-002 (OPEN, owner-set per stage) — NOT invented"
+      - param: aov_threshold
+        applies_to: "AOV"
+        per_stage: true
+        value: "M6-OD-002 (OPEN, owner-set per stage) — NOT invented"
+      - param: verified_rate_threshold
+        applies_to: "Verified Rate"
+        per_stage: true
+        value: "M6-OD-002 (OPEN, owner-set per stage) — NOT invented"
+      - param: duplicate_rate_threshold
+        applies_to: "quality alert (dedup / Data Quality Gate)"
+        per_stage: false
+        value: "M6-OD-002 (OPEN) — NOT invented"
+      - param: outbox_failure_rate_threshold
+        applies_to: "quality alert (measurement outbox stability)"
+        per_stage: false
+        value: "M6-OD-002 (OPEN) — NOT invented"
+
+    boundary:
+      - "M6-owned KPI binding; plan_only (schema, not code)"
+      - "formulas DRAFT_LOCKED in MONITORING_REGISTER §14 — referenced verbatim, NOT redefined"
+      - "threshold PARAMETER NAMES only; all numeric VALUES = M6-OD-002 (owner-set); NONE invented (register L52-54)"
+      - "Revenue/ROAS/CPA/AOV/Verified Rate use verified revenue/orders only (RULE-003)"
+      - "read-only KPIs (surfaced by M6-CTR-018 support view, RULE-012); staged BLOCKED/OFF"
+
+  # =========================================================================
+  # M6-CTR-025 Evidence package — 10 locked categories + pack file format
+  # =========================================================================
+  - contract_id: M6-CTR-025
+    name: evidence_package
+    kind: FILE_FORMAT_BINDING                          # content DRAFT_LOCKED (doc §22); this binds the pack file format
+    schema_version: GFD-M6-CTR-025-BINDING-001
+    ownership: M6
+    status_lock: >
+      DRAFT_LOCKED (content-level, doc §22). The 10 evidence categories + their 'Nội dung bắt buộc' are locked
+      VERBATIM (doc §22, extract L419-430) and preserved unchanged. This binding defines the pack FILE FORMAT
+      (HARDENING) and the required trace ids correlation_id + evidence_id (doc §22 L430).
+    read_by: owner review (Scale Gate M6.2G, PR/PILOT), judge sign-off, audit
+
+    source:
+      doc_anchor: "[DOC §22 L417-430] Evidence Plan table: 10 evidence categories with 'Nội dung bắt buộc' (verbatim)"
+      trace_anchor: "[DOC §22 L430] 'Smoke Report | P0 smoke result with correlation_id and evidence_id'"
+      rule_anchors:
+        - "[REG RULE-014 / H02] Security/Privacy evidence = no raw PII, consent, hash policy, access control (L429); evidence itself is PII-masked + secret_ref"
+
+    # The 10 locked evidence categories — name + required content VERBATIM from doc §22 (L421-430).
+    content_categories:
+      - name: "Event Registry Evidence"
+        required_content: "Screenshot/API/DB record chứng minh event codes, owner, policy"
+        doc_source: "[DOC §22 L421]"
+      - name: "Consent Evidence"
+        required_content: "Case consent pass/fail-closed, opt-out handling"
+        doc_source: "[DOC §22 L422]"
+      - name: "Outbox Evidence"
+        required_content: "conversion/audience outbox queued, sent, retry, error, dead-letter"
+        doc_source: "[DOC §22 L423]"
+      - name: "Dedup Evidence"
+        required_content: "Pixel/CAPI/Offline duplicate event xử lý đúng"
+        doc_source: "[DOC §22 L424]"
+      - name: "Attribution Evidence"
+        required_content: "Order Verified trace ngược campaign/adset/ad/page/live/comment/Messenger"
+        doc_source: "[DOC §22 L425]"
+      - name: "Dashboard Evidence"
+        required_content: "Revenue Verified, ROAS, CPA, AOV lấy đúng nguồn"
+        doc_source: "[DOC §22 L426]"
+      - name: "Scale Gate Evidence"
+        required_content: "PASS/HOLD/FAIL with owner approval flow"
+        doc_source: "[DOC §22 L427]"
+      - name: "Learning Evidence"
+        required_content: "candidate -> review -> approve/reject/hold -> rollback"
+        doc_source: "[DOC §22 L428]"
+      - name: "Security/Privacy Evidence"
+        required_content: "No PII thô, consent, hash policy, access control"
+        doc_source: "[DOC §22 L429]"
+      - name: "Smoke Report"
+        required_content: "P0 smoke result with correlation_id and evidence_id"
+        doc_source: "[DOC §22 L430]"
+
+    # Pack file format — [PACK] HARDENING (the doc lists content, not a file layout).
+    package_format:
+      structure: "one section per content_category (all 10 required); each section holds the category's 'Nội dung bắt buộc'"
+      required_trace_ids:
+        correlation_id:
+          type: string
+          required: true
+          note: "trace id linking evidence to the event/run (doc §22 L430)"
+        evidence_id:
+          type: string
+          required: true
+          note: "stable id of the evidence artifact (doc §22 L430)"
+      pii_safety: "all evidence PII-masked (abc***xy) + secret_ref; no raw PII / tokens in the package (RULE-014/H02, M6-OD-012)"
+      file_format_note: "concrete file layout (dir/markdown/json) is pack HARDENING; owner-review only; not owner-mandated content"
+
+    boundary:
+      - "M6-owned evidence package binding; plan_only (schema, not code)"
+      - "10 content categories + required content DRAFT_LOCKED (doc §22) — preserved verbatim, unchanged"
+      - "file format is pack HARDENING (owner review); correlation_id + evidence_id required trace ids (L430)"
+      - "evidence is PII-masked + secret_ref; no raw PII/tokens (RULE-014/H02, M6-OD-012)"
+      - "untrusted channel content quoted only in fenced form (RULE-H03); staged BLOCKED/OFF"
+
+# ===========================================================================
+schema_changelog_proposal:
+  - row: 32
+    date: "2026-07-22"
+    artifact: "M6-CTR-015 Dashboard KPI contract — threshold binding (M6-P0714)"
+    change_vs_doc: >
+      Threshold BINDING for the DRAFT_LOCKED KPI contract. The 14 KPI formulas (MONITORING_REGISTER §14, doc
+      §14) are referenced VERBATIM and NOT redefined. [PACK] additions: named threshold parameters
+      (roas_threshold, cpa_threshold, aov_threshold, verified_rate_threshold [per stage], duplicate_rate_threshold,
+      outbox_failure_rate_threshold) attached to their KPIs. All numeric VALUES = M6-OD-002 (owner-set); NONE
+      invented (register L52-54). No formula renamed/removed.
+    kind: "ADDITION (HARDENING — OWNER REVIEW): threshold parameter names only"
+    authorized_by: "M6-P0714 (proposal; owner ratifies)"
+    notes: "follows rows 9-31 (M6-P0701..0713); renumber sequentially at apply time. No rename. Values await M6-OD-002."
+  - row: 33
+    date: "2026-07-22"
+    artifact: "M6-CTR-025 Evidence package — file format binding (M6-P0714)"
+    change_vs_doc: >
+      File-format BINDING for the DRAFT_LOCKED evidence content. The 10 evidence categories + 'Nội dung bắt
+      buộc' (doc §22 L419-430) are preserved VERBATIM. [PACK] additions: the pack file format (one section per
+      category), required trace ids correlation_id + evidence_id (doc §22 L430), PII-safety (mask + secret_ref).
+      No category renamed/removed; file layout is HARDENING (owner review), not owner-mandated content.
+    kind: "ADDITION (HARDENING — OWNER REVIEW): pack file format + trace ids"
+    authorized_by: "M6-P0714 (proposal; owner ratifies)"
+    notes: "follows row 32; renumber sequentially at apply time. No rename."
+
+open_decisions:
+  - id: M6-OD-002
+    status: OPEN
+    effect: "official per-stage CPA/ROAS/AOV/Verified-Rate (+ duplicate rate, outbox failure rate) threshold VALUES. The binding provides parameter NAMES only; numbers await this decision — none invented (MONITORING_REGISTER L52-54)"
+  - id: M6-OD-012
+    status: OPEN
+    effect: "masking format for any identity-derived value quoted in evidence artifacts (abc***xy recommended)"
+  - id: M6-OD-011
+    status: OPEN
+    effect: "target repository/stack; the concrete evidence-package file layout + KPI query implementation depend on the chosen stack"
+
+boundary:
+  - "M6-owned binder; plan_only (contract schema, not application code)"
+  - "M6-CTR-015: 14 KPI formulas DRAFT_LOCKED (MONITORING_REGISTER §14) referenced verbatim; only NAMED thresholds bound, VALUES = M6-OD-002 (none invented)"
+  - "M6-CTR-025: 10 evidence categories DRAFT_LOCKED (doc §22) preserved verbatim; file format is pack HARDENING; correlation_id + evidence_id required (L430)"
+  - "Revenue/ROAS/CPA/AOV/Verified Rate use ORDER_VERIFIED only (RULE-003); KPIs are read-only support view (RULE-012)"
+  - "evidence PII-masked + secret_ref; NO raw PII/tokens (RULE-014/H02, M6-OD-012); untrusted channel content fenced only (RULE-H03)"
+  - "staged: global_gateway_state=BLOCKED, production_flag=OFF"
+
+acceptance_self_map:
+  - "M6-CTR-015 + M6-CTR-025 defined field-level: 14 KPIs (name+formula referenced verbatim) + 6 named thresholds; 10 evidence categories (verbatim) + file format + trace ids"
+  - "doc-named content preserved verbatim (14 KPI formulas from MONITORING_REGISTER §14; 10 evidence categories from doc §22); every [PACK] addition -> changelog rows 32/33"
+  - "open owner decisions referenced as parameters (M6-OD-002 threshold VALUES, M6-OD-012 masking, M6-OD-011 stack); NO owner value invented (threshold NAMES only)"

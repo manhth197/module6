@@ -1,0 +1,41 @@
+{
+  "prompt_id": "M6-P0702",
+  "status": "PASS",
+  "summary": "CONTRACT_IDENTITY_CONSENT (CONTRACT_HARMONIZATION, plan_only). Entry gate OK: ledger M6-P0702=RUNNING, dependency M6-P0701 (event_registry contract)=PASS, role=ANALYST_ARCHITECT. (Note: a Stop-hook fired earlier because the ledger had M6-P0702=RUNNING before its prompt was pasted; resolved once the operator pasted the M6-P0702 prompt - no evidence was fabricated for an un-executed prompt.) Produced two CONSUMED-shape contracts at 04-artifacts/analysis/contracts/CONTRACT_IDENTITY_CONSENT.contract.yaml: M6-CTR-005 guest_contacts (owner=Customer identity) + M6-CTR-006 guest_marketing_consent_snapshot (owner=Consent system). Both CONSUMED: M6 defines only the row shape it READS + read-side validation; never writes. CTR-005 guest_contacts: row_shape guest_id (PII key) + contact_fingerprint ([DOC L265] verbatim, PII-class); additions mapped_customer_id + mapping_audit_ref (the guest->customer mapping M6 reads, with audit + no-overwrite-without-evidence per [DOC §7 L115] / RULE-006) + first_seen_at; read_validation - missing/ambiguous mapping => attribution LOW/HOLD (RULE-009), M6 never overwrites/merges/reconstructs raw contact. CTR-006 consent snapshot: row_shape consent_snapshot_id (key, referenced by ads_measurement_event.consent_snapshot_id §10 L208) + subject_ref (PII) + consent_state enum [VALID|MISSING|EXPIRED|OPT_OUT] (DOC-SOURCED from §15 L302, NOT invented) + captured_at ('Consent tai thoi diem event' L266); additions consent_scope [external_measurement|audience_sync|crm] (doc-derived from §7 L118, the three egress kinds consent gates) + source_channel; read_validation - TWO CHECKPOINTS (event-time snapshot + send-time re-validation by dispatcher, RULE-002), consent_state!=VALID => NO external measurement/audience/CRM (§7 L118, SMK-002), M6 never infers/upgrades consent (MISSING never treated as VALID) or writes the snapshot. PII DISCIPLINE (highest-stakes dimension): NO raw PII anywhere - field names only; every identity field (guest_id/contact_fingerprint/mapped_customer_id/subject_ref) flagged pii_class=IDENTITY + masked/secret_ref (RULE-014/H02, format M6-OD-012 abc***xy). Changelog rows 10 (CTR-005) + 11 (CTR-006) proposed (follow M6-P0701's row 9). Open decisions as parameters: M6-OD-012 (masking format), M6-ENTRY-002 (P5 channel identity evidence). VERIFICATION (no downstream critic M6-PC0702): 1 independent verification agent checked no-raw-PII / doc-verbatim / no-invented-values / consumed-shape / fail-closed-two-checkpoint / changelog / YAML-well-formed. Content dimensions ALL CLEAN (agent confirmed: 0 raw PII, all identity fields flagged; contact_fingerprint verbatim L265; consent_state 4 states doc-sourced §15 L302; consent_scope traces §7 L118; both CONSUMED per register; RULE-002/006 fail-closed present; no consent inference; rows 10/11 reasonable). 1 MAJOR: the YAML did NOT parse - root was both a top-level sequence (two '- contract_id' items) AND had trailing mapping keys (schema_changelog_proposals/open_decisions/boundary/acceptance_self_map) at col 0, which no YAML parser accepts -> FIXED by nesting the two contracts under a top-level 'contracts:' key (root now a single mapping); re-verified with PyYAML safe_load: PARSE_OK, root_keys=[contracts,schema_changelog_proposals,open_decisions,boundary,acceptance_self_map], contracts=[M6-CTR-005,M6-CTR-006], changelog_rows=[10,11]. ACCEPTANCE CHECKS MET: (a) M6-CTR-005 + M6-CTR-006 defined field-level with types + constraints; (b) doc-named fields preserved (contact_fingerprint verbatim, consent states doc-sourced) + every addition -> changelog row 10/11; (c) open owner decisions referenced as parameters (M6-OD-012, ENTRY-002); consent-state/scope values doc-sourced, none invented. BOUNDARY: plan_only - schema definition not a table/migration; CONSUMED (M6 reads, Customer-identity + Consent own); consent fail-closed; NO raw PII/secrets; staged BLOCKED/OFF; channel content untrusted DATA. Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "04-artifacts/analysis/research/RESEARCH_IDENTITY_CONSENT.md",
+    "04-artifacts/analysis/contracts/CONTRACT_EVENT_REGISTRY.contract.yaml",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/contracts/CONTRACT_IDENTITY_CONSENT.contract.yaml",
+    "04-artifacts/evidence/prompts/M6-P0702.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv (read-only): entry gate M6-P0701=PASS, M6-P0702=RUNNING, M6-P0703=TODO (no M6-PC0702 critic); also checked ledger after the Stop-hook to confirm M6-P0702 was RUNNING (operator had not yet pasted its prompt at that point)",
+    "Read (read-only): extract §13 L265-266 (guest_contacts + consent rows), §7 L115 (identity mapping) + L118 (consent fail-closed), §15 L302 (consent states), §10 L208 (consent_snapshot_id ref); CONTRACT_REGISTER (CTR-005/006 CONSUMED/MISSING/P0702), SCHEMA_CHANGELOG (rows 1-8), DECISION_REGISTER (M6-OD-012, ENTRY-002); prior RESEARCH_IDENTITY_CONSENT (two-checkpoint)",
+    "1 independent verification agent (analysis_only, read-only): no-PII/verbatim/no-invented-values/consumed-shape/fail-closed/changelog/YAML - content CLEAN, 1 MAJOR YAML-parse defect",
+    "Bash python PyYAML safe_load (read-only) BEFORE and AFTER fix: pre-fix ParserError (root seq+map conflict); post-fix PARSE_OK with contracts=[M6-CTR-005,M6-CTR-006], changelog_rows=[10,11]"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/contracts/CONTRACT_IDENTITY_CONSENT.contract.yaml",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "04-artifacts/analysis/research/RESEARCH_IDENTITY_CONSENT.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0702 and marks it, AND (out-of-band) appends SCHEMA_CHANGELOG rows 10+11 per the contract's schema_changelog_proposals (after M6-P0701's row 9; this role cannot write 00-spec). Then paste M6-P0703 (CONTRACT_WEB_EVENT_LOGS, order 63, ANALYST_ARCHITECT) which produces CTR-004 web_event_logs (M6-owned, append-only, partial fields L117). CONTRACT_IDENTITY_CONSENT feeds slice M6.2A (identity + consent fail-closed) and the consent gate in the outbox/dispatcher contracts (M6-P0705/0713)."
+}

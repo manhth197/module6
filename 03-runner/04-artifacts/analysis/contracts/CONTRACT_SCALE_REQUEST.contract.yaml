@@ -1,0 +1,345 @@
+# CONTRACT_SCALE_REQUEST — M6-CTR-013 ads_scale_request + M6-CTR-026 scale_gate_approval_flow
+# Prompt: M6-P0709 · Phase: CONTRACT_HARMONIZATION · Mode: plan_only (schema definition; no code/migration)
+# TWO contracts => nested under a top-level 'contracts:' key so the root is a SINGLE mapping (parse-safe,
+# per the M6-P0702 lesson).
+#
+# THE governing invariant [DOC §16 L312, verbatim]: "SCALE GATE LÀ QUYẾT ĐỊNH CỦA OWNER. Module 6 chỉ tính
+# toán và đề xuất." Module 6 COMPUTES and PROPOSES a scale request + evidence; it NEVER executes the scale
+# (RULE-010; module boundary: never scales budget or publishes optimizations without approval). Owner
+# approves/rejects; approval binds a budget_cap + rollback_condition. Thresholds stay parameters (M6-OD-002);
+# the doc-stated "AOV tối thiểu 2 hộp/đơn" floor is preserved verbatim; no numeric value is invented.
+
+contracts:
+
+  # =========================================================================
+  # M6-CTR-013 ads_scale_request — the proposal record (M6 computes + proposes)
+  # =========================================================================
+  - contract_id: M6-CTR-013
+    name: ads_scale_request
+    kind: OWNED_SHAPE_DEFINED                          # producer: MISSING -> field-level defined
+    schema_version: GFD-M6-CTR-013-OWNED-001           # pack label; not owner content
+    ownership: M6                                       # M6 owns the REQUEST; the DECISION is the owner's (CTR-026)
+    written_by: Module 6 (computes metrics, assembles the 8-condition evidence, PROPOSES) — never executes scale (RULE-010)
+    read_by: owner/approver (Scale Gate CTR-026), evidence pack (M6-CTR-025), audit
+
+    status_summary:
+      kind: OWNED_SHAPE_DEFINED
+      note: >
+        A proposal to increase budget / scale a campaign / open audience scale / publish an optimization
+        [DOC §16 L312]. It carries the 8 §16 gate conditions as evidence; it is eligible for owner approval
+        ONLY when every applicable condition is MET and the Risk veto is clear. Module 6 proposes; it does not
+        act (RULE-010).
+
+    source:
+      doc_anchor_object: "[DOC §13 L275] 'ads_scale_request | Đề nghị scale ngân sách | Owner approval required'"
+      doc_anchor_gate: "[DOC §16 L312-324] Scale Gate: owner-decision header + 8 condition rows (verbatim below)"
+      rule_anchors:
+        - "[REG RULE-009] LOW/HOLD/FAIL never used as scale evidence"
+        - "[REG RULE-010] no executable scale — Module 6 measures/proposes, never executes"
+        - "[REG RULE-017] risk hard veto (recall, sale lock, quality hold, complaint P0, platform spam flag)"
+        - "[REG H01] global_gateway_state=BLOCKED / production_flag=OFF immutable => no real scale"
+
+    row_shape:
+      request_id:
+        type: string
+        required: true
+        role: primary_identifier
+        kind: "ADDITION [PACK]"
+
+      scale_scope:
+        type: enum
+        values: [CAMPAIGN_BUDGET_INCREASE, CAMPAIGN_SCALE, AUDIENCE_SCALE, OPTIMIZATION_PUBLISH]  # doc-named actions L312
+        required: true
+        kind: "ADDITION [PACK] — doc-sourced actions"
+        note: "the 4 scale actions the doc lists: 'Tăng ngân sách, bật campaign scale, mở audience scale hoặc publish optimization' (L312). OPTIMIZATION_PUBLISH additionally governed by guarded-learning RULE-011 + safe range M6-OD-006"
+
+      target_ref:
+        type: string
+        required: true
+        kind: "ADDITION [PACK] — reference to the campaign/adset/audience/optimization"
+        pii_note: "mask any identity-derived reference in logs/evidence (abc***xy) + secret_ref (RULE-014/H02, M6-OD-012)"
+
+      proposed_change:
+        type: object
+        required: true
+        kind: "ADDITION [PACK] — the PROPOSAL Module 6 computes"
+        note: "e.g. proposed budget delta / audience expansion. A RECOMMENDATION only — Module 6 never applies it (RULE-010); execution is the owner's/ops' action outside Module 6"
+
+      gate_evidence:
+        type: list
+        required: true
+        kind: "ADDITION [PACK] — the 8 doc §16 conditions as evidence rows"
+        note: "one entry per §16 condition (see gate_conditions); each carries {condition_id, requirement (verbatim), evidence_ref, status[MET|NOT_MET|HOLD]}. ALL applicable => MET before eligibility; RISK any-true => veto"
+
+      budget_cap:
+        type: object
+        required: true
+        kind: "ADDITION [PACK] — doc Approval row 'có budget cap'"
+        note: "the cap the owner binds at approval (CTR-026). The numeric VALUE is owner-provided, NOT invented here (framework field only)"
+
+      rollback_condition:
+        type: string
+        required: true
+        kind: "ADDITION [PACK] — doc Approval row 'có rollback condition'"
+        note: "the condition under which the scale is rolled back; required by the doc for any scale"
+
+      risk_bound:
+        type: string
+        required: true
+        kind: "ADDITION [PACK] — doc header 'có giới hạn rủi ro' (L312)"
+        note: "the risk limit attached to the request; the Risk condition (RULE-017) is a hard veto"
+
+      approval_ref:
+        type: string
+        required: false
+        kind: "ADDITION [PACK] — link to the scale_gate_approval_flow record (M6-CTR-026)"
+
+      requested_by:
+        type: string
+        required: true
+        kind: "ADDITION [PACK]"
+
+      requested_at:
+        type: datetime
+        required: true
+        kind: "ADDITION [PACK]"
+
+      status:
+        type: enum
+        values: [DRAFT, SUBMITTED, PENDING_OWNER, APPROVED, REJECTED, WITHDRAWN]  # request lifecycle; owner decision lives in CTR-026
+        required: true
+        default: DRAFT
+        kind: "ADDITION [PACK]"
+        note: "DRAFT/SUBMITTED/PENDING_OWNER are M6 compute-side. APPROVED/REJECTED are a READ-ONLY, one-directional MIRROR of a RECORDED CTR-026 owner decision — Module 6 NEVER sets APPROVED/REJECTED independently (RULE-015 no self-certify)"
+
+    # --- the 8 doc §16 condition rows, VERBATIM 'Yêu cầu tối thiểu' ---
+    gate_conditions:
+      - id: P3_P5_P6_EVIDENCE
+        doc_condition: "P3/P5/P6 evidence"
+        requirement: "Verified Revenue boundary, Payment/COD/Order Verified, Channel identity, event identity có evidence"
+        doc_source: "[DOC §16 L317]"
+        doc_verbatim: true
+        evidence_source: "M6-ENTRY-001 (P3 Verified Revenue), M6-ENTRY-002 (P5 channel identity), M6-ENTRY-003 (P6 event identity) — OPEN until filed; fail-closed"
+
+      - id: QUOTE_ORDER
+        doc_condition: "Quote/Order"
+        requirement: "QuoteSnapshot hoạt động đúng, order tạo đúng, không tạo order khi chưa xác nhận"
+        doc_source: "[DOC §16 L318]"
+        doc_verbatim: true
+        evidence_source: "M6-ENTRY-001 / Module 3 Commerce — CONSUMED evidence; Module 6 NEVER creates an order or prices (boundary)"
+
+      - id: PUBLIC_PRIVACY
+        doc_condition: "Public/Privacy"
+        requirement: "AI/Gateway không public giá cuối, không leak PII, không spam"
+        doc_source: "[DOC §16 L319]"
+        doc_verbatim: true
+        evidence_source: "M6-ENTRY-004 (Module 4 + Module 5 owners) — OPEN until filed"
+
+      - id: FUNNEL
+        doc_condition: "Funnel"
+        requirement: "AOV tối thiểu 2 hộp/đơn, CPA trong ngưỡng, verified rate đạt ngưỡng owner đặt"
+        doc_source: "[DOC §16 L320]"
+        doc_verbatim: true
+        threshold_note: "'AOV tối thiểu 2 hộp/đơn' is the DOC-STATED floor (preserved verbatim, NOT invented). The per-stage official CPA / verified-rate (and AOV) numeric thresholds are M6-OD-002 (owner-set); 'đạt ngưỡng owner đặt' is the doc's own deferral. No number invented"
+
+      - id: DASHBOARD
+        doc_condition: "Dashboard"
+        requirement: "ROAS đo bằng ORDER_VERIFIED, attribution đủ campaign/adset/ad/live/messenger"
+        doc_source: "[DOC §16 L321]"
+        doc_verbatim: true
+        evidence_source: "M6-CTR-015 dashboard; ROAS from ORDER_VERIFIED only (RULE-003); attribution chain (M6-CTR-002)"
+
+      - id: QUALITY
+        doc_condition: "Quality"
+        requirement: "Data Quality Gate PASS, duplicate thấp, consent pass, outbox ổn định"
+        doc_source: "[DOC §16 L322]"
+        doc_verbatim: true
+        evidence_source: "M6-CTR-012 data quality gate = PASS (RULE-009); dedup RULE-005; consent RULE-002; outbox M6-CTR-008 stable"
+
+      - id: RISK
+        doc_condition: "Risk"
+        requirement: "Không recall, không sale lock, không quality hold, không complaint P0, không platform spam flag"
+        doc_source: "[DOC §16 L323]"
+        doc_verbatim: true
+        veto: true
+        evidence_source: "RULE-017 HARD VETO — any of these true => request cannot be approved (auto-block), regardless of other conditions"
+
+      - id: APPROVAL
+        doc_condition: "Approval"
+        requirement: "Owner duyệt scale request, có budget cap, có rollback condition"
+        doc_source: "[DOC §16 L324]"
+        doc_verbatim: true
+        owner_only: true
+        excluded_from_pre_eligibility: true
+        evidence_source: "M6-CTR-026 scale_gate_approval_flow — owner decision + budget_cap + rollback_condition"
+        note: "satisfied ONLY by a recorded CTR-026 owner decision (owner-only); Module 6 never marks this MET (RULE-015); EXCLUDED from the pre-eligibility 'conditions 1-7 MET' set to avoid the circular 'APPROVAL must be MET before the owner approves'"
+
+    eligibility_rule: >
+      a request is eligible for owner approval ONLY when gate conditions 1-7 (ALL EXCEPT APPROVAL) are MET AND
+      the RISK condition is clear (RULE-017 hard veto). The APPROVAL condition is NOT part of this pre-eligibility
+      set — it is satisfied ONLY by a recorded CTR-026 owner decision, which happens AFTER eligibility (this
+      avoids the circular 'APPROVAL must be MET before the owner approves'). Any HOLD/FAIL data quality subject
+      or LOW-confidence attribution is NOT valid scale evidence (RULE-009). Eligibility is necessary, NOT
+      sufficient — the owner still decides; Module 6 never self-approves (RULE-015).
+
+    boundary:
+      - "M6-owned request record; plan_only (schema, not a table/migration)"
+      - "Module 6 COMPUTES + PROPOSES only; NEVER executes a scale (RULE-010, §16 L312)"
+      - "no invented thresholds — CPA/ROAS/verified-rate = M6-OD-002; 'AOV 2 hộp/đơn' is doc-stated; budget_cap value owner-provided"
+      - "Quote/Order + P3/P5/P6 evidence are CONSUMED from other modules; M6 never creates orders, prices, or confirms payment (boundary)"
+      - "NO raw PII/secrets — target_ref masked + secret_ref (RULE-014/H02)"
+      - "Risk hard veto (RULE-017); staged BLOCKED/OFF => no real scale ever in this pack (H01)"
+
+  # =========================================================================
+  # M6-CTR-026 scale_gate_approval_flow — request -> owner approve/reject -> budget cap -> rollback
+  # =========================================================================
+  - contract_id: M6-CTR-026
+    name: scale_gate_approval_flow
+    kind: OWNED_SHAPE_DEFINED                          # producer: MISSING -> field-level defined
+    schema_version: GFD-M6-CTR-026-OWNED-001
+    ownership: "M6 + Owner"                             # M6 submits request+evidence; OWNER decides
+    written_by: Module 6 submits (SUBMITTED/PENDING); the OWNER records the decision (APPROVED/REJECTED)
+    read_by: scale execution (owner/ops, OUTSIDE Module 6), evidence pack (M6-CTR-025), audit
+
+    status_summary:
+      kind: OWNED_SHAPE_DEFINED
+      note: >
+        The approval flow [CONTRACT_REGISTER L42]: request -> owner approve/reject -> budget cap -> rollback
+        condition. The Scale Gate is the OWNER's decision (§16 L312). Module 6 never self-approves (RULE-015 no
+        self-certify) and never executes the scale (RULE-010).
+
+    source:
+      doc_anchor: "[DOC §16 L312] 'SCALE GATE LÀ QUYẾT ĐỊNH CỦA OWNER. Module 6 chỉ tính toán và đề xuất ... đều cần owner approval, có evidence, có rollback và có giới hạn rủi ro'"
+      doc_anchor_row: "[DOC §16 L324] Approval: 'Owner duyệt scale request, có budget cap, có rollback condition'"
+      flow_anchor: "[REG CONTRACT_REGISTER L42] request -> owner approve/reject -> budget cap -> rollback condition"
+      rule_anchors:
+        - "[REG RULE-010] no executable scale (Module 6 measures/proposes)"
+        - "[REG RULE-015] no self-certify — Module 6 never marks its own scale PASS/APPROVED"
+        - "[REG RULE-017] risk hard veto"
+        - "[REG H01] BLOCKED/OFF immutable => no real scale"
+
+    row_shape:
+      approval_id:
+        type: string
+        required: true
+        role: primary_identifier
+        kind: "ADDITION [PACK]"
+
+      request_ref:
+        type: string
+        required: true
+        kind: "ADDITION [PACK] — the ads_scale_request (M6-CTR-013) under decision"
+
+      approval_state:
+        type: enum
+        values: [PENDING, APPROVED, REJECTED]          # owner approve/reject (L324); minimal doc-faithful set
+        required: true
+        default: PENDING
+        kind: "ADDITION [PACK] — owner decision states"
+        note: "PENDING until the owner acts; APPROVED/REJECTED are owner-recorded. Module 6 never sets APPROVED itself (RULE-015)"
+
+      owner_decision:
+        type: object
+        required: false
+        kind: "ADDITION [PACK] — audited owner action"
+        shape: "{actor (owner role), decision [APPROVE|REJECT], reason, decided_at, evidence_ref}"
+        note: "present once the owner decides; audited (actor/reason/evidence), mirroring the adjustment-record discipline (RULE-008 shape)"
+
+      budget_cap:
+        type: object
+        required: false
+        kind: "ADDITION [PACK] — bound on APPROVED (doc Approval row)"
+        note: "the owner-set spend ceiling; required for APPROVED. Numeric VALUE is owner-provided, NOT invented"
+
+      rollback_condition:
+        type: string
+        required: false
+        kind: "ADDITION [PACK] — bound on APPROVED (doc Approval row)"
+        note: "required for APPROVED; the condition that triggers rollback of the scale"
+
+      risk_veto:
+        type: boolean
+        required: true
+        default: false
+        kind: "ADDITION [PACK] — RULE-017 hard veto"
+        note: "true if any Risk condition (recall/sale-lock/quality-hold/complaint-P0/platform-spam-flag) is active => cannot be APPROVED"
+
+      decided_at:
+        type: datetime
+        required: false
+        kind: "ADDITION [PACK]"
+
+    approval_invariants:
+      - "the Scale Gate is the OWNER's decision (§16 L312) — Module 6 submits + evidences, never self-approves (RULE-015)"
+      - "APPROVED requires: every applicable gate condition MET (CTR-013) + owner approval + a bound budget_cap + a bound rollback_condition (§16 L324) + risk_veto=false (RULE-017)"
+      - "even when APPROVED, Module 6 does NOT change ad-platform budget/audience itself — execution is the owner's/ops' action OUTSIDE Module 6 (RULE-010, module boundary)"
+      - "no scale evidence from HOLD/FAIL/LOW subjects (RULE-009)"
+      - "no owner value invented (budget_cap, thresholds are owner-provided / M6-OD-002)"
+
+    boundary:
+      - "M6 + Owner; plan_only (flow schema, not a table/migration)"
+      - "Module 6 proposes; OWNER decides and executes (RULE-010/015, §16 L312)"
+      - "risk hard veto (RULE-017); staged global_gateway_state=BLOCKED, production_flag=OFF => no real scale ever (H01)"
+      - "NO raw PII/secrets; channel-origin content untrusted DATA (RULE-H03)"
+
+# ===========================================================================
+schema_changelog_proposal:
+  - row: 20
+    date: "2026-07-22"
+    artifact: "M6-CTR-013 ads_scale_request (M6-owned, M6-P0709)"
+    change_vs_doc: >
+      New field-level definition from doc §16 (L312-324). The 8 gate conditions (P3/P5/P6 evidence, Quote/Order,
+      Public/Privacy, Funnel, Dashboard, Quality, Risk, Approval) with their 'Yêu cầu tối thiểu' are preserved
+      VERBATIM as gate_conditions. [PACK] additions: request record shape (request_id, scale_scope [4 doc-named
+      actions], target_ref, proposed_change, gate_evidence, budget_cap, rollback_condition, risk_bound,
+      approval_ref, requested_by/at, status). No owner value invented: CPA/ROAS/verified-rate thresholds =
+      M6-OD-002; 'AOV tối thiểu 2 hộp/đơn' is doc-stated; budget_cap value owner-provided. Module 6 proposes
+      only (RULE-010).
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0709 (proposal; owner ratifies)"
+    notes: "follows rows 9-19 (M6-P0701..0708); renumber sequentially at apply time. No rename."
+  - row: 21
+    date: "2026-07-22"
+    artifact: "M6-CTR-026 scale_gate_approval_flow (M6 + Owner, M6-P0709)"
+    change_vs_doc: >
+      New field-level definition of the approval flow (CONTRACT_REGISTER L42: request -> owner approve/reject ->
+      budget cap -> rollback condition) from doc §16 L312/L324. [PACK] additions: approval_id, request_ref,
+      approval_state [PENDING|APPROVED|REJECTED], owner_decision {actor,decision,reason,decided_at,evidence_ref},
+      budget_cap, rollback_condition, risk_veto, decided_at. Invariants: Scale Gate is owner's decision; Module 6
+      never self-approves (RULE-015) or executes (RULE-010); APPROVED requires all conditions MET + budget_cap +
+      rollback + risk_veto=false. No owner value invented.
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0709 (proposal; owner ratifies)"
+    notes: "follows row 20; renumber sequentially at apply time. No rename. Thresholds M6-OD-002; safe-range publish M6-OD-006."
+
+open_decisions:
+  - id: M6-OD-002
+    status: OPEN
+    effect: "official per-stage CPA/ROAS/AOV/Verified-Rate thresholds (Funnel + Dashboard conditions). 'AOV tối thiểu 2 hộp/đơn' is the doc floor; OD-002 ratifies/adjusts per-stage numbers. Until decided, Funnel/Dashboard pass on the doc-stated conditions + owner-set thresholds, never invented numbers"
+  - id: M6-OD-006
+    status: OPEN
+    effect: "safe range for guarded auto-publish (OPTIMIZATION_PUBLISH scope); publish stays framework-only until decided (RULE-011)"
+  - id: M6-OD-012
+    status: OPEN
+    effect: "masking format for identity-derived target_ref / evidence refs (abc***xy recommended)"
+  - id: M6-OD-011
+    status: OPEN
+    effect: "target repository/stack; storage engine for the request + approval records depends on the chosen stack"
+  - id: M6-ENTRY-001
+    status: OPEN
+    effect: "P3 Verified Revenue boundary evidence (Module 3) — Scale Gate blocked until filed (fail-closed)"
+  - id: M6-ENTRY-002
+    status: OPEN
+    effect: "P5 channel identity evidence (Module 5) — Scale Gate blocked until filed"
+  - id: M6-ENTRY-003
+    status: OPEN
+    effect: "P6 event identity / event_registry evidence (Core) — Scale Gate blocked until filed"
+  - id: M6-ENTRY-004
+    status: OPEN
+    effect: "Public/privacy conduct evidence (Module 4 + Module 5) — Scale Gate blocked until filed"
+
+acceptance_self_map:
+  - "M6-CTR-013 and M6-CTR-026 defined field-level with types + constraints (request shape + 8 verbatim gate conditions; approval flow + states)"
+  - "doc-named content preserved verbatim (8 §16 'Yêu cầu tối thiểu' rows, owner-decision header, Approval row); every [PACK] addition -> changelog rows 20/21"
+  - "open owner decisions referenced as parameters (M6-OD-002 thresholds, M6-OD-006 safe-range, M6-OD-012 masking, M6-OD-011 stack, M6-ENTRY-001..004 entry evidence); NO threshold/budget value invented; 'AOV 2 hộp/đơn' doc-stated"
+  - "Module 6 proposes, owner decides and executes (RULE-010/015, §16 L312); Risk hard veto (RULE-017); staged BLOCKED/OFF"

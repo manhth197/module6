@@ -1,0 +1,44 @@
+{
+  "prompt_id": "M6-P0705",
+  "status": "PASS",
+  "summary": "CONTRACT_MEASUREMENT_OUTBOX (CONTRACT_HARMONIZATION, plan_only). Entry gate OK: ledger M6-P0705=RUNNING, dependency M6-P0704 (conversion_events)=PASS, role=ANALYST_ARCHITECT. Produced the field-level shape of M6-CTR-008 marketing_measurement_outbox at 04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_OUTBOX.contract.yaml. NATURE: M6-owned, WORKER-ONLY - runtime ENQUEUES QUEUED rows transactionally with the conversion; only the dispatcher worker (M6-CTR-021) transitions status and performs egress; runtime never sends (RULE-004). CONTENT: 14 fields - 2 DOC-NAMED verbatim from [DOC §12 L252] (error_log, next_retry_at) + 12 [PACK] completions: outbox_id (PK), source_event_id (conversion link), platform [PIXEL|CAPI|OFFLINE] (doc-sourced §12/§13 L268), dedup_key (UNIQUE, LOCKED RULE-005 formula), idempotency_key (LOCKED RULE-005), payload_ref (PII-safe), consent_snapshot_id (CTR-006), status [QUEUED|SENT|RETRY|DEAD_LETTER] (SPEC §13), retry_count, max_retries (bound doc-mandated, value=config not invented), created_at/sent_at. KEY SEAM (folded from M6-P0704 finding): the composite UNIQUE RULE-005 dedup_key (platform + event_code + customer_or_guest_key + event_ts_bucket + source_event_id) lives HERE with unique:true - one row per (conversion x platform) - because 'platform' is resolved at the outbox fan-out; this correctly completes the conversion(source, platform-agnostic)<->outbox(per-platform, dedup_key unique) seam. GOVERNING: bounded retry -> dead-letter (retry_count>=max_retries => DEAD_LETTER; error_log + next_retry_at; NO infinite retry, NO silent loss per L252/SMK-016); send_policy at dispatch (consent_valid AND event_in_registry AND data_quality_pass AND not_duplicate, L257); consent re-validated at send (RULE-002); Offline only after ORDER_VERIFIED (§12 L250); payload hashed at dispatch (M6-OD-003), no raw PII; staged BLOCKED/OFF => no real send. VERIFICATION (no downstream critic M6-PC0705): PyYAML parse-check PARSE_OK (proactive; single root mapping, doc_verbatim=[error_log,next_retry_at], dedup_unique=True, status=[QUEUED,SENT,RETRY,DEAD_LETTER], row 14). 1 independent verification agent checked 9 dimensions (doc-verbatim / dedup-unique+formula / status-states / worker-only-no-direct-send / bounded-retry-dead-letter / consent+offline+staged / no-invented-values / PII / changelog+YAML) - ALL 9 CLEAN, 0 BLOCKER/0 MAJOR. 1 MINOR: my M6-OD-011 open_decisions effect narrowed it to 'outbox storage' whereas the register defines M6-OD-011 as the GENERAL target-repo/stack decision - could mislead a judge on the decision's scope -> FIXED (reworded to 'target repository/stack (general implementation decision, per DECISION_REGISTER); its effect HERE: outbox physical storage + transactional-outbox semantics depend on the chosen stack'); re-parsed PARSE_OK. ACCEPTANCE CHECKS MET: (a) M6-CTR-008 defined field-level with types + constraints (2 doc + 12 completions + write_validation); (b) doc-named fields error_log + next_retry_at preserved verbatim + every addition -> changelog row 14; (c) open owner decisions referenced as parameters (M6-OD-003 hash, M6-OD-004 connector, M6-OD-011 repo/stack); dedup/idempotency = locked RULE-005 formulas; max_retries VALUE not invented (config); platform values doc-sourced; no invented owner values. BOUNDARY: plan_only - schema definition not a table/migration; worker-only egress (RULE-004); bounded retry no silent loss; NO raw PII/secrets (payload_ref PII-safe, dedup_key internal/masked, hash at dispatch); staged BLOCKED/OFF => no real send ever; channel content untrusted DATA. Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/SPEC.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "04-artifacts/analysis/contracts/CONTRACT_CONVERSION_EVENTS.contract.yaml",
+    "04-artifacts/analysis/research/RESEARCH_OUTBOX_WORKER_PATTERNS.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_OUTBOX.contract.yaml",
+    "04-artifacts/evidence/prompts/M6-P0705.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv (read-only): entry gate M6-P0704=PASS, M6-P0705=RUNNING, M6-P0706=TODO (no M6-PC0705 critic)",
+    "Read (read-only): extract §12 L246-252 (channels Pixel/CAPI/Offline/Audience + retry L252 error_log/next_retry_at verbatim), §13 L268 (object), §12 L254-255 (dedup/idempotency formulas) + L257 (send_policy); SPEC §13 L305-308 (outbox state machine); CONTRACT_REGISTER (CTR-008 M6 worker-only/MISSING/P0705, partial L252), SCHEMA_CHANGELOG, DECISION_REGISTER (M6-OD-003/004/011); prior RESEARCH_OUTBOX_WORKER_PATTERNS",
+    "Bash python PyYAML safe_load (read-only) x2: pre-verify PARSE_OK (14 fields, dedup unique, states, row 14); post-fix PARSE_OK (OD-011 effect reworded)",
+    "1 independent verification agent (analysis_only, read-only): 9 dimensions CLEAN, 1 MINOR (M6-OD-011 scope wording) -> fixed via Edit; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_OUTBOX.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_CONVERSION_EVENTS.contract.yaml",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "04-artifacts/analysis/research/RESEARCH_OUTBOX_WORKER_PATTERNS.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/SPEC.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0705 and marks it, AND (out-of-band) appends SCHEMA_CHANGELOG row 14 per the contract's schema_changelog_proposal (after rows 9-13). Then paste M6-P0706 (CONTRACT_AUDIENCE, order 66, ANALYST_ARCHITECT) which produces CTR-009 customer_segments + CTR-010 customer_segment_members (consumed CRM shapes) + CTR-011 marketing_audience_outbox (M6 worker-only, consent fail-closed audience sync). CONTRACT_MEASUREMENT_OUTBOX feeds slice M6.2C and the dispatcher contract (M6-P0713 marketing_measurement_dispatcher)."
+}

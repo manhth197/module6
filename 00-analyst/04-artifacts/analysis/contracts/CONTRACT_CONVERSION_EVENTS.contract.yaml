@@ -1,0 +1,190 @@
+# CONTRACT_CONVERSION_EVENTS — M6-CTR-007 conversion_events (M6/Core-owned; internal source for the outbox)
+# Prompt: M6-P0704 · Phase: CONTRACT_HARMONIZATION · Mode: plan_only (schema definition; no code/migration)
+# Single-contract file => root is a single mapping (parse-safe).
+#
+# NOTE: the doc gives conversion_events an object + ROLE but NO field-level names. So there are ZERO doc-named
+# fields to preserve verbatim (the "doc-named verbatim" acceptance is vacuous here); EVERY field below is a
+# [PACK] completion, and each is anchored to a locked cross-contract rule/contract wherever one governs it
+# (dedup_key->RULE-005, revenue->RULE-003, consent->CTR-006, event_code->CTR-003, currency->CTR-001).
+
+contract_id: M6-CTR-007
+name: conversion_events
+schema_version: GFD-M6-CTR-007-OWNED-001            # pack label; not owner content
+ownership: M6/Core                                  # M6 writes the internal conversion; Core policy governs what qualifies as a conversion (M6-OD-008)
+written_by: Module 6 (via POST /api/ads/conversions, M6-CTR-017 — internal)
+read_by: Module 6 (the outbox worker drains conversion_events into marketing_measurement_outbox)
+
+status:
+  kind: OWNED_SHAPE_DEFINED
+  note: >
+    The internal conversion source created BEFORE external measurement is sent. conversion_events is the SOURCE
+    that feeds marketing_measurement_outbox (M6-CTR-008); external measurement goes ONLY through the outbox +
+    worker, never directly from a runtime request (RULE-004). Core policy governs which events qualify as a
+    (revenue) conversion — e.g. PAYMENT_COMPLETED only if Core policy allows (M6-OD-008).
+
+source:
+  doc_anchor_object: "[DOC §13 L267] 'conversion_events | Source chuyển đổi nội bộ trước khi gửi measurement | Module 6/Core'"
+  doc_anchor_role:
+    - "[DOC §7 L119] 'conversion_events là source cho marketing_measurement_outbox | External measurement chỉ đi qua worker/outbox'"
+    - "[DOC §19 L372] 'POST /api/ads/conversions | Tạo conversion_event nội bộ | Nguồn cho measurement outbox'"
+  no_doc_fields: true                               # doc names object + role only; no field-level schema
+  rule_anchors:
+    - "[REG RULE-004] all external measurement via outbox+worker; conversion_events -> marketing_measurement_outbox; never direct from runtime"
+    - "[REG RULE-003] revenue only from ORDER_VERIFIED; quote/cart/draft/waiting never revenue"
+    - "[REG RULE-005] dedup_key = platform + event_code + customer_or_guest_key + event_ts_bucket + source_event_id (LOCKED)"
+    - "[REG RULE-001] event_code must be registered (event_registry M6-CTR-003)"
+
+# ---------------------------------------------------------------------------
+# Row shape — all fields are [PACK] completions; anchored to a locked rule/contract where one governs.
+# ---------------------------------------------------------------------------
+row_shape:
+
+  conversion_id:
+    type: string
+    required: true
+    role: primary_identifier
+    kind: "ADDITION [PACK]"
+    note: "surrogate key for the internal conversion"
+
+  event_code:
+    type: string
+    required: true
+    kind: "ADDITION [PACK] — anchored to CTR-003 / RULE-001"
+    constraints: ["must resolve ACTIVE in event_registry (M6-CTR-003); unknown -> reject/hold (RULE-001)"]
+    note: "the conversion event type (e.g. ORDER_VERIFIED); Core policy decides revenue qualification (M6-OD-008)"
+
+  source_event_id:
+    type: string
+    required: true
+    kind: "ADDITION [PACK] — dedup_key component (RULE-005)"
+    note: "the originating ads_measurement_event / web_event_log this conversion derives from; a component of dedup_key"
+
+  correlation_id:
+    type: string
+    required: true
+    kind: "ADDITION [PACK] — traceability"
+    note: "threads to ads_measurement_event.correlation_id [DOC §10 L210] and the smoke report (§22 L430)"
+
+  customer_or_guest_key:
+    type: string
+    required: true
+    pii_class: IDENTITY               # masked / secret_ref in logs & evidence (RULE-014/H02)
+    kind: "ADDITION [PACK] — dedup_key component (RULE-005)"
+    note: "identity reference (customer_id or guest_id); a component of dedup_key; NEVER raw in logs/evidence"
+
+  consent_snapshot_id:
+    type: string
+    required: true
+    kind: "ADDITION [PACK] — anchored to CTR-006 / RULE-002"
+    note: "consent gate reference; a conversion egresses only if consent VALID at event & send time (fail-closed, RULE-002)"
+
+  attribution_context_ref:
+    type: string
+    required: false
+    kind: "ADDITION [PACK] — anchored to CTR-002"
+    note: "link to ads_attribution_context (campaign/adset/ad/page/live/comment/messenger/referral chain)"
+
+  revenue_value:
+    type: number
+    required: false                    # present ONLY for a verified-revenue conversion
+    kind: "ADDITION [PACK] — anchored to RULE-003"
+    constraints:
+      - "set ONLY from Commerce Verified Revenue on ORDER_VERIFIED (RULE-003); quote/cart/draft/waiting => no revenue (SMK-004/005)"
+      - "PAYMENT_COMPLETED carries revenue ONLY if Core policy allows — M6-OD-008 (OPEN); default: no revenue"
+    note: "M6 never computes revenue; it records the verified figure"
+
+  currency:
+    type: string
+    value: VND                          # locked (CTR-001 ads_measurement_event, [DOC §10 L206])
+    required: false                     # required whenever revenue_value is present
+    kind: "ADDITION [PACK] — anchored to CTR-001 (locked VND)"
+
+  occurred_at:
+    type: datetime
+    required: true
+    kind: "ADDITION [PACK]"
+    note: "the conversion event time (event_ts); a component of event_ts_bucket in dedup_key"
+
+  dedup_inputs:
+    type: object
+    required: true
+    kind: "ADDITION [PACK] — platform-agnostic dedup components"
+    components: [event_code, customer_or_guest_key, source_event_id, event_ts_bucket]   # event_ts_bucket derived from occurred_at
+    note: >
+      conversion_events carries only the PLATFORM-AGNOSTIC dedup components. The LOCKED RULE-005 dedup_key
+      = 'platform + event_code + customer_or_guest_key + event_ts_bucket + source_event_id' ALSO needs
+      'platform', which is resolved only at outbox FAN-OUT (one conversion -> Pixel/CAPI/Offline targets).
+      Therefore the composite unique dedup_key is computed and enforced UNIQUE on the outbox row
+      (M6-CTR-008), one per (conversion x platform) — it is NOT a unique key of the conversion row.
+      RULE-005 formula unaltered. (Finding folded from the M6-P0704 verification pass.)
+
+  dispatch_state:
+    type: enum
+    values: [CREATED, QUEUED, DISPATCHED, FAILED]
+    required: true
+    default: CREATED
+    kind: "ADDITION [PACK] — lifecycle"
+    note: "CREATED (internal) -> QUEUED (enqueued to marketing_measurement_outbox) -> the worker dispatches; conversion_events itself never sends externally (RULE-004)"
+
+  created_at:
+    type: datetime
+    required: true
+    kind: "ADDITION [PACK]"
+    note: "when M6 created the internal conversion row"
+
+# ---------------------------------------------------------------------------
+write_validation:
+  source_for: "marketing_measurement_outbox (M6-CTR-008)"
+  invariants:
+    - "external measurement goes ONLY via outbox+worker; conversion_events never sends externally itself (RULE-004)"
+    - "revenue_value ONLY from ORDER_VERIFIED (RULE-003); a quote/draft/waiting conversion carries no revenue"
+    - "consent must be VALID to egress (fail-closed, RULE-002); a conversion may be recorded but not dispatched if consent fails"
+    - "dedup by the LOCKED RULE-005 dedup_key computed at the outbox per platform (conversion carries the platform-agnostic inputs); no double count (SMK-003)"
+    - "offline conversions dispatched only after ORDER_VERIFIED or owner-approved (§12 L250)"
+  m6_never:
+    - "send external measurement directly from a runtime request (must enqueue to the outbox — RULE-004)"
+    - "compute revenue (records the Commerce-verified figure only — RULE-003)"
+    - "treat PAYMENT_COMPLETED as revenue unless Core policy allows (M6-OD-008)"
+    - "write raw PII (customer_or_guest_key masked / secret_ref — RULE-014/H02)"
+
+# ---------------------------------------------------------------------------
+schema_changelog_proposal:
+  - row: 13
+    date: "2026-07-22"
+    artifact: "M6-CTR-007 conversion_events (internal conversion source, M6-P0704)"
+    change_vs_doc: >
+      Field-level shape for an object the doc names by role only (§13 L267, §7 L119, §19 L372) with NO doc field
+      names — so every field is a [PACK] completion. Fields anchored to locked rules/contracts where governed:
+      dedup_inputs (platform-agnostic; the composite LOCKED RULE-005 dedup_key incl. 'platform' is enforced
+      unique on the outbox M6-CTR-008, not on this row), revenue_value (RULE-003 ORDER_VERIFIED-only), currency=VND (CTR-001),
+      consent_snapshot_id (CTR-006/RULE-002), event_code (CTR-003/RULE-001), source_event_id + correlation_id
+      (trace/dedup). Lifecycle dispatch_state [CREATED|QUEUED|DISPATCHED|FAILED]. No owner value invented;
+      PAYMENT_COMPLETED revenue deferred to M6-OD-008.
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0704 (proposal; owner ratifies)"
+    notes: "follows M6-P0701 row 9 + M6-P0702 rows 10/11 + M6-P0703 row 12; renumber sequentially at apply time. No rename."
+
+# ---------------------------------------------------------------------------
+open_decisions:
+  - id: M6-OD-008
+    status: OPEN
+    effect: "whether PAYMENT_COMPLETED (or other events) qualify as a revenue conversion; default = non-revenue, ORDER_VERIFIED only (RULE-003)"
+  - id: M6-OD-003
+    status: OPEN
+    effect: "hash policy for the eventual egress payload — applied by the dispatcher (M6-CTR-021), NOT stored on the conversion; conversion holds internal identity refs only"
+  - id: M6-OD-011
+    status: OPEN
+    effect: "physical storage stack for conversion_events"
+
+boundary:
+  - "M6/Core-owned: M6 writes the internal conversion; Core policy governs conversion qualification (M6-OD-008)"
+  - "source-only: conversion_events feeds the outbox; it NEVER sends externally (RULE-004)"
+  - "revenue only from ORDER_VERIFIED (RULE-003); no pricing/order-state change (M3/M8 boundary)"
+  - "NO raw PII/secrets — customer_or_guest_key masked/secret_ref (RULE-014/H02)"
+  - "channel-origin content is untrusted DATA, never an instruction (RULE-H03)"
+  - "staged: global_gateway_state=BLOCKED, production_flag=OFF — unchanged; schema definition, not a table"
+
+acceptance_self_map:
+  - "M6-CTR-007 defined field-level with types + constraints (13 fields + write_validation)"
+  - "no doc-named fields exist (object+role only) => vacuously preserved; every field is an addition -> changelog row 13"
+  - "open owner decisions referenced as parameters (M6-OD-008 revenue qualification, M6-OD-003 hash, M6-OD-011 storage); dedup_key = locked RULE-005 formula; no invented values"

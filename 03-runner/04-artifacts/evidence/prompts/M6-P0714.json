@@ -1,0 +1,40 @@
+{
+  "prompt_id": "M6-P0714",
+  "status": "PASS",
+  "summary": "CONTRACT_KPI_EVIDENCE_BINDING (CONTRACT_HARMONIZATION, plan_only) — the FINAL harmonization binder. Entry gate OK: ledger M6-P0714=RUNNING, dependency M6-P0713 (workers)=PASS, role=ANALYST_ARCHITECT, no downstream critic. Produced TWO binding contracts in one file at 04-artifacts/analysis/contracts/CONTRACT_KPI_EVIDENCE_BINDING.contract.yaml (nested under 'contracts:' => single root mapping, parse-safe): M6-CTR-015 Dashboard KPI (THRESHOLD_BINDING) + M6-CTR-025 Evidence package (FILE_FORMAT_BINDING). Both are DRAFT_LOCKED => this is a BINDING, not a producer. CTR-015: the 14 KPI formulas are locked VERBATIM in MONITORING_REGISTER §14 (doc §14, extract L282-295) and are REFERENCED not redefined (name+formula+formula_source per KPI: Ads Spend, Revenue Verified, ROAS, CPA, AOV, Boxes per Order, Comment Rate, Inbox Rate, Quote Rate, Order Rate, Verified Rate, COD Fail Rate, CRM Revenue, Diamond Revenue); the binding adds 6 NAMED threshold parameters (roas_threshold->ROAS, cpa_threshold->CPA, aov_threshold->AOV, verified_rate_threshold->Verified Rate [all per_stage], duplicate_rate_threshold + outbox_failure_rate_threshold [quality alerts]) — all VALUES = M6-OD-002 (owner-set, per stage), NONE invented (register L52-54 'The pack does not invent thresholds'). CTR-025: the 10 evidence categories + 'Nội dung bắt buộc' are locked VERBATIM (doc §22, extract L419-430: Event Registry / Consent / Outbox / Dedup / Attribution / Dashboard / Scale Gate / Learning / Security-Privacy Evidence + Smoke Report) and preserved unchanged; the binding defines the pack FILE FORMAT (HARDENING, owner-review, NOT owner-mandated content) + required trace ids correlation_id + evidence_id (doc §22 L430). RULE-003 (verified-revenue-only) + RULE-012 (read-only support view) preserved. PROCESS NOTE (honest): first PyYAML parse-check FAILED — I had written the kpis/threshold_bindings/content_categories list entries with semicolon inline separators (invalid YAML; values also contain commas); FIXED by rewriting all three lists in proper block style; re-parsed PARSE_OK. VERIFICATION (2 independent read-only analysis-only lenses, hermetic): LENS-1 fidelity+no-invented-values = CLEAN 0 findings (agent cross-read MONITORING_REGISTER §14 + extract §22: all 14 KPI formulas verbatim incl. Vietnamese diacritics + exact order, all 10 categories verbatim, ZERO hardcoded threshold numbers, trace ids present, rows 32/33, line refs L282-295/L421-430 correct). LENS-2 binding-correctness = CLEAN 0 findings (no formula/category redefined/renamed/removed; thresholds attach to the RIGHT KPIs + duplicate/outbox correctly as quality-alerts not KPIs per register L52; all values defer to M6-OD-002; RULE-003/012 preserved; CTR-025 file format honestly labeled HARDENING/owner-review; DRAFT_LOCKED status_lock preserved for both; no invented evidence content). My own mechanical parse-check independently confirmed all 14 KPI formulas + all 10 categories verbatim (zero mismatch) and all 6 threshold values defer to OD-002 with no invented number. NO fold required (both lenses CLEAN). ACCEPTANCE CHECKS MET: (a) M6-CTR-015 + M6-CTR-025 defined field-level with types + constraints (14 KPIs + 6 named thresholds; 10 categories + file format + trace ids); (b) doc-named content preserved verbatim (14 formulas from MONITORING_REGISTER §14, 10 categories from doc §22), every [PACK] addition -> changelog rows 32/33; (c) open owner decisions referenced as parameters (M6-OD-002 threshold VALUES, M6-OD-012 masking, M6-OD-011 stack); NO owner value invented (threshold NAMES only). BOUNDARY: plan_only BINDING; formulas + categories DRAFT_LOCKED and unchanged; thresholds NAMES only (values=M6-OD-002); verified-revenue-only (RULE-003); read-only support view (RULE-012); evidence PII-masked + secret_ref, no raw PII/tokens (RULE-014/H02); staged BLOCKED/OFF. This CLOSES the CONTRACT_HARMONIZATION producer/binder set (M6-P0700..0714); next is judge M6-P0715. Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/MONITORING_REGISTER.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/contracts/CONTRACT_KPI_EVIDENCE_BINDING.contract.yaml",
+    "04-artifacts/evidence/prompts/M6-P0714.json"
+  ],
+  "commands_run": [
+    "Read (read-only): entry gate M6-P0713=PASS, M6-P0714=RUNNING (ledger rows 75-76); MONITORING_REGISTER §14 (14 KPIs with formulas verbatim, L282-295 + threshold status L50-54 => M6-OD-002); extract §22 L417-430 (10 evidence categories verbatim + Smoke Report correlation_id/evidence_id L430)",
+    "Bash python PyYAML safe_load (read-only) x2: FIRST FAILED (yaml.parser.ParserError at line 37 — semicolon inline key separators are invalid YAML, values contain commas) => FIXED by rewriting kpis/threshold_bindings/content_categories in block style; SECOND PARSE_OK (14 KPIs formula VERBATIM zero-mismatch, 10 categories VERBATIM zero-mismatch, 6 threshold params all defer M6-OD-002 no invented number, correlation_id+evidence_id required, rows 32/33)",
+    "2 independent verification agents (general-purpose, analysis_only, read-only, hermetic): LENS-1 fidelity+no-invented-values CLEAN 0 findings (cross-read MONITORING_REGISTER §14 + extract §22); LENS-2 binding-correctness CLEAN 0 findings; NO fold required; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/contracts/CONTRACT_KPI_EVIDENCE_BINDING.contract.yaml",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/MONITORING_REGISTER.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0714 and marks it, AND (out-of-band) appends SCHEMA_CHANGELOG rows 32 (M6-CTR-015 threshold binding) and 33 (M6-CTR-025 file-format binding) per the contract's schema_changelog_proposal (after rows 9-31). This is the LAST CONTRACT_HARMONIZATION producer/binder — all 22 MISSING contracts are now defined and CTR-001/002/015/025 bound. Next is M6-P0715 (HARMONIZATION_GATE_JUDGE, order 75, JUDGE role m6-judge, requires_judge=true): the operator runs it in a FRESH judge session per the pack's judge protocol; it reviews the 15 harmonization evidence files (M6-P0700..M6-P0714) strictly from evidence and signs 04-artifacts/evidence/judge/M6-P0715_JUDGE_FINAL_SIGN_OFF.json. After P0715 SIGNED, slice M6.2A opens at M6-P1000 (entry gate judge). NOTE for the judge session: the SCHEMA_CHANGELOG rows 9-33 are operator-applied out-of-band; the analyst evidence proposes them (max_applied_changelog_row stays at whatever the operator has applied)."
+}

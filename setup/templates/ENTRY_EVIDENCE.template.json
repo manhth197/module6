@@ -1,0 +1,23 @@
+{
+  "schema_version": "GFD-M6-ENTRY-EVIDENCE-001",
+  "entry_id": "M6-ENTRY-00X",
+  "source_module": "Module 3 | Module 5 | Core Event Governance | Module 4",
+  "supplied_by": "OWNER_OR_AUTHORIZED_REVIEWER",
+  "captured_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "status": "READY_FOR_JUDGE",
+  "scope": "Exact boundary or behavior this evidence proves",
+  "evidence_refs": [
+    "relative/or/approved/reference"
+  ],
+  "assertions": [
+    {
+      "id": "ASSERT-001",
+      "claim": "A specific, testable claim",
+      "evidence_ref": "relative/or/approved/reference"
+    }
+  ],
+  "sha256_manifest": [],
+  "open_blockers": [],
+  "pii_handling": "MASKED_OR_NONE",
+  "review_note": "This file is input for a fresh Judge session; it is not a self-certified PASS."
+}

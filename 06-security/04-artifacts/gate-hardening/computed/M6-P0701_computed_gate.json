@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-07-22T02:04:35Z",
+  "claimed_fail_gate_tripped": false,
+  "classification": "standard",
+  "computed_fail_gate_tripped": false,
+  "computed_status": "CLEAN",
+  "evidence_present": true,
+  "evidence_sha256": {
+    "04-artifacts/evidence/prompts/M6-P0701.json": "ad2dd7f5b26e90448c85720f58562ffd79b74e98af0c9b0a2e7153d6ab0bf9ab"
+  },
+  "failures": [],
+  "integrity_violations": [],
+  "mode": "gate",
+  "prompt_id": "M6-P0701",
+  "rules_version": "M6-SGV-1.0",
+  "warnings": []
+}

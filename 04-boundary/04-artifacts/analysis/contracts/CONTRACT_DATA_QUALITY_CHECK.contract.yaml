@@ -1,0 +1,296 @@
+# CONTRACT_DATA_QUALITY_CHECK — M6-CTR-012 ads_data_quality_check (M6-owned)
+# Prompt: M6-P0708 · Phase: CONTRACT_HARMONIZATION · Mode: plan_only (schema definition; no code/migration)
+# Single-contract file => root is a single mapping (parse-safe).
+#
+# Defines the Data Quality Gate record from doc §15 (extract L299-308): one check definition per gate item,
+# with PASS / HOLD / FAIL semantics. The 8 gate items + their PASS and FAIL/HOLD conditions are the DOC
+# content (preserved verbatim, grouped exactly as the doc groups FAIL/HOLD — NOT split). The check RECORD
+# shape is [PACK]. Per-item non-PASS severity is DERIVED from the governing locked rule / doc line, never
+# an owner-set value; the fail-closed scale-block (RULE-009) holds regardless of the HOLD/FAIL label.
+
+contract_id: M6-CTR-012
+name: ads_data_quality_check
+kind: OWNED_SHAPE_DEFINED                             # producer: MISSING -> field-level defined
+schema_version: GFD-M6-CTR-012-OWNED-001              # pack label; not owner content
+ownership: M6                                         # M6-owned; "Data Quality Gate" (L274)
+written_by: data_quality_checker worker (M6-CTR-024) — emits PASS/HOLD/FAIL per gate item
+read_by: >
+  dashboard/ROAS (M6-CTR-015/018), Scale Gate evidence (M6-CTR-013/026), evidence pack (M6-CTR-025), audit.
+  Sets/feeds data_quality_status on ads_measurement_event (M6-CTR-001 §10 field, Zone C).
+
+status_summary:
+  kind: OWNED_SHAPE_DEFINED
+  note: >
+    The gate that decides whether a measurement subject is trustworthy [DOC §13 L274 'ads_data_quality_check
+    | Kết quả kiểm dữ liệu | Data Quality Gate']. Eight gate items (§15) each evaluate to PASS or a non-PASS
+    (HOLD/FAIL). Per subject, data_quality_status = worst-of the applicable items (FAIL > HOLD > PASS).
+    Any non-PASS row is NEVER used as scale evidence (RULE-009). This is a measure/flag record — it does not
+    itself block sends (consent/registry/dedup are enforced at their own checkpoints); it records the verdict.
+
+source:
+  doc_anchor_object: "[DOC §13 L274] 'ads_data_quality_check | Kết quả kiểm dữ liệu | Data Quality Gate'"
+  doc_anchor_gate: "[DOC §15 L299-308] Data Quality Gate table: 8 gate items with 'PASS khi' / 'FAIL/HOLD khi' columns (verbatim below)"
+  status_field_anchor: "[DOC §10.1 L211] ads_measurement_event.data_quality_status: PASS | HOLD | FAIL (the tri-state this gate produces)"
+  worker_anchor: "[REG CONTRACT_REGISTER L40] M6-CTR-024 worker: data_quality_checker — duty PASS/HOLD/FAIL output"
+  rule_anchors:
+    - "[REG RULE-001] event_registry gate (Event Registry item)"
+    - "[REG RULE-002] consent fail-closed two-checkpoint (Consent item)"
+    - "[REG RULE-003] revenue only from ORDER_VERIFIED / Commerce Verified Revenue (Verified Revenue item)"
+    - "[REG RULE-005] dedup_key / no double count (Dedup item, SMK-003)"
+    - "[REG RULE-006] identity mapping with audit (Identity item)"
+    - "[REG RULE-009] LOW/HOLD/FAIL never used as scale evidence (aggregate rule)"
+    - "[REG RULE-012] data-mart/dashboard is support-view; metric needs trace (Dashboard item)"
+    - "[REG RULE-017] risk hard veto — no scale under recall/sale-lock/suppression (Suppression item)"
+    - "[DOC §11 L240] ambiguous/conflict source => dashboard marks LOW confidence hoặc HOLD (Attribution item)"
+
+# ---------------------------------------------------------------------------
+# DOC GATE ITEMS — §15 (L299-308). doc_name / pass_when / fail_or_hold_when are VERBATIM (Vietnamese),
+# grouped exactly as the doc groups them. non_pass_severity is DERIVED (see severity_basis); it is NOT an
+# owner-set value. owner_ratifiable=false => a locked rule forces the label; true => pack default, owner may
+# reclassify HOLD<->FAIL (the fail-closed scale-block holds either way).
+# ---------------------------------------------------------------------------
+gate_items:
+
+  - id: EVENT_REGISTRY
+    doc_name: "Event Registry"
+    pass_when: "Event code tồn tại, owner rõ, schema đúng"
+    fail_or_hold_when: "Unknown event, event không có owner"
+    doc_source: "[DOC §15 L301]"
+    doc_verbatim: true
+    applies_to: [ADS_MEASUREMENT_EVENT, CONVERSION_EVENT, OUTBOX_ITEM]
+    governing_rule: "RULE-001 (event_registry gate)"
+    non_pass_severity: FAIL
+    severity_basis: "rule-forced non-PASS (RULE-001 verbatim: 'Unknown events are rejected or held, with audit'). Default fail-closed = FAIL (reject); sub-case: an unknown event HELD pending registry resolution = HOLD until resolved — mirrors DEDUP. Either disposition is non-PASS: not a valid measurement, not scale evidence"
+    owner_ratifiable: false
+
+  - id: CONSENT
+    doc_name: "Consent"
+    pass_when: "Consent valid tại thời điểm event/external send"
+    fail_or_hold_when: "Missing/expired/opt-out"
+    doc_source: "[DOC §15 L302]"
+    doc_verbatim: true
+    applies_to: [ADS_MEASUREMENT_EVENT, CONVERSION_EVENT, OUTBOX_ITEM]
+    governing_rule: "RULE-002 (consent fail-closed, two-checkpoint)"
+    non_pass_severity: FAIL
+    severity_basis: "rule-forced: missing/expired/opt-out is fail-closed for external send (RULE-002); the send checkpoint blocks regardless of this record"
+    owner_ratifiable: false
+
+  - id: DEDUP
+    doc_name: "Dedup"
+    pass_when: "No duplicate hoặc duplicate được merge chính xác"
+    fail_or_hold_when: "Pixel/CAPI/Offline double count"
+    doc_source: "[DOC §15 L303]"
+    doc_verbatim: true
+    applies_to: [ADS_MEASUREMENT_EVENT, CONVERSION_EVENT, OUTBOX_ITEM]
+    governing_rule: "RULE-005 (dedup_key; SMK-003 no double count)"
+    non_pass_severity: FAIL
+    severity_basis: "rule-forced: an unresolved double count corrupts ROAS (RULE-005/SMK-003). Sub-case: a duplicate DETECTED and pending correct merge = HOLD until merged (doc 'duplicate được merge chính xác' passes)"
+    owner_ratifiable: false
+
+  - id: IDENTITY
+    doc_name: "Identity"
+    pass_when: "guest/customer/order mapping rõ"
+    fail_or_hold_when: "Guest merge sai hoặc order không map được"
+    doc_source: "[DOC §15 L304]"
+    doc_verbatim: true
+    applies_to: [ADS_MEASUREMENT_EVENT, CONVERSION_EVENT]
+    governing_rule: "RULE-006 (identity mapping with audit)"
+    non_pass_severity: HOLD
+    severity_basis: "derived (owner-ratifiable): ambiguous / unmappable identity is flagged HOLD and not used as scale evidence (RULE-006/009). Sub-case: a CONFIRMED wrong merge (correctness violation) escalates to FAIL"
+    owner_ratifiable: true
+
+  - id: ATTRIBUTION
+    doc_name: "Attribution"
+    pass_when: "campaign/adset/ad/page/live/messenger chain đủ"
+    fail_or_hold_when: "Nguồn mơ hồ, conflict không xử lý"
+    doc_source: "[DOC §15 L305]"
+    doc_verbatim: true
+    applies_to: [ADS_MEASUREMENT_EVENT, CONVERSION_EVENT]
+    governing_rule: "DOC §11 L240 + RULE-009"
+    non_pass_severity: HOLD
+    severity_basis: "doc-forced: ambiguous/conflict source => 'dashboard phải đánh dấu LOW confidence hoặc HOLD, không dùng làm scale evidence' (§11 L240, RULE-009)"
+    owner_ratifiable: false
+
+  - id: VERIFIED_REVENUE
+    doc_name: "Verified Revenue"
+    pass_when: "Revenue lấy từ Commerce Verified Revenue"
+    fail_or_hold_when: "Quote/order draft/unpaid được tính revenue"
+    doc_source: "[DOC §15 L306]"
+    doc_verbatim: true
+    applies_to: [ADS_MEASUREMENT_EVENT, CONVERSION_EVENT]
+    governing_rule: "RULE-003 (revenue only ORDER_VERIFIED / Commerce Verified Revenue only, L256)"
+    non_pass_severity: FAIL
+    severity_basis: "rule-forced: counting quote/order-draft/unpaid as revenue is a hard violation (RULE-003). PAYMENT_COMPLETED remains non-revenue until M6-OD-008"
+    owner_ratifiable: false
+
+  - id: SUPPRESSION
+    doc_name: "Suppression"
+    pass_when: "Recall/Sale Lock/CRM suppression được phản ánh"
+    fail_or_hold_when: "Scale khi đang bị lock/suppression"
+    doc_source: "[DOC §15 L307]"
+    doc_verbatim: true
+    applies_to: [SCALE_REQUEST, AUDIENCE_SYNC]
+    governing_rule: "RULE-017 (risk hard veto) + §16 Risk row L323 (no scale under recall/sale-lock/quality-hold)"
+    non_pass_severity: FAIL
+    severity_basis: "rule-forced: scaling under an active recall / sale-lock / suppression is a risk hard veto (RULE-017, §16 L323)"
+    owner_ratifiable: false
+
+  - id: DASHBOARD
+    doc_name: "Dashboard"
+    pass_when: "Metric có sample evidence và trace"
+    fail_or_hold_when: "Dashboard chỉ là visual không có source trace"
+    doc_source: "[DOC §15 L308]"
+    doc_verbatim: true
+    applies_to: [DASHBOARD_METRIC]
+    governing_rule: "RULE-012 (support-view; metric must trace to source)"
+    non_pass_severity: HOLD
+    severity_basis: "derived (owner-ratifiable): a metric without sample evidence + trace is unusable as evidence => HOLD (RULE-012). Owner may set FAIL for strict evidence packs"
+    owner_ratifiable: true
+
+# ---------------------------------------------------------------------------
+# CHECK RECORD shape — [PACK] completions (the doc gives gate items + conditions, no record fields).
+# ---------------------------------------------------------------------------
+row_shape:
+
+  check_id:
+    type: string
+    required: true
+    role: primary_identifier
+    kind: "ADDITION [PACK]"
+
+  subject_type:
+    type: enum
+    values: [ADS_MEASUREMENT_EVENT, CONVERSION_EVENT, OUTBOX_ITEM, DASHBOARD_METRIC, SCALE_REQUEST, AUDIENCE_SYNC]  # [PACK] scopes derived from gate-item applies_to
+    required: true
+    kind: "ADDITION [PACK]"
+    note: "what is being checked; scoping matches each gate item's applies_to"
+
+  subject_ref:
+    type: string
+    required: true
+    kind: "ADDITION [PACK] — reference to the checked subject"
+    pii_note: "if the subject reference is identity-derived, mask in logs/evidence (abc***xy) + secret_ref (RULE-014/H02, M6-OD-012)"
+
+  gate_item:
+    type: enum
+    values: [EVENT_REGISTRY, CONSENT, DEDUP, IDENTITY, ATTRIBUTION, VERIFIED_REVENUE, SUPPRESSION, DASHBOARD]  # the 8 doc §15 items
+    required: true
+    kind: "ADDITION [PACK] — enumerates the doc §15 gate items"
+
+  status:
+    type: enum
+    values: [PASS, HOLD, FAIL]                        # locked tri-state (§10.1 L211)
+    required: true
+    kind: "ADDITION [PACK] — doc tri-state"
+    note: "PASS when the item's pass_when holds; otherwise HOLD/FAIL per the item's non_pass_severity"
+
+  reason_code:
+    type: string
+    required: false
+    kind: "ADDITION [PACK]"
+    note: "which fail_or_hold_when condition matched (untrusted channel content quoted only in fenced form; PII masked)"
+
+  evidence_ref:
+    type: string
+    required: true
+    kind: "ADDITION [PACK] — sample evidence + trace"
+    note: "the Dashboard gate item requires 'sample evidence và trace' (L308); every check carries a trace ref"
+
+  correlation_id:
+    type: string
+    required: true
+    kind: "ADDITION [PACK]"
+    note: "ties the check to the subject's correlation_id (evidence linkage §22)"
+
+  checked_at:
+    type: datetime
+    required: true
+    kind: "ADDITION [PACK]"
+
+  checker:
+    type: string
+    required: true
+    kind: "ADDITION [PACK]"
+    note: "the data_quality_checker worker (M6-CTR-024); checks are worker-produced, not ad-hoc"
+
+# ---------------------------------------------------------------------------
+aggregate_semantics:
+  per_subject_status: >
+    data_quality_status for a subject (e.g. ads_measurement_event.data_quality_status, M6-CTR-001 §10) =
+    worst-of the gate items APPLICABLE to that subject, ordering FAIL > HOLD > PASS (worst-status
+    propagation). A subject is PASS only when every applicable gate item is PASS.
+  scale_evidence_rule: >
+    any non-PASS (HOLD or FAIL) => the subject is NOT usable as scale evidence (RULE-009). This holds
+    regardless of whether the item is labelled HOLD or FAIL — the fail-closed scale-block is invariant.
+  hold_vs_fail_note: >
+    the per-item non_pass_severity default is DERIVED from the cited governing_rule / doc line, NOT an
+    owner-set value. Items with owner_ratifiable:true (IDENTITY, DASHBOARD) await owner confirmation and may
+    be reclassified HOLD<->FAIL; the scale_evidence_rule above is unaffected by any such reclassification.
+
+# ---------------------------------------------------------------------------
+write_validation:
+  worker_only: true
+  ops:
+    - "data_quality_checker (M6-CTR-024) INSERTs one check row per (subject, applicable gate_item) with a status"
+    - "the subject's data_quality_status is set to worst-of its applicable gate item statuses"
+  invariants:
+    - "the 8 doc §15 gate items + their pass_when / fail_or_hold_when conditions are preserved verbatim (no split of the doc's grouped FAIL/HOLD column, no reworded condition)"
+    - "status is the locked tri-state PASS|HOLD|FAIL (§10.1 L211)"
+    - "any non-PASS subject is never used as scale evidence (RULE-009)"
+    - "every check carries an evidence_ref (sample evidence + trace) — a metric without trace cannot PASS the Dashboard item (L308)"
+    - "no raw PII in reason_code / subject_ref (mask abc***xy + secret_ref, RULE-014/H02)"
+  m6_never:
+    - "invent a per-item HOLD-vs-FAIL owner value the doc did not set (severity is DERIVED from locked rules; owner ratifies the ratifiable ones)"
+    - "use a HOLD/FAIL subject as scale evidence (RULE-009)"
+    - "count quote/order-draft/unpaid as revenue (Verified Revenue item, RULE-003)"
+    - "approve scale under active recall/sale-lock/suppression (Suppression item, RULE-017)"
+    - "present a dashboard metric with no source trace as evidence (Dashboard item, RULE-012)"
+
+# ---------------------------------------------------------------------------
+schema_changelog_proposal:
+  - row: 19
+    date: "2026-07-22"
+    artifact: "M6-CTR-012 ads_data_quality_check (M6-owned, M6-P0708)"
+    change_vs_doc: >
+      New field-level definition from doc §15 (L299-308). The 8 gate items (Event Registry, Consent, Dedup,
+      Identity, Attribution, Verified Revenue, Suppression, Dashboard) with their PASS and FAIL/HOLD
+      conditions are preserved VERBATIM and grouped exactly as the doc groups FAIL/HOLD (no split). [PACK]
+      additions: the check RECORD shape (check_id, subject_type, subject_ref, gate_item, status
+      [PASS|HOLD|FAIL], reason_code, evidence_ref, correlation_id, checked_at, checker) + aggregate semantics
+      (per-subject data_quality_status = worst-of applicable items; any non-PASS not used as scale evidence,
+      RULE-009). Per-item non_pass_severity is DERIVED from the cited governing locked rule / doc line, NOT an
+      owner value; IDENTITY and DASHBOARD are owner_ratifiable.
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0708 (proposal; owner ratifies)"
+    notes: "follows rows 9-18 (M6-P0701..0707); renumber sequentially at apply time. No rename. No owner value invented (no thresholds; HOLD/FAIL labels derived from locked rules)."
+
+# ---------------------------------------------------------------------------
+open_decisions:
+  - id: M6-OD-008
+    status: OPEN
+    effect: "whether PAYMENT_COMPLETED counts as revenue-adjacent; until decided, the Verified Revenue item passes ONLY on ORDER_VERIFIED (RULE-003)"
+  - id: M6-OD-002
+    status: OPEN
+    effect: "CPA/ROAS/AOV/Verified-Rate thresholds are §14/§16 (numeric); the §15 gate items here are non-numeric conditions, so no threshold is set in this contract"
+  - id: M6-OD-012
+    status: OPEN
+    effect: "masking format for identity-derived subject_ref / reason_code in evidence & logs (abc***xy recommended)"
+  - id: M6-OD-011
+    status: OPEN
+    effect: "target repository/stack; storage engine for the check record depends on the chosen stack"
+  - id: M6-OD-003
+    status: OPEN
+    effect: "hash policy / allowed fields when consent/identity data leaves via outbox; does not change this record's shape"
+
+boundary:
+  - "M6-owned Data Quality Gate record; plan_only (schema definition, not a table/migration)"
+  - "measure/flag only — records verdicts; consent/registry/dedup are ENFORCED at their own checkpoints, not by this record"
+  - "any non-PASS subject is never scale evidence (RULE-009); scale stays an owner decision (RULE-010, §16)"
+  - "NO raw PII/secrets — subject_ref / reason_code masked + secret_ref (RULE-014/H02, M6-OD-012)"
+  - "channel-origin content (matched conditions, sample text) is untrusted DATA, quoted only in fenced form (RULE-H03)"
+  - "staged: global_gateway_state=BLOCKED, production_flag=OFF => no real egress/scale in this pack"
+
+acceptance_self_map:
+  - "M6-CTR-012 defined field-level: 8 doc gate items (verbatim pass/fail-hold) + the check RECORD shape with types + constraints + aggregate semantics"
+  - "doc-named content preserved verbatim (8 items, PASS + FAIL/HOLD conditions, grouped as the doc groups them); every [PACK] addition -> changelog row 19"
+  - "open owner decisions referenced as parameters (M6-OD-008 revenue, M6-OD-002 thresholds N/A here, M6-OD-012 masking, M6-OD-011 stack, M6-OD-003 hash); per-item HOLD/FAIL severity DERIVED from locked rules, never invented"

@@ -1,0 +1,31 @@
+{
+  "prompt_id": "M6-P0101",
+  "status": "PASS",
+  "summary": "LOCK_BOUNDARY. Entry gate OK: ledger M6-P0101=RUNNING, dependency M6-P0100=PASS, role=ANALYST_ARCHITECT. Verified SPEC.md §4 'What Module 6 is NOT - forbidden ownership' (SPEC lines 57-77) against extract doc §4 Boundary Lock (M6_FULL_DETAIL_EXTRACT.md lines 70-84) and doc §18 cross-module integration (extract lines 355-365). RESULT: every forbidden cell represented, nothing softened => PASS. CHECK A - doc §4 'bị cấm' (forbidden) column, 8 rows, each byte-identical in SPEC §4: Measurement (ex74->sp64), Attribution (ex75->sp65), Revenue (ex76->sp66 'Tính revenue từ quote, cart, order draft, payment waiting, COD waiting'), Google/Meta (ex77->sp67), Dashboard (ex78->sp68), Scale (ex79->sp69), Learning (ex80->sp70), Core policy (ex81->sp71). No cell reworded/weakened. SPEC §4 additionally HARDENS with two extra forbidden rows (additions, not softenings): Deliverable (sp72) reproduced from Document Control extract line 22 ('Không phải: Code, migration, dashboard production, Meta config thật, ngân sách ads, go-live approval, scale approval'); Identity (sp73) 'Module 6 is not Commerce, not AI Advisor, not Gateway, not CRM, not Finance' - citation 'extract line 510' verified against the KẾT LUẬN box at extract line 510 ('...Module 6 không phải Commerce, không phải AI Advisor, không phải Gateway, không phải CRM, không phải Finance và không được tự scale...'). CHECK B - doc §18 'Module 6 không được làm gì' column, 7 rows: SPEC §4 (lines 75-76) explicitly delegates the cross-module must-not-do column to registers/ENTRY_EVIDENCE_REGISTER.md ('Cross-module \"must not do\" column: see ... (doc §18 table reproduced)'). That register's 'Consumed-boundary reference' table (ENTRY_EVIDENCE_REGISTER.md lines 25-31) reproduces all 7 forbidden cells VERBATIM with per-row source-line citations: M3 (line359 'Không tính giá, tạo đơn, xác nhận payment hoặc doanh thu'), M4 (line360), M5 (line361 'Không xử lý raw webhook hoặc public reply'), M7 (line362), M8 (line363 'Không tự chuyển order state hoặc verified revenue'), CRM/Member (line364), Finance/Diamond (line365 'Không tính final commission hoặc payout'). Nothing softened. OBSERVATIONS (non-blocking; listed, none fixed; for DOC_LOCK consolidation judge M6-P0113): OBS-1 extract §4's 'Module 6 được làm' (allowed) column (8 cells) is intentionally NOT in SPEC §4 by design - SPEC §4 is the negative/forbidden view ('What Module 6 is NOT'); the positive/allowed side is carried in SPEC §3 'What Module 6 IS - canonical pipeline'. Structural split, not a softening of any forbidden cell. OBS-2 extract §4's 'CẢNH BÁO TRIỂN KHAI' deployment-warning banner (extract lines 83-84: 'Không được hiểu Module 6 là vài đoạn code Pixel/CAPI hoặc một dashboard ROAS...') is not reproduced as a discrete element anywhere in SPEC.md - grep for its distinctive phrases ('vài đoạn code|Pixel/CAPI|Copy-paste|CẢNH BÁO|đo lường thật') returned no banner match (only unrelated Pixel/CAPI worker/flow references at SPEC lines 199/356/393). It is an implementation-seriousness admonition, NOT a 'bị cấm' ownership cell, so it neither violates 'every bị cấm cell represented' nor softens any forbidden cell; its substantive required components (identity, consent, event registry, dedup, attribution, verified revenue, data quality, owner approval, audit, smoke, rollback) are distributed across SPEC §3/§7 and the registers. Surfaced in case owner wants verbatim retention of the warning box. OBS-3 the §18 forbidden cells reside in registers/ENTRY_EVIDENCE_REGISTER.md (delegated) rather than inline in SPEC §4 - valid delegation, register table is complete and verbatim. No missing/contradictory input and no OPEN owner decision gates this prompt => not BLOCKED. global_gateway_state=BLOCKED and production_flag=OFF unchanged; no enabling tokens written. No raw secrets/PII. This is an honest self-report only; the runner machine gate and the DOC_LOCK judge decide PASS.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/SPEC.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/prompts/M6-P0101.json"
+  ],
+  "commands_run": [
+    "Grep SPEC.md '^## ' => section map (confirmed §4 header line 57, §5 line 78) (read-only)",
+    "Grep SPEC.md for CẢNH BÁO TRIỂN KHAI banner phrases ('vài đoạn code|Pixel/CAPI|Copy-paste|CẢNH BÁO|đo lường thật') => banner NOT reproduced in SPEC; only unrelated Pixel/CAPI refs at lines 199/356/393 (read-only)",
+    "Read tool (read-only): SPEC §4 lines 57-77; extract §4 lines 70-84; extract §18 lines 355-365; extract line 510 (Identity-row citation); registers/ENTRY_EVIDENCE_REGISTER.md; ledger rows 14-16"
+  ],
+  "evidence_refs": [
+    "00-spec/SPEC.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0101 and marks it; then paste M6-P0102 (LOCK_RULE_REGISTER). Boundary is verified lockable: all 8 doc §4 'bị cấm' cells + 2 hardening rows present verbatim in SPEC §4, all 7 doc §18 cross-module must-not-do cells present verbatim in registers/ENTRY_EVIDENCE_REGISTER.md, nothing softened. OBS-2 (deployment-warning banner not reproduced) is a non-blocking, non-ownership note for judge M6-P0113 if verbatim retention is wanted; no SPEC edit is within this analysis_only prompt's scope."
+}

@@ -1,0 +1,9 @@
+# ==========================================================================
+# 01-coder - ROLE REQUIREMENTS (venv: 01-coder/.venv)
+# ==========================================================================
+# Layer 1 - pack baseline (STDLIB-ONLY policy lives there):
+-r ../requirements.txt
+#
+# Layer 2 - role-specific packages (GATED):
+# CODER: implementation-stack packages land HERE (web framework, DB driver, platform SDKs) ONLY after owner decision M6-OD-011 resolves the target repo/stack AND the harmonization gate passes. Applied by the OPERATOR with a SCHEMA_CHANGELOG row - never by the agent.
+# -- intentionally no packages below this line --

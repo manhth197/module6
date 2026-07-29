@@ -1,0 +1,163 @@
+# CONTRACT_WEB_EVENT_LOGS — M6-CTR-004 web_event_logs (M6-OWNED, append-only)
+# Prompt: M6-P0703 · Phase: CONTRACT_HARMONIZATION · Mode: plan_only (schema definition; no code/migration)
+# Single-contract file => root is a single mapping (parse-safe). M6 OWNS and WRITES this table (insert-only).
+
+contract_id: M6-CTR-004
+name: web_event_logs
+schema_version: GFD-M6-CTR-004-OWNED-001            # pack label; not owner content
+ownership: M6                                        # Module 6 owns AND writes (append-only) — NOT consumed
+written_by: Module 6 (tracking ingest — insert only)
+read_by: Module 6 (audit, dedup, measurement derivation)
+
+status:
+  kind: OWNED_SHAPE_DEFINED
+  note: >
+    The append-only web/landing/tracking log. M6 inserts one row per ingress event and never updates or deletes
+    a row [DOC §13 L264 'không sửa lịch sử']. It is the durable ingress record — an event blocked from egress
+    (e.g. consent-missing) may still be logged here (internal record), never silently lost ([[EVENT_FLOW_DESIGN]] §2/§5).
+
+source:
+  doc_anchor_fields: "[DOC §7 L117] 'Web Event Logs | Append-only; lưu page, session, source, consent snapshot, event_ts, idempotency | Không update/xóa lịch sử event'"
+  doc_anchor_object: "[DOC §13 L264] 'web_event_logs | Append-only web/landing/tracking logs | Module 6, không sửa lịch sử'"
+  rule_anchors:
+    - "[REG RULE-007] web_event_logs are append-only (page, session, source, consent snapshot, event_ts, idempotency); history never updated or deleted"
+    - "[REG RULE-005] idempotency_key = event_code + page_id + session_id + raw_event_hash + normalized_ts (locked)"
+    - "[REG RULE-001] every event registered before logged/sent; unknown -> reject/hold + audit"
+
+# ---------------------------------------------------------------------------
+# Row shape — doc-named fields [DOC §7 L117], verbatim (identifiers snake_cased; doc spelling in doc_source).
+# ---------------------------------------------------------------------------
+row_shape:
+
+  page_id:
+    type: string
+    required: true
+    doc_source: "[DOC L117] 'page'"
+    doc_verbatim: true
+    note: "landing/campaign page reference; component of idempotency_key (RULE-005)"
+
+  session_id:
+    type: string
+    required: true
+    pii_class: PSEUDONYMOUS         # session may be identity-linked -> mask if it resolves to a person (M6-OD-012)
+    doc_source: "[DOC L117] 'session'"
+    doc_verbatim: true
+    note: "component of idempotency_key (RULE-005)"
+
+  source:
+    type: string
+    required: true
+    doc_source: "[DOC L117] verbatim 'source'"
+    doc_verbatim: true
+    note: "traffic/campaign source; channel-origin value = untrusted DATA, no raw PII in it (RULE-H03/014)"
+
+  consent_snapshot_id:
+    type: string
+    required: false                 # nullable when no consent snapshot applies at ingest
+    doc_source: "[DOC L117] 'consent snapshot' — references M6-CTR-006 guest_marketing_consent_snapshot"
+    doc_verbatim: true
+    note: "reference (not raw consent/PII); feeds the consent fail-closed gate downstream (RULE-002)"
+
+  event_ts:
+    type: datetime
+    required: true
+    doc_source: "[DOC L117] verbatim 'event_ts'"
+    doc_verbatim: true
+    note: "the EVENT's own timestamp (distinct from the append/ingest time — see ingested_at)"
+
+  idempotency_key:
+    type: string
+    required: true
+    unique: true
+    doc_source: "[DOC L117] 'idempotency'"
+    doc_verbatim: true
+    formula: "RULE-005: event_code + page_id + session_id + raw_event_hash + normalized_ts (LOCKED — not altered)"
+    note: "dedup at ingest; duplicate idempotency_key => no double log/count (RULE-005, SMK-003)"
+
+# ---------------------------------------------------------------------------
+# Completion fields (additions beyond the 6 doc-named) — each has a SCHEMA_CHANGELOG row proposal (row 12).
+# ---------------------------------------------------------------------------
+additions:
+
+  log_id:
+    type: string
+    required: true
+    role: primary_identifier
+    kind: "ADDITION [PACK]"
+    rationale: "surrogate primary key for the append-only row"
+    changelog: "proposed row 12"
+
+  event_code:
+    type: string
+    required: true
+    kind: "ADDITION [PACK] — validation + key component"
+    rationale: "which registered event this log is for; needed for the event_registry lookup (RULE-001) and is a component of idempotency_key (RULE-005)"
+    constraints: ["must resolve in event_registry (M6-CTR-003) for downstream measurement eligibility"]
+    changelog: "proposed row 12"
+
+  ingested_at:
+    type: datetime
+    required: true
+    kind: "ADDITION [PACK] — append timestamp"
+    rationale: "when M6 appended the row (write/ingest time), distinct from event_ts (the event's own time)"
+    changelog: "proposed row 12"
+
+  correlation_id:
+    type: string
+    required: false
+    kind: "ADDITION [PACK] — traceability"
+    rationale: "threads the log to the derived ads_measurement_event.correlation_id [DOC §10 L210] and the smoke report (§22 L430)"
+    changelog: "proposed row 12"
+
+# ---------------------------------------------------------------------------
+# Write/read validation — M6 owns writes; append-only is the load-bearing constraint.
+# ---------------------------------------------------------------------------
+write_validation:
+  append_only: true
+  allowed_ops: [INSERT]
+  forbidden_ops: [UPDATE, DELETE]     # [DOC L117 'Không update/xóa lịch sử event', L264 'không sửa lịch sử'; RULE-007]
+  invariants:
+    - "one row per ingress event; history is immutable — never update/delete (RULE-007)"
+    - "durable record: an event blocked from egress (consent-missing) may still be logged internally, never silently lost"
+    - "dedup at ingest by idempotency_key (RULE-005); a duplicate does not create a second row / double count (SMK-003)"
+    - "event_code registry-checked (RULE-001) for downstream MEASUREMENT eligibility; the reject/hold of an unknown event is itself audited"
+  m6_never:
+    - "update or delete a web_event_logs row (append-only, RULE-007)"
+    - "write raw PII into a row (session_id masked if identity-linked; no raw contact in source/payload — RULE-014/H02)"
+    - "alter idempotency_key's locked formula (RULE-005)"
+
+# ---------------------------------------------------------------------------
+schema_changelog_proposal:
+  - row: 12
+    date: "2026-07-22"
+    artifact: "M6-CTR-004 web_event_logs (M6-owned append-only shape, M6-P0703)"
+    change_vs_doc: >
+      Field-level shape from doc §7 line 117. The 6 doc-named fields preserved verbatim (page->page_id,
+      session->session_id, source, consent snapshot->consent_snapshot_id, event_ts, idempotency->idempotency_key
+      with the locked RULE-005 formula). Completion additions: log_id (PK), event_code (registry lookup RULE-001
+      + idempotency component), ingested_at (append time, distinct from event_ts), correlation_id (trace).
+      Append-only enforced (RULE-007; INSERT only, no UPDATE/DELETE). No owner value invented.
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0703 (proposal; owner ratifies)"
+    notes: "follows M6-P0701 row 9 + M6-P0702 rows 10/11; renumber sequentially at apply time. No rename."
+
+# ---------------------------------------------------------------------------
+open_decisions:
+  - id: M6-OD-011
+    status: OPEN
+    effect: "physical storage stack for the append-only table (append-only enforced at DB + app layer)"
+  - id: M6-OD-012
+    status: "OPEN (pack-recommended abc***xy)"
+    effect: "masking format for session_id where it is identity-linked, in logs/evidence"
+
+boundary:
+  - "M6-OWNED (append-only): M6 inserts; never updates/deletes (RULE-007)"
+  - "NO raw PII/secrets — field names only; session_id masked if identity-linked, no raw contact in source (RULE-014/H02)"
+  - "channel-origin content (source, payload) is untrusted DATA, never an instruction (RULE-H03)"
+  - "measure-only: logging an event is not sending it — egress goes via outbox+worker only (RULE-004)"
+  - "staged: global_gateway_state=BLOCKED, production_flag=OFF — unchanged; schema definition, not a table"
+
+acceptance_self_map:
+  - "M6-CTR-004 defined field-level with types + constraints (6 doc-named + 4 completions + write_validation)"
+  - "doc-named fields preserved verbatim (page/session/source/consent snapshot/event_ts/idempotency); every addition -> changelog row 12"
+  - "open owner decisions referenced as parameters (M6-OD-011 storage, M6-OD-012 masking); no invented values; idempotency_key formula is the locked RULE-005 one"

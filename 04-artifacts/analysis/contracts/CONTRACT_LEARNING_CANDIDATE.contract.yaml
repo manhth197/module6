@@ -1,0 +1,270 @@
+# CONTRACT_LEARNING_CANDIDATE — M6-CTR-014 ads_learning_candidate (M6-owned)
+# Prompt: M6-P0710 · Phase: CONTRACT_HARMONIZATION · Mode: plan_only (schema definition; no code/migration)
+# Single-contract file => root is a single mapping (parse-safe).
+#
+# Defines the Learning Engine candidate record from doc §17 (extract L326-353) + object anchor L276.
+# THE forbidden cell [LEX-006 verbatim]: "Cho machine tự publish toàn quyền hoặc bịa persona/keyword/hook gốc"
+# => (1) every candidate MUST be seeded from a canonical source (never machine-fabricated), and (2) only the
+# three permitted output kinds, guarded auto-publish ONLY inside an owner-approved safe range (M6-OD-006).
+# The learning engine is guarded (RULE-011). Module 6 never self-approves a candidate (RULE-015).
+
+contract_id: M6-CTR-014
+name: ads_learning_candidate
+kind: OWNED_SHAPE_DEFINED                             # producer: MISSING -> field-level defined
+schema_version: GFD-M6-CTR-014-OWNED-001             # pack label; not owner content
+ownership: M6                                         # M6 owns the candidate record (Learning review queue)
+written_by: >
+  Learning Engine — the Learn stage scores signals; the Review stage emits a candidate into the review queue
+  (review_state=PENDING). Owner/marketing decide approve/reject/hold. Never full-authority publish (RULE-011, LEX-006).
+read_by: owner/marketing review queue, Scale Gate publish (M6-CTR-013/026 OPTIMIZATION_PUBLISH), evidence pack (M6-CTR-025), audit
+
+status_summary:
+  kind: OWNED_SHAPE_DEFINED
+  note: >
+    A candidate keyword/persona/hook/creative/landing/CTA proposed by the guarded Learning Engine [DOC §13 L276,
+    §17 L347-353]. Candidates are SEEDED from canonical sources (never machine-fabricated, LEX-006), SCORED only
+    from verified signals that passed the Data Quality Gate (RULE-011, L330), and go to a review queue for
+    owner/marketing approve/reject/hold. Publish is guarded: only inside an owner-approved safe range (M6-OD-006)
+    with rollback + audit; never full-authority auto-publish (LEX-006, RULE-011).
+
+source:
+  doc_anchor_object: "[DOC §13 L276] 'ads_learning_candidate | Candidate keyword/persona/hook/creative/landing/CTA | Learning review queue'"
+  doc_anchor_lifecycle: "[DOC §17 L347-353] stages Seed / Run / Learn / Review / Publish (verbatim below)"
+  doc_anchor_outputs: "[DOC §17 L332] 'Learning Engine được đề xuất candidate, delta recommendation và safe-range optimization; không được tự publish toàn quyền từ đầu'"
+  doc_anchor_seed: "[DOC §17 L328] seed from Content Block canonical / SKU Master / Phase ADS rule / business truth; [L330] learn only after clean verified signal; [L349] 'không để machine tự bịa chiến lược gốc'"
+  doc_anchor_mapping: "[DOC §17 L334] 'Mọi optimization phải gắn với sellable SKU, program, Golden Hour/24/7 policy, product public claim và brand wording'; [L336] mapping chain SKU -> Persona -> Behavior -> Keyword -> Creative Hook -> Landing -> CTA -> Event -> Verified Revenue"
+  rule_anchors:
+    - "[REG RULE-011] guarded learning: seed-only-from-canonical; Learn only after seed + ONLY verified DQ-passed signals; outputs = candidate/delta/safe-range; review queue; publish only via approval OR guarded auto-publish inside owner-approved safe range + rollback + audit"
+    - "[REG LEX-006] FORBIDDEN cell (Module 6 bị cấm): 'Cho machine tự publish toàn quyền hoặc bịa persona/keyword/hook gốc' — no fabricated origin strategy, no full auto-publish"
+    - "[REG RULE-009] LOW/HOLD/FAIL signals never used (learn only from clean verified signal)"
+    - "[REG RULE-010] no executable scale (publish optimization is a scale action; Scale Gate approval)"
+    - "[REG RULE-015] no self-certify — Module 6 never sets its own candidate APPROVED"
+
+# ---------------------------------------------------------------------------
+row_shape:
+
+  candidate_id:
+    type: string
+    required: true
+    role: primary_identifier
+    kind: "ADDITION [PACK]"
+
+  candidate_type:
+    type: enum
+    values: [KEYWORD, PERSONA, HOOK, CREATIVE, LANDING, CTA]   # doc L276 'keyword/persona/hook/creative/landing/CTA'
+    required: true
+    kind: "ADDITION [PACK] — doc-named candidate types (L276)"
+    note: "the 6 candidate types the doc lists. 'Negative keyword' is a SEED LIBRARY (L343 blocklist), NOT an L276 candidate type"
+
+  output_kind:
+    type: enum
+    values: [CANDIDATE, DELTA_RECOMMENDATION, SAFE_RANGE_OPTIMIZATION]   # doc L332 — the ONLY 3 permitted kinds
+    required: true
+    kind: "ADDITION [PACK] — doc-named output kinds (L332, RULE-011)"
+    note: "the ONLY three permitted Learning Engine outputs (L332). Full-authority publish is FORBIDDEN (LEX-006)"
+
+  sellable_sku_ref:
+    type: string
+    required: true
+    kind: "ADDITION [PACK] — mapping to a sellable SKU/program"
+    note: "every optimization is tied to a sellable SKU / program / Golden Hour / public claim / brand wording (L334). Sellable set pending Hero SKU lock M6-OD-001"
+
+  mapping_ref:
+    type: string
+    required: false
+    kind: "ADDITION [PACK] — link into the mapping chain (L336)"
+
+  seed_provenance:
+    type: object
+    required: true
+    kind: "ADDITION [PACK] — LOAD-BEARING anti-fabrication guard (LEX-006)"
+    shape: "{seed_source [CONTENT_BLOCK|SKU_MASTER|PHASE_ADS_RULE|BUSINESS_TRUTH], seed_ref, seeded_at}"
+    note: "PROVES the candidate is seeded from a canonical source, NOT machine-fabricated (L328/L349, LEX-006). A candidate with no canonical seed_provenance is INVALID (fail-closed). Content VALUES pending M6-OD-007"
+
+  signal_basis:
+    type: object
+    required: true
+    kind: "ADDITION [PACK] — the verified signal the score is built on"
+    note: "the effectiveness signal read at the Learn stage (L351); MUST be a verified business signal that passed the Data Quality Gate (M6-CTR-012 = PASS; L330, RULE-011). HOLD/FAIL/LOW signals are never used (RULE-009)"
+
+  score:
+    type: number
+    required: false
+    kind: "ADDITION [PACK] — Learn-stage effectiveness score"
+    note: "score of persona/keyword/hook/landing/CTA (L351); the numeric value is computed, not an owner threshold"
+
+  proposed_delta:
+    type: object
+    required: false
+    kind: "ADDITION [PACK] — for output_kind=DELTA_RECOMMENDATION"
+    note: "the recommended change; a RECOMMENDATION only — never applied without approval (RULE-010/011)"
+
+  safe_range:
+    type: object
+    required: false
+    kind: "ADDITION [PACK] — for output_kind=SAFE_RANGE_OPTIMIZATION; framework only"
+    note: "the bounds within which guarded auto-publish is permitted. The VALUES are the owner-approved safe range M6-OD-006 (owner-set) — NOT invented here. Until M6-OD-006 is decided there is NO safe range => no guarded publish (fail-closed)"
+
+  review_state:
+    type: enum
+    values: [PENDING, APPROVED, REJECTED, HOLD]        # doc L352 'owner/marketing approve/reject/hold'
+    required: true
+    default: PENDING
+    kind: "ADDITION [PACK] — review-queue states (L352)"
+    note: "M6 emits PENDING into the review queue. APPROVED/REJECTED/HOLD are set ONLY by owner/marketing review — Module 6 NEVER self-approves (RULE-015). This field is a read-only mirror of the owner/marketing decision on the M6 side"
+
+  reviewed_by:
+    type: string
+    required: false
+    kind: "ADDITION [PACK] — owner/marketing reviewer (audited)"
+
+  reviewed_at:
+    type: datetime
+    required: false
+    kind: "ADDITION [PACK]"
+
+  review_reason:
+    type: string
+    required: false
+    kind: "ADDITION [PACK] — audited decision reason (untrusted text fenced; PII masked)"
+
+  publish_state:
+    type: enum
+    values: [NOT_PUBLISHED, GUARDED_PUBLISHED, ROLLED_BACK]   # doc L353 guarded auto-publish + rollback
+    required: true
+    default: NOT_PUBLISHED
+    kind: "ADDITION [PACK] — publish lifecycle (L353)"
+    note: "GUARDED_PUBLISHED is permitted ONLY when review_state=APPROVED AND inside the owner-approved safe range (M6-OD-006) AND rollback_condition + audit_ref are set (L353). Otherwise NOT_PUBLISHED (fail-closed). Full-authority publish is FORBIDDEN (LEX-006). NOTE on RULE-011: the rule phrases publish as 'owner/marketing approval OR guarded auto-publish inside the owner-approved safe range'; the pack takes the FAIL-CLOSED reading — the Review stage (L352) always gates the Publish stage (L353), so an approved candidate publishes either manually or via guarded-auto inside the safe range, NEVER without Review approval. Owner may ratify a looser policy"
+
+  rollback_condition:
+    type: string
+    required: false
+    kind: "ADDITION [PACK] — required for GUARDED_PUBLISHED (L353)"
+
+  audit_ref:
+    type: string
+    required: false
+    kind: "ADDITION [PACK] — required for GUARDED_PUBLISHED (L353 'có ... audit')"
+
+  created_at:
+    type: datetime
+    required: true
+    kind: "ADDITION [PACK]"
+
+# ---------------------------------------------------------------------------
+# Lifecycle — doc §17 stages (L349-353), descriptions VERBATIM.
+# ---------------------------------------------------------------------------
+lifecycle:
+  - stage: Seed
+    description: "Fill thư viện từ Content Block/SKU/Rule đã khóa; không để machine tự bịa chiến lược gốc"
+    doc_source: "[DOC §17 L349]"
+    doc_verbatim: true
+  - stage: Run
+    description: "Chạy acquisition/retargeting theo mapping active và sellable SKU"
+    doc_source: "[DOC §17 L350]"
+    doc_verbatim: true
+  - stage: Learn
+    description: "Đọc signal hiệu quả, score persona/keyword/hook/landing/CTA"
+    doc_source: "[DOC §17 L351]"
+    doc_verbatim: true
+  - stage: Review
+    description: "Sinh candidate vào review queue; owner/marketing approve/reject/hold"
+    doc_source: "[DOC §17 L352]"
+    doc_verbatim: true
+  - stage: Publish
+    description: "Guarded auto-publish trong safe range, có rollback và audit"
+    doc_source: "[DOC §17 L353]"
+    doc_verbatim: true
+
+# ---------------------------------------------------------------------------
+# Seed libraries — doc §17 L338-345 (names + seed source; the sources for seed_provenance).
+# ---------------------------------------------------------------------------
+seed_libraries:
+  - name: "Persona Library"
+    purpose: "Nhóm khách mục tiêu"
+    seed_source: "Content Block 20 SKU, customer context, CRM lifecycle"
+    doc_source: "[DOC §17 L340]"
+  - name: "Behavior Library"
+    purpose: "Hành vi số và hành vi mua"
+    seed_source: "Web/Messenger/Live/CRM events đã pass data quality"
+    doc_source: "[DOC §17 L341]"
+  - name: "Keyword Library"
+    purpose: "Từ khóa acquisition/intent"
+    seed_source: "Content Block, product public view, search/ads history"
+    doc_source: "[DOC §17 L342]"
+  - name: "Negative Keyword Library"
+    purpose: "Chặn tệp/ý định không phù hợp"
+    seed_source: "Spam/troll/low-intent/fake order signals"
+    doc_source: "[DOC §17 L343]"
+    note: "a blocklist library, NOT an L276 candidate_type"
+  - name: "Creative Hook Library"
+    purpose: "Hook không sale sốc, đúng brand, đúng claim"
+    seed_source: "Product effectiveness, Meta-safe wording, Golden Hour Tri Ân"
+    doc_source: "[DOC §17 L344]"
+  - name: "Landing / CTA Library"
+    purpose: "Mapping landing và CTA theo intent"
+    seed_source: "Hero SKU, Golden Hour, Diamond, CRM/reorder"
+    doc_source: "[DOC §17 L345]"
+
+# ---------------------------------------------------------------------------
+guardrails:
+  - "LEARN-ONLY-AFTER-SEED: the Learn/scoring stage runs ONLY after a canonical seed exists AND consumes ONLY verified business signals that passed the Data Quality Gate (RULE-011, L330); never learns from dirty/HOLD/FAIL/LOW signal (RULE-009)"
+  - "NO FABRICATED ORIGIN: every candidate carries seed_provenance from a canonical source; Module 6 NEVER fabricates an original persona/keyword/hook/strategy (LEX-006 'bịa persona/keyword/hook gốc', L349)"
+  - "THREE OUTPUT KINDS ONLY: candidate, delta recommendation, safe-range optimization (L332); full-authority publish is FORBIDDEN (LEX-006 'tự publish toàn quyền', L332 'không được tự publish toàn quyền từ đầu')"
+  - "REVIEW IS OWNER/MARKETING: candidates enter the review queue as PENDING; approve/reject/hold is owner/marketing; Module 6 never self-approves (RULE-015, L352)"
+  - "GUARDED PUBLISH ONLY: publish_state=GUARDED_PUBLISHED requires review APPROVED + inside the owner-approved safe range (M6-OD-006) + rollback_condition + audit_ref (L353, RULE-011). Until M6-OD-006 is decided there is NO safe range => framework-only, NOT_PUBLISHED (fail-closed)"
+  - "MAPPED TO SELLABLE: every optimization is tied to a sellable SKU/program/Golden Hour/public claim/brand wording (L334)"
+  - "CONTENT FILL PENDING: persona/keyword/hook content VALUES are seeded per M6-OD-007; until locked, framework-only (no seeded content invented, L349, DECISION_REGISTER M6-OD-007)"
+  - "STAGED: global_gateway_state=BLOCKED / production_flag=OFF => no real publish ever in this pack (H01)"
+
+# ---------------------------------------------------------------------------
+schema_changelog_proposal:
+  - row: 22
+    date: "2026-07-22"
+    artifact: "M6-CTR-014 ads_learning_candidate (M6-owned, M6-P0710)"
+    change_vs_doc: >
+      New field-level definition from doc §17 (L326-353) + object anchor L276. Doc-named content preserved
+      verbatim: candidate_type [KEYWORD|PERSONA|HOOK|CREATIVE|LANDING|CTA] (L276), output_kind
+      [CANDIDATE|DELTA_RECOMMENDATION|SAFE_RANGE_OPTIMIZATION] (L332), the 5 lifecycle stages (L349-353), the 6
+      seed libraries (L338-345). [PACK] additions: record shape (candidate_id, sellable_sku_ref, mapping_ref,
+      seed_provenance, signal_basis, score, proposed_delta, safe_range, review_state [PENDING|APPROVED|REJECTED|
+      HOLD] L352, reviewed_by/at/reason, publish_state [NOT_PUBLISHED|GUARDED_PUBLISHED|ROLLED_BACK] L353,
+      rollback_condition, audit_ref, created_at) + guardrails. No owner value invented: safe_range values =
+      M6-OD-006; content fill = M6-OD-007; sellable set = M6-OD-001. Guarded learning (RULE-011); no full
+      auto-publish / no fabricated origin (LEX-006).
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0710 (proposal; owner ratifies)"
+    notes: "follows rows 9-21 (M6-P0701..0709); renumber sequentially at apply time. No rename."
+
+# ---------------------------------------------------------------------------
+open_decisions:
+  - id: M6-OD-006
+    status: OPEN
+    effect: "safe range for guarded auto-publish (safe_range field + publish_state=GUARDED_PUBLISHED). Until decided there is NO safe range => publish stays framework-only, NOT_PUBLISHED (fail-closed)"
+  - id: M6-OD-007
+    status: OPEN
+    effect: "whether persona/keyword/hook content is locked from Content Block 20 SKU. Until locked, candidates stay framework-only (no seeded content VALUES invented); the Seed stage may proceed as framework"
+  - id: M6-OD-001
+    status: OPEN
+    effect: "Hero SKU lock — scopes the sellable_sku_ref set (every optimization ties to a sellable SKU, L334)"
+  - id: M6-OD-012
+    status: OPEN
+    effect: "masking format for any identity-derived reference in review_reason / signal_basis (abc***xy recommended)"
+  - id: M6-OD-011
+    status: OPEN
+    effect: "target repository/stack; storage engine for the candidate record depends on the chosen stack"
+
+boundary:
+  - "M6-owned Learning review-queue record; plan_only (schema, not a table/migration)"
+  - "guarded learning (RULE-011): learn only after canonical seed + verified DQ-passed signal; never fabricate origin strategy (LEX-006)"
+  - "three output kinds only; NEVER full-authority publish (LEX-006); guarded auto-publish ONLY inside owner-approved safe range (M6-OD-006) + rollback + audit"
+  - "review approve/reject/hold is owner/marketing; Module 6 never self-approves (RULE-015)"
+  - "publish optimization is a scale action needing approval (RULE-010; Scale Gate M6-CTR-013/026 OPTIMIZATION_PUBLISH)"
+  - "no owner value invented — safe_range=M6-OD-006, content fill=M6-OD-007, sellable set=M6-OD-001"
+  - "NO raw PII/secrets (review_reason/signal_basis masked + secret_ref, RULE-014/H02); channel content untrusted DATA (RULE-H03)"
+  - "staged: global_gateway_state=BLOCKED, production_flag=OFF => no real publish ever (H01)"
+
+acceptance_self_map:
+  - "M6-CTR-014 defined field-level with types + constraints (candidate_type, output_kind, review/publish states, seed_provenance, safe_range + record shape + lifecycle + libraries)"
+  - "doc-named content preserved verbatim (6 candidate types L276, 3 output kinds L332, 5 lifecycle stages L349-353, 6 libraries L338-345); every [PACK] addition -> changelog row 22"
+  - "open owner decisions referenced as parameters (M6-OD-006 safe range, M6-OD-007 content fill, M6-OD-001 sellable SKU, M6-OD-012 masking, M6-OD-011 stack); NO owner value invented; guarded learning (RULE-011); no full auto-publish / no fabricated origin (LEX-006)"

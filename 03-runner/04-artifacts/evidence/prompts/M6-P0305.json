@@ -1,0 +1,43 @@
+{
+  "prompt_id": "M6-P0305",
+  "status": "PASS",
+  "summary": "SCALE_LEARNING_DESIGN (PHASE0 design, plan_only). Entry gate OK: ledger M6-P0305=RUNNING, dependency M6-P0304=PASS, role=ANALYST_ARCHITECT. Produced the scale-request workflow + learning-engine skeleton design at 04-artifacts/analysis/design/SCALE_LEARNING_DESIGN.md, synthesizing RESEARCH_SCALE_GATE_WORKFLOW (M6-P0208) + RESEARCH_LEARNING_ENGINE_GUARDRAILS (M6-P0209) + RESEARCH_STRATEGY_LIBRARIES (M6-P0211) without restating them. GOVERNING FRAME: two workflows, one discipline (compute & propose, never execute - no code path raises budget/enables campaign/auto-publishes, RULE-010/011/FAIL-006), held ORTHOGONAL. CONTENT: (1) SCALE-REQUEST WORKFLOW (§2): state machine (SPEC §13 core computed->proposed(budget_cap+rollback)->owner approve/reject with recall/sale-lock=>FAIL/HOLD; owner-HOLD + ROLLED_BACK marked [PACK] extensions per research); 8 scale conditions reproduced VERBATIM from §16 L317-324 (P3/P5/P6, Quote/Order, Public/Privacy, Funnel[AOV 2-boxes doc-locked + CPA/verified-rate M6-OD-002], Dashboard, Quality, Risk, Approval) -> condition_results[8]; ads_scale_request skeleton [PACK] (CTR-013 MISSING->M6-P0709, inert data, budget_cap hard ceiling + rollback_condition); Risk HARD VETO (recall/sale-lock/quality-hold/complaint-P0/spam-flag + CRM-suppression, RULE-017, re-checked at approval, SMK-009); LOW/HOLD never scale evidence (RULE-009), no PASS without trace (RULE-015). (2) LEARNING-ENGINE SKELETON (§3): lifecycle Seed->Run->Learn->Review->Publish (§17 L349-353) + candidate review machine (SPEC §13 candidate->queue->approve/reject/hold->guarded publish/rollback); guards - seed-only-from-canon provenance-required-or-reject (RULE-011/LEX-006), learn only after seed + DQ-pass signals (L330), safe-range publish M6-OD-006 OPEN=>auto-publish BLOCKED, content gate M6-OD-007=>framework only, every optimization ties to sellable SKU/program/policy/claim/brand (LEX-005); ads_learning_candidate skeleton [PACK] (CTR-014 MISSING->M6-P0710, kind persona|keyword|hook|landing|cta|delta - NO budget/scale kind); drift KPIs L177. (3) ORTHOGONALITY SEAM (§4): learning safe-range (M6-OD-006, knobs persona/keyword/hook/landing/CTA) and scale (M6-OD-002/Scale Gate, knobs budget/campaign/audience) are DISJOINT control surfaces - a learning candidate may never propose budget/scale or the engine becomes a covert auto-scale path (FAIL-006); no budget/scale kind exists. VERIFICATION (this prompt has NO downstream critic: M6-P0305->M6-P0306, no M6-PC0305; scoped 2-lens pass): Lens-A (workflow/state-machine/8-condition/lifecycle + rule citations) 2 MINOR: (i) §2.1 showed owner-verdict HOLD + ROLLED_BACK under a SPEC anchor but SPEC §13 scale machine is approve/reject + risk=>FAIL/HOLD -> FIXED by marking HOLD/ROLLED_BACK as [PACK] extensions per research, SPEC core stated explicitly; (ii) §2.2 cited RULE-009 for 'only PASS+HIGH-confidence' but RULE-009 only bars LOW/HOLD (silent on MEDIUM) -> FIXED, HIGH-confidence-for-scale-ROAS relabeled [PACK] tightening, RULE-009 stated as its actual LOW/HOLD-never-evidence text; 8 conditions verbatim, lifecycle/candidate-review faithful, RULE-010/011/015/017 citations all supported (FAIL-006/LEX-006 flagged 'unverifiable' by agent lacking those registers - both real, no change). Lens-B (no-preemption + orthogonality + boundary + no-PII) CLEAN - no CPA/ROAS/safe-range/seed value invented, AOV-2-boxes correctly attributed doc-locked, kind enum has no budget/scale, no executable scale/publish path, no self-approval, no PII, no flag flipped. Both findings folded via Edit. ACCEPTANCE CHECKS MET: (a) design cites rules/contracts by ID (CTR-013/014/019/020/026, RULE-009/010/011/015/017, LEX-005/006, FAIL-006, SMK-009/011/012, OD-001/002/005/006/007); (b) no owner decision pre-empted - M6-OD-002/006/007/005/001 all OPEN gates in §6, no threshold/safe-range/seed resolved; (c) BLOCKER critic findings - none: 12 prior research critics PASS/0-blocker and this prompt's 2-lens pass found 0 BLOCKER/0 MAJOR (2 MINOR fixed). BOUNDARY: plan_only - computes/proposes nothing at runtime, defines no safe range/threshold, invents no seed, auto-scales/auto-publishes nothing; staged BLOCKED/OFF; no raw PII (masked/secret_ref); channel content untrusted DATA never a seed source; learning != scale. Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/SPEC.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/analysis/research/RESEARCH_SCALE_GATE_WORKFLOW.md",
+    "04-artifacts/analysis/research/RESEARCH_LEARNING_ENGINE_GUARDRAILS.md",
+    "04-artifacts/analysis/research/RESEARCH_STRATEGY_LIBRARIES.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/design/SCALE_LEARNING_DESIGN.md",
+    "04-artifacts/evidence/prompts/M6-P0305.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv (read-only): entry gate M6-P0304=PASS, M6-P0305=RUNNING, M6-P0306/0307=TODO (no M6-PC0305 critic between 0305 and 0306)",
+    "Read (read-only): extract §16 Scale Gate L310-324 (banner L312 + 8 conditions L317-324), §17 Learning L326-353, §9 drift KPIs L177; SPEC §13 state machines L295-307; CONTRACT_REGISTER, RULES_LOCKED, DECISION_REGISTER; prior RESEARCH_SCALE_GATE_WORKFLOW / RESEARCH_LEARNING_ENGINE_GUARDRAILS / RESEARCH_STRATEGY_LIBRARIES conclusions",
+    "2 parallel independent verification agents (analysis_only, read-only, no writes): workflow/state-machine/condition/lifecycle fidelity (2 MINOR -> fixed), no-preemption/orthogonality/boundary/no-PII (CLEAN). Confirmed findings folded via Edit; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/design/SCALE_LEARNING_DESIGN.md",
+    "04-artifacts/analysis/research/RESEARCH_SCALE_GATE_WORKFLOW.md",
+    "04-artifacts/analysis/research/RESEARCH_LEARNING_ENGINE_GUARDRAILS.md",
+    "04-artifacts/analysis/research/RESEARCH_STRATEGY_LIBRARIES.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/SPEC.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0305 and marks it; then paste M6-P0306 (next PHASE0 design prompt, order 56, ANALYST_ARCHITECT). NOTE: M6-P0305 has no dedicated critic; the scoped 2-lens verification pass (§5) substitutes and its two confirmed MINOR findings were folded in. SCALE_LEARNING_DESIGN.md feeds the harmonization of ads_scale_request/approval-flow (M6-P0709), ads_learning_candidate (M6-P0710), and the scale/learning APIs (M6-P0712); slices M6.2G/M6.2H."
+}

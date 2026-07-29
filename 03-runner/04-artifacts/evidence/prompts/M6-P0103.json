@@ -1,0 +1,28 @@
+{
+  "prompt_id": "M6-P0103",
+  "status": "PASS",
+  "summary": "LOCK_FAIL_GATES. Entry gate OK: ledger M6-P0103=RUNNING, dependency M6-P0102=PASS, role=ANALYST_ARCHITECT. Verified registers/FAIL_GATE_REGISTER.md against extract §23 'Done Gate / Fail Gate' (00-spec/M6_FULL_DETAIL_EXTRACT.md). RESULT: no deviations => PASS. CHECK A - owner fail gates M6-FAIL-001..007 are 1:1 VERBATIM with the seven data rows of the §23 Fail Gate table at extract lines 444-450 (table header 'Fail Gate | Chặn ngay nếu' at 442-443): 001 Revenue misuse = L444 'Quote/cart/order draft/payment waiting/COD waiting bị tính revenue'; 002 Consent violation = L445 'External measurement hoặc audience sync khi thiếu consent'; 003 Event drift = L446 'Tự phát minh event ngoài event_registry'; 004 Core override = L447 'Override pricing/policy/Golden Hour/24-7/Diamond/CRM owner'; 005 Data Mart abuse = L448 'Dùng Data Mart làm trigger owner'; 006 Auto scale = L449 'Tự tăng ngân sách hoặc publish optimization không approval'; 007 No evidence = L450 'Không có audit/evidence/smoke mà gọi PASS'. All 7 Names and all 7 'Chặn ngay nếu' conditions are byte-identical to the extract; row order preserved; per-row Source citations (001->444, 002->445, 003->446, 004->447, 005->448, 006->449, 007->450) are each correct. Section attribution 'doc §23' confirmed by grep: §22 'Evidence Plan' at extract line 417, §23 'Done Gate / Fail Gate' at line 432, §24 at line 452 - so the 442-450 table sits inside §23. CHECK B - pack extensions M6-FAIL-008..010 are clearly HARDENING and correctly derived: they are in a SEPARATE section '## Pack extensions (HARDENING - OWNER REVIEW)' with a 'Derivation' column (NOT 'Source'). FAIL-008 'Raw PII exposure' derivation cites §12 line 248 ('Chỉ gửi event public-safe ... Không gửi PII thô'), §16 line 319 ('Public/Privacy | ... không leak PII ...'), §22 line 429 ('Security/Privacy Evidence | No PII thô, consent, hash policy, access control') - all three support the gate; the gate additionally covers 'raw secret/token' which is pack hygiene consistent with hardening rule M6-RULE-H02 and is transparently an extension (not attributed to the doc). FAIL-009 'Gate bypass' derivation is honestly stated 'Pack mechanics only; no doc source' - correct: self-certifying PASS/SIGNED, editing the runner state ledger, or skipping a JUDGE_GATE row are pack-only gate mechanics (this is the same M6-FAIL-009 referenced in CLAUDE.md). FAIL-010 'Phase jump' derivation cites §6 line 100 ('## 6. ADS Phase Flow - Không được nhảy phase') and §24 line 454 ('Không nhảy Phase 2 nếu Phase 1 chưa pass. Không nhảy Phase 3 nếu Phase 2 chưa pass.') - both support the gate. Derivation lines corroborated: L248, L100, L454 read directly this/prior turn; L319 and L429 were independently quoted by the M6-P0102 sub-auditors (R014, R016) and re-cited here. OBSERVATION (non-blocking, not a deviation): the register header says '1:1 with the owner document's Fail Gate table (doc §23, extract lines 442-450)' which is the whole table range INCLUDING the two header rows 442-443; the seven gate DATA rows are 444-450 and each row's own Source cell cites the precise line (444..450). Inclusive-header-range vs precise-per-row nuance only; no cell is altered. No missing/contradictory input and no OPEN owner decision gates this prompt => not BLOCKED. global_gateway_state=BLOCKED and production_flag=OFF unchanged; no enabling tokens written. No raw secrets/PII. Honest self-report only; the runner machine gate and the DOC_LOCK judge decide PASS.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/prompts/M6-P0103.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): registers/FAIL_GATE_REGISTER.md; extract lines 438-455 (§23 Fail Gate table + §24 header); ledger rows 16-18",
+    "Grep extract '^## 2[234]\\.' => §22 Evidence Plan L417, §23 Done Gate / Fail Gate L432, §24 Dev/AI Agent Handoff L452 (confirms fail-gate table 442-450 is under §23)"
+  ],
+  "evidence_refs": [
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0103 and marks it; then paste M6-P0104 (LOCK_SMOKE_REGISTER). Fail-gate register is verified lockable: owner gates M6-FAIL-001..007 are 1:1 verbatim with extract lines 444-450 under §23, and pack extensions M6-FAIL-008..010 are clearly HARDENING with correct derivations (008<-§12/§16/§22, 009 pack-mechanics-only, 010<-§6/§24). No deviations; nothing for the judge to reconcile beyond the noted inclusive-vs-precise range observation."
+}

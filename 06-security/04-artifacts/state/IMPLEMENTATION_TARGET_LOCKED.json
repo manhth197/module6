@@ -1,0 +1,33 @@
+{
+    "schema_version":  "GFD-M6-IMPLEMENTATION-TARGET-001",
+    "module":  "M6",
+    "status":  "LOCKED",
+    "workspace_mode":  "STAGED_ONLY",
+    "staging_root":  "04-artifacts/impl",
+    "repository":  {
+                       "mode":  "GREENFIELD",
+                       "absolute_path":  "D:\\M6\\Module6-workspace\\work-root\\target-repo",
+                       "code_root":  "."
+                   },
+    "stack":  {
+                  "language":  "python",
+                  "language_version":  "3.12",
+                  "framework":  "",
+                  "database":  "",
+                  "queue":  "",
+                  "test_command":  "pytest -q",
+                  "run_command":  "python -m app"
+              },
+    "owner_decision":  {
+                           "id":  "M6-OD-011",
+                           "status":  "DECIDED",
+                           "decided_at":  "2026-07-23T02:06:50Z",
+                           "evidence_ref":  "04-artifacts/evidence/decisions/M6-OD-011.json"
+                       },
+    "safety":  {
+                   "production_access":  false,
+                   "external_platform_calls":  false,
+                   "live_migrations":  false
+               },
+    "note":  "Operator-owned manifest. Executors never edit this file; implementation remains staged until an owner-controlled integration step."
+}

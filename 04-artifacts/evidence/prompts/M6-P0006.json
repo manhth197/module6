@@ -1,0 +1,27 @@
+{
+  "prompt_id": "M6-P0006",
+  "status": "PASS",
+  "summary": "EVIDENCE_DIRS_CHECK. Ledger confirmed M6-P0006=RUNNING and dependency M6-P0005=PASS before proceeding. All three evidence directories EXIST (Test-Path -PathType Container): 04-artifacts/evidence/prompts/ (7 items: 6 evidence JSONs M6-P0000..M6-P0005 + .gitkeep), 04-artifacts/evidence/judge/ (1 item: .gitkeep), 04-artifacts/evidence/entry/ (1 item: .gitkeep); parent 04-artifacts/evidence/ also exists. Acceptance check 'all three evidence dirs exist' = satisfied. Writability determined from role_policy.json (NOT by attempting writes): this role's allowed_write_roots = work-root, 04-artifacts/evidence/prompts, 04-artifacts/evidence/judge, 05-judge. Therefore evidence/prompts/ (writable; demonstrated live by writing this evidence JSON) and evidence/judge/ (writable) are in policy; evidence/entry/ is NOT in this role's allowlist and, per registry/ROLE_REGISTRY.json, not in any executor role's allowlist either => operator-managed (entry evidence M6-ENTRY-00X.json placed via an operator-controlled process, analogous to 04-artifacts/state). This is a policy fact, not a defect: the acceptance criterion is existence, and all three exist. Marker note listing the dirs written to work-root/EVIDENCE_DIRS_CHECK.md (NOT inside any evidence dir, per task). Read-only otherwise; no state touched, no write attempted against an evidence dir outside my allowlist. Final PASS/FAIL is the runner gate + Judge's call.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    ".claude/role_policy.json",
+    "registry/ROLE_REGISTRY.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "work-root/EVIDENCE_DIRS_CHECK.md",
+    "04-artifacts/evidence/prompts/M6-P0006.json"
+  ],
+  "commands_run": [
+    "Test-Path -PathType Container for evidence/prompts, evidence/judge, evidence/entry (+ parent evidence); Get-ChildItem item counts (read-only)"
+  ],
+  "evidence_refs": [
+    "work-root/EVIDENCE_DIRS_CHECK.md",
+    ".claude/role_policy.json",
+    "registry/ROLE_REGISTRY.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine gate for M6-P0006 (EVIDENCE_GATE) and marks it, then pastes the next prompt M6-P0007 (SECRET_SCAN_BASELINE). Note for reviewer: evidence/entry/ exists but is not writable by any executor role per registry (operator-managed) — not a defect for this existence check."
+}

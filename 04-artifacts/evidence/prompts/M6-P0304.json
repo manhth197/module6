@@ -1,0 +1,43 @@
+{
+  "prompt_id": "M6-P0304",
+  "status": "PASS",
+  "summary": "DASHBOARD_DESIGN (PHASE0 design, plan_only). Entry gate OK: ledger M6-P0304=RUNNING, dependency M6-P0303=PASS, role=ANALYST_ARCHITECT. Produced the dashboard + data-quality layer design at 04-artifacts/analysis/design/DASHBOARD_DESIGN.md. GOVERNING FRAME: a dashboard that cannot be prettied with unverified data - verified-only revenue enforced STRUCTURALLY at the query layer ([DOC §4 L78 forbidden 'Lam dep dashboard bang du lieu chua verified']); DQ status propagates worst-first; data mart read-only never a trigger (RULE-012); thresholds M6-OD-002 OPEN, no value invented. CONTENT covers all four requested areas: (1) 14 LOCKED METRICS + SOURCE TRACE (§1): all 14 from §14/MONITORING_REGISTER reproduced verbatim (Ads Spend, Revenue Verified, ROAS, CPA, AOV, Boxes per Order, Comment Rate, Inbox Rate, Quote Rate, Order Rate, Verified Rate, COD Fail Rate, CRM Revenue, Diamond Revenue) with a [PACK] source-trace column (which locked object/field each resolves from) and a rev? column marking the 8 verified-revenue-bearing metrics (Revenue Verified/ROAS/CPA/AOV/Boxes-per-Order/Verified-Rate/CRM-Revenue/Diamond-Revenue) vs the 6 non-revenue funnel/spend metrics. (2) VERIFIED-ONLY REVENUE AT QUERY LAYER (§2): structural - every revenue metric's DEFINITION keys on ORDER_VERIFIED/verified_revenue/verified_orders, no query path admits quote/cart/draft/payment-waiting/COD-waiting (RULE-003 enumerates exactly those 5 exclusions); revenue_value from Commerce Verified Revenue only (L256), never computed by M6; fail-closed SMK-015 (dashboard quote/draft as revenue->Fail), SMK-004/005, DQ item 6; PAYMENT_COMPLETED non-revenue default (M6-OD-008). (3) DQ GATE PROPAGATION (§3): 8 §15 items reproduced verbatim (both PASS + FAIL/HOLD columns L301-308); worst-status propagation FAIL>HOLD>PASS ([PACK] per RESEARCH_DASHBOARD_DATA_QUALITY) - a metric inherits worst DQ status of inputs, green never shown over held/failed input; evidence-first (visual without source trace = FAIL, L308/RULE-015); suppression item surfaces recall/sale-lock/CRM-suppression (RULE-017). (4) DATA MART READ-ONLY (§4): support-view only, never trigger owner for CRM/pricing/Diamond/scale (RULE-012/§9 L169); dashboard API read-only 'Chi doc data mart/support view' (§19 L373, CTR-018); SMK-010 (data mart trigger->Fail); presents scale-readiness to owner, does not act (RULE-010). §5 thresholds all M6-OD-002 OPEN - dashboard may DISPLAY 14 metrics + DQ now but alert firing BLOCKED until owner sets thresholds (no value invented). VERIFICATION (this prompt has NO downstream critic: M6-P0304->M6-P0305, no M6-PC0304; scoped 2-lens pass): Lens-A (14-metric fidelity + verified-revenue enforcement + rev?-classification) 1 MINOR - row 2 note rendered '**Chi ORDER_VERIFIED**' (bold) under a 'verbatim' column but source is plain -> FIXED (bold removed); count=14 exact, all formulas/notes else verbatim, rev? set correct, enforcement + SMK-004/005/015 citations accurate. Lens-B (DQ propagation + data-mart-read-only + no-threshold-preemption + no-PII) CLEAN + 1 informational imprecision - §3 ROAS example labeled the revenue input as 'item 5' (Attribution) when Revenue Verified is DQ item 6 -> TIGHTENED to 'DQ items 5 and 6'; full-file scan found NO invented numeric threshold, propagation correctly [PACK]-tagged, data-mart citations correct, no PII, no flag flipped. Both findings folded via Edit. ACCEPTANCE CHECKS MET: (a) design cites rules/contracts by ID (CTR-015/018, RULE-003/010/012/015/017, DQ items 1-8, SMK-004/005/010/015, OD-002/005/008); (b) no owner decision pre-empted - M6-OD-002 thresholds OPEN + alert firing BLOCKED, M6-OD-005 model OPEN, M6-OD-008 non-revenue default, no numeric threshold anywhere; (c) BLOCKER critic findings - none: 12 prior research critics PASS/0-blocker and this prompt's 2-lens pass found 0 BLOCKER/0 MAJOR (1 MINOR + 1 informational, both fixed). BOUNDARY: plan_only - runs no query, fires no alert, triggers nothing; data mart read-only support-view (RULE-012); staged BLOCKED/OFF; metrics are aggregates, identity dims masked/secret_ref, no PII; channel counts untrusted DATA. Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/SPEC.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/MONITORING_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "04-artifacts/analysis/research/RESEARCH_DASHBOARD_DATA_QUALITY.md",
+    "04-artifacts/analysis/design/DATA_MODEL_BASELINE.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/design/DASHBOARD_DESIGN.md",
+    "04-artifacts/evidence/prompts/M6-P0304.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv (read-only): entry gate M6-P0303=PASS, M6-P0304=RUNNING, M6-P0305=TODO (no M6-PC0304 critic between 0304 and 0305)",
+    "Read (read-only): extract §14 Dashboard KPI Contract L278-295 (14 metrics), §15 Data Quality Gate L299-308 (8 items), §9 Data Mart L169, §19 dashboard API L373; MONITORING_REGISTER (14 metrics verbatim + DQ full table + threshold status M6-OD-002); RULES_LOCKED, DECISION_REGISTER, SMOKE_REGISTER; prior RESEARCH_DASHBOARD_DATA_QUALITY conclusions",
+    "2 parallel independent verification agents (analysis_only, read-only, no writes): 14-metric/verified-revenue fidelity (1 MINOR -> fixed), DQ-propagation/data-mart/no-threshold-preemption/no-PII (CLEAN + 1 informational -> tightened). Confirmed findings folded via Edit; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/design/DASHBOARD_DESIGN.md",
+    "04-artifacts/analysis/research/RESEARCH_DASHBOARD_DATA_QUALITY.md",
+    "04-artifacts/analysis/design/DATA_MODEL_BASELINE.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/MONITORING_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0304 and marks it; then paste M6-P0305 (next PHASE0 design prompt, order 55, ANALYST_ARCHITECT). NOTE: M6-P0304 has no dedicated critic; the scoped 2-lens verification pass (§6) substitutes and its confirmed findings (1 MINOR + 1 informational) were folded in. DASHBOARD_DESIGN.md feeds CTR-015 threshold binding (M6-P0714), the dashboard API harmonization (M6-P0712), and the Scale Gate dashboard-evidence condition."
+}

@@ -1,0 +1,26 @@
+{
+  "role_name": "PM_ORCHESTRATOR,JUDGE",
+  "allowed_write_roots": [
+    "work-root",
+    "04-artifacts/evidence/prompts",
+    "04-artifacts/evidence/judge",
+    "05-judge"
+  ],
+  "deny_write_roots": [
+    "00-spec",
+    "04-artifacts/state",
+    "registry",
+    "scripts",
+    "scripts-win",
+    "_source_snapshot",
+    ".claude",
+    "CLAUDE.md",
+    "setup",
+    "00-analyst",
+    "01-coder",
+    "02-tester",
+    "03-runner",
+    "04-boundary",
+    "06-security"
+  ]
+}

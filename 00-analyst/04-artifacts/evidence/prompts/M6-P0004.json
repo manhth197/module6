@@ -1,0 +1,28 @@
+{
+  "prompt_id": "M6-P0004",
+  "status": "PASS",
+  "summary": "ROLE_REGISTRY_LOAD: loaded registry/ROLE_REGISTRY.json and cross-checked against the ledger. Ledger confirmed M6-P0004=RUNNING and dependency M6-P0003=PASS before proceeding. CHECK 1 (every ledger Role maps to exactly one agent id): 7 distinct ledger roles, each maps to exactly one agent (ROLE_AGENT_MULTIMAP_ISSUES=0): ANALYST_ARCHITECT->m6-analyst-architect (65 rows), BOUNDARY_ADVERSARY->m6-boundary-adversary (24), CODER->m6-coder (22), JUDGE->m6-judge (27), PM_ORCHESTRATOR->m6-pm-orchestrator (25), SECURITY_PII->m6-security-pii (12), TESTER->m6-tester (23). Row total 198 = prompts_total in CURRENT_STATE_LOCKED.json. All 7 reconcile with registry agents (LEDGER_ROLE_MISMATCH=0, LEDGER_ROLE_NOT_IN_REGISTRY=0). The registry pack-root entry is a compound role_name PM_ORCHESTRATOR,JUDGE with pipe-joined agent m6-pm-orchestrator|m6-judge; expanded position-wise before matching so ledger PM_ORCHESTRATOR and JUDGE each resolve to one agent. Informational: two registry roles have no ledger prompts (RUNNER/m6-runner, JUDGE-OUTPUT-ONLY/m6-judge); this does not violate Check 1 (forward direction) and is recorded for completeness. CHECK 2 (hook sha256 match files in each role folder): verified Get-FileHash SHA256 of all 6 hook files across 8 hook homes (pack-root .claude/hooks, the 6 role-session .claude/hooks, and setup/hooks-master) => HOOK_FILES_CHECKED=48, HOOK_HASH_MISMATCH=0, HOOK_FILE_MISSING=0, ALL_HOOK_HASHES_MATCH=True. Role/agent table + hashes recorded to work-root/ROLE_REGISTRY_LOAD.md. Read-only. Final PASS/FAIL is the runner gate + Judge's call.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "registry/ROLE_REGISTRY.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    ".claude/hooks/role_pre_tool_guard.ps1"
+  ],
+  "files_changed": [
+    "work-root/ROLE_REGISTRY_LOAD.md",
+    "04-artifacts/evidence/prompts/M6-P0004.json"
+  ],
+  "commands_run": [
+    "Get-Content registry/ROLE_REGISTRY.json | ConvertFrom-Json; Import-Csv ledger; Group-Object Role; expand compound registry roles; reconcile ledger role/agent vs registry (read-only)",
+    "Get-FileHash -Algorithm SHA256 over 6 hook files x 8 hook homes; compare to registry.hook_sha256"
+  ],
+  "evidence_refs": [
+    "work-root/ROLE_REGISTRY_LOAD.md",
+    "registry/ROLE_REGISTRY.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine gate for M6-P0004 (EVIDENCE_GATE) and marks it, then pastes the next prompt M6-P0005 (RUNNER_STATE_INIT_VERIFY). Note for reviewer: registry roles RUNNER and JUDGE-OUTPUT-ONLY have no ledger prompts (informational, not a mismatch)."
+}

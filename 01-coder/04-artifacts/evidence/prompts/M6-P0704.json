@@ -1,0 +1,40 @@
+{
+  "prompt_id": "M6-P0704",
+  "status": "PASS",
+  "summary": "CONTRACT_CONVERSION_EVENTS (CONTRACT_HARMONIZATION, plan_only). Entry gate OK: ledger M6-P0704=RUNNING, dependency M6-P0703 (web_event_logs)=PASS, role=ANALYST_ARCHITECT. Produced the field-level shape of M6-CTR-007 conversion_events at 04-artifacts/analysis/contracts/CONTRACT_CONVERSION_EVENTS.contract.yaml. NATURE: ownership=M6/Core (M6 writes the internal conversion; Core policy governs what qualifies as a conversion). The doc names the object + ROLE only (§13 L267, §7 L119, §19 L372) with NO field-level names => there are ZERO doc-named fields to preserve (verbatim acceptance vacuous); every field is a [PACK] completion, each anchored to a locked cross-contract rule where one governs. CONTENT: 13 fields - conversion_id (PK), event_code (CTR-003/RULE-001 registry), source_event_id (dedup input), correlation_id (trace), customer_or_guest_key (PII, dedup input), consent_snapshot_id (CTR-006/RULE-002 consent gate), attribution_context_ref (CTR-002), revenue_value (RULE-003 ORDER_VERIFIED-only; PAYMENT_COMPLETED deferred to M6-OD-008), currency=VND (CTR-001 locked), occurred_at, dedup_inputs (platform-agnostic components), dispatch_state [CREATED|QUEUED|DISPATCHED|FAILED], created_at. GOVERNING ROLE: conversion_events is the SOURCE feeding marketing_measurement_outbox (CTR-008); external measurement goes ONLY via outbox+worker, NEVER directly (RULE-004); revenue only from ORDER_VERIFIED (RULE-003); consent must be VALID to egress (fail-closed RULE-002). VERIFICATION (no downstream critic M6-PC0704): PyYAML parse-check PARSE_OK (proactive, single root mapping). 1 independent verification agent checked 9 dimensions (no-doc-fields-honesty / source-for-outbox-no-direct-send / dedup-formula / revenue-ORDER_VERIFIED-only / consent-gate / ownership / no-invented-values / PII / changelog+YAML) - ALL 9 CLEAN, 0 BLOCKER/0 MAJOR. 1 MINOR (genuine semantic catch): I had put dedup_key (required,unique, RULE-005 formula) ON the conversion_events row, but the RULE-005 formula includes 'platform' which is resolved only at OUTBOX FAN-OUT (one conversion -> Pixel/CAPI/Offline) - so a unique dedup_key is NOT computable at conversion-row creation; it is an OUTBOX-row property (CTR-008), not a conversion-row property -> FIXED: replaced dedup_key with dedup_inputs (platform-agnostic components: event_code, customer_or_guest_key, source_event_id, event_ts_bucket-from-occurred_at); the composite unique RULE-005 dedup_key (incl. platform) is now correctly deferred to the outbox (M6-CTR-008), one per (conversion x platform); write_validation + changelog updated to match; re-parsed PARSE_OK (has_dedup_key_field=False). This correctly sets the conversion(source, platform-agnostic) <-> outbox(per-platform, dedup_key unique) seam for M6-P0705. ACCEPTANCE CHECKS MET: (a) M6-CTR-007 defined field-level with types + constraints (13 fields + write_validation); (b) no doc-named fields exist (object+role only) => vacuously preserved, every field is an addition -> changelog row 13; (c) open owner decisions referenced as parameters (M6-OD-008 revenue qualification, M6-OD-003 hash-at-dispatcher, M6-OD-011 storage); dedup formula = locked RULE-005 (unaltered); no invented values (currency=VND locked, revenue ORDER_VERIFIED-only). BOUNDARY: plan_only - schema definition not a table/migration; source-only (never sends externally, RULE-004); revenue only ORDER_VERIFIED (RULE-003); no raw PII/secrets (customer_or_guest_key masked/secret_ref); staged BLOCKED/OFF; channel content untrusted DATA. Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "04-artifacts/analysis/design/EVENT_FLOW_DESIGN.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/contracts/CONTRACT_CONVERSION_EVENTS.contract.yaml",
+    "04-artifacts/evidence/prompts/M6-P0704.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv (read-only): entry gate M6-P0703=PASS, M6-P0704=RUNNING, M6-P0705=TODO (no M6-PC0704 critic)",
+    "Read (read-only): extract §13 L267 (conversion_events object verbatim), §7 L119 (role), §19 L372 (conversions API), §12 L254 (dedup_key formula) + L250 (offline after ORDER_VERIFIED), §10 L206 (VND) + L210 (correlation); CONTRACT_REGISTER (CTR-007 M6/Core/MISSING/P0704), SCHEMA_CHANGELOG, DECISION_REGISTER (M6-OD-008/003/011)",
+    "Bash python PyYAML safe_load (read-only) x2: pre-fix PARSE_OK (13 fields incl dedup_key); post-fix PARSE_OK (dedup_inputs replaces dedup_key, has_dedup_key_field=False)",
+    "1 independent verification agent (analysis_only, read-only): 9 dimensions CLEAN, 1 MINOR (dedup_key platform/outbox-placement) -> fixed via Edit (dedup_key -> dedup_inputs; composite key deferred to outbox CTR-008); NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/contracts/CONTRACT_CONVERSION_EVENTS.contract.yaml",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "04-artifacts/analysis/design/EVENT_FLOW_DESIGN.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0704 and marks it, AND (out-of-band) appends SCHEMA_CHANGELOG row 13 per the contract's schema_changelog_proposal (after rows 9-12). Then paste M6-P0705 (CONTRACT_MEASUREMENT_OUTBOX, order 65, ANALYST_ARCHITECT) which produces CTR-008 marketing_measurement_outbox (M6 worker-only; partial fields error_log/next_retry_at L252) - NOTE: per this prompt's fix, the composite UNIQUE RULE-005 dedup_key (incl. platform) belongs on the outbox row (one per conversion x platform), so M6-P0705 should define dedup_key unique there. CONTRACT_CONVERSION_EVENTS feeds slice M6.2C."
+}

@@ -1,0 +1,55 @@
+# Get-NextPromptLocked.ps1 -- show the next ready prompt (by Order, deps gated).
+# Writes _NEXT_PROMPT_LOCKED.md at the pack root and prints a summary.
+# Usage: powershell -NoProfile -ExecutionPolicy Bypass -File scripts-win\Get-NextPromptLocked.ps1
+
+$ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot "_M6RunnerLib.ps1")
+
+$rows = Read-M6Csv $script:LedgerPath
+$running = @($rows | Where-Object { $_.Status -eq 'RUNNING' })
+if ($running.Count -gt 0) {
+    Write-Host "A prompt is already RUNNING:" -ForegroundColor Yellow
+    foreach ($r in $running) { Write-Host ("  " + $r.PromptId + "  " + $r.Role + "  " + $r.Title) }
+    Write-Host "Finish it (Check + Mark) or reset it (Set-PromptStatusLocked -Status TODO/BLOCKED) first."
+    exit 1
+}
+
+$next = $null
+foreach ($r in ($rows | Sort-Object { [int]$_.Order })) {
+    if ($r.Status -ne 'TODO') { continue }
+    $missing = @()
+    if (Test-M6DepsPassed $rows $r ([ref]$missing)) { $next = $r; break }
+}
+
+if (-not $next) {
+    Write-Host "No ready prompt. Either everything is done or dependencies are blocked."
+    $blocked = @($rows | Where-Object { $_.Status -eq 'TODO' } | Sort-Object { [int]$_.Order } | Select-Object -First 5)
+    foreach ($b in $blocked) {
+        $miss = @(); [void](Test-M6DepsPassed $rows $b ([ref]$miss))
+        Write-Host ("  waiting: " + $b.PromptId + " <- " + ($miss -join ", "))
+    }
+    exit 1
+}
+
+$md = @()
+$md += "# NEXT PROMPT (locked runner)"
+$md += ""
+$md += "| Field | Value |"
+$md += "|---|---|"
+$md += ("| PromptId | " + $next.PromptId + " |")
+$md += ("| Order | " + $next.Order + " |")
+$md += ("| Role | " + $next.Role + " (window: see setup/OPERATING_LOOP.md) |")
+$md += ("| Phase / Slice | " + $next.Phase + " / " + $next.Slice + " |")
+$md += ("| Title | " + $next.Title + " |")
+$md += ("| Gate | " + $next.GateLevel + " |")
+$md += ("| Prompt file | " + $next.File + " |")
+$md += ("| Expected evidence | " + $next.ExpectedEvidence + " |")
+$md += ""
+$md += "Run: scripts-win\Get-NextPromptDetail.ps1 -CopyToClipboard -Open"
+$outPath = Join-Path $script:PackRoot "_NEXT_PROMPT_LOCKED.md"
+[System.IO.File]::WriteAllText($outPath, ($md -join [Environment]::NewLine), (New-Object System.Text.UTF8Encoding($false)))
+
+Write-Host ("NEXT: " + $next.PromptId + "  [" + $next.Role + "]  " + $next.Title)
+Write-Host ("      file: " + $next.File)
+Write-Host ("      wrote " + $outPath)
+exit 0

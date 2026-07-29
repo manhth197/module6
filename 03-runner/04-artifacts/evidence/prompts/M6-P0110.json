@@ -1,0 +1,31 @@
+{
+  "prompt_id": "M6-P0110",
+  "status": "PASS",
+  "summary": "LOCK_ENTRY_EVIDENCE. Entry gate OK: ledger M6-P0110=RUNNING, dependency M6-P0109=PASS, role=ANALYST_ARCHITECT. Verified registers/ENTRY_EVIDENCE_REGISTER.md and registers/CONFLICT_MATRIX.md against 00-spec/M6_FULL_DETAIL_EXTRACT.md. RESULT: both checks PASS; no deviations. CHECK 1 - entry evidence rows against extract lines 317, 488 and the §18 boundary table: the register header quotes extract line 317 VERBATIM ('P3/P5/P6 evidence | Verified Revenue boundary, Payment/COD/Order Verified, Channel identity, event identity có evidence' - matches §16 line 317 exactly) and line 488 VERBATIM ('Không bắt đầu Module 6 implementation nếu chưa có P3 Verified Revenue boundary và P5 channel/event identity evidence'). The 4 rows correctly decompose line 317's 'P3/P5/P6 evidence' with real supporting citations: M6-ENTRY-001 (P3 Verified Revenue boundary) <- line 317 + line 318 ('QuoteSnapshot hoạt động đúng, order tạo đúng, không tạo order khi chưa xác nhận' - verbatim) + line 488; M6-ENTRY-002 (P5 channel identity) <- line 317 + line 361 (§18 M5 row 'Page, live, comment, messenger, handoff, delivery logs') + line 488; M6-ENTRY-003 (P6 event identity) <- line 317 + line 263 ('event_registry | Danh sách event hợp lệ, owner, channel, data sensitivity, external send policy | Core Event Governance') + line 490 ('Tạo/kiểm event_registry trước mọi tracking hook'); M6-ENTRY-004 (public/privacy conduct) <- line 319 ('AI/Gateway không public giá cuối, không leak PII, không spam'). All 4 marked OPEN and fail-closed (missing entry evidence => affected slices stay BLOCKED). The §18 Consumed-boundary reference table (7 rows, 'Module 6 must NOT do' column, extract lines 359-365) is reproduced verbatim (re-confirmed here; also locked in M6-P0101). CHECK 2 - Conflict Matrix rows cite real line numbers and recommendations do not silently resolve owner questions: all 7 M6-CONF-001..007 rows verified. Citations are REAL: CONF-001 (§10 ads_measurement_event singular vs §13 ads_measurement_events plural) lines 191+273; CONF-002 (PAYMENT_COMPLETED conditional revenue) lines 157+187; CONF-003 (retargeting scope) lines 104+393 - DIRECTLY VERIFIED: extract line 104 'Core output' column DOES contain 'Data Engine, Acquisition Engine cơ bản, Retargeting Engine cơ bản' (Phase 1), and line 393 M6.2I scope DOES read 'live/comment/Messenger/quote/order retargeting measurement', so the tension (Phase 1 names a basic Retargeting Engine while retargeting measurement is scoped to M6.2I in the Phase 2 band) is real; CONF-004 (GOLDEN_HOUR_START/REMINDER 'Tùy cấu hình') line 134; CONF-005 (doc-control 'not code' vs slices doing implementation) lines 22+384-395+452-472; CONF-006 (24-7 vs 24/7 spelling) lines 447+470; CONF-007 (P6 self-referencing scale evidence) line 317. NO recommendation silently resolves an owner question: the two rows touching genuine owner decisions DELEGATE - CONF-002 -> M6-OD-008 and CONF-004 -> M6-OD-009 (both verified in M6-P0107); the remainder are naming/scope/self-reference reconciliations marked 'OPEN (pack proceeds with recommendation)' (CONF-001/003/007) or document-interpretation/cosmetic reconciliations marked 'RESOLVED-BY-READING (owner may veto)' (CONF-005/006). None sets a price, policy, threshold or scale rule and none flips a gate/flag; the matrix header restates M6-RULE-018 ('conflicts are NEVER resolved silently by code - each row carries the pack's recommendation for the owner to ratify'). No missing/contradictory input and no OPEN owner decision in THIS prompt's own scope => not BLOCKED (the OPEN entry-evidence rows and OPEN conflicts are the documented, correctly-marked SUBJECT being verified, not blockers of this verification). global_gateway_state=BLOCKED and production_flag=OFF unchanged; no enabling tokens written. No raw secrets/PII. Honest self-report only; the runner machine gate and the DOC_LOCK judge decide PASS.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/CONFLICT_MATRIX.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/prompts/M6-P0110.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): registers/ENTRY_EVIDENCE_REGISTER.md; registers/CONFLICT_MATRIX.md; extract §16 scale conditions 311-324 (line 317 P3/P5/P6 evidence, 318 Quote/Order, 319 Public/Privacy), §6 phase flow 100-107 (line 104 Core output incl. 'Retargeting Engine cơ bản'), §20 roadmap 382-395 (line 393 M6.2I 'retargeting measurement'); (lines 157/187/134/22/263/361/447/470/488/490 read in prior prompts); ledger rows 23-24",
+    "Cross-check: CONF-002->M6-OD-008 and CONF-004->M6-OD-009 delegation vs DECISION_REGISTER (verified M6-P0107); entry-evidence rows vs slice_definitions.json entry_evidence arrays (M6.2A: 001/002/003; M6.2G: 001/002/003/004; M6.2I: 002)"
+  ],
+  "evidence_refs": [
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/CONFLICT_MATRIX.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0110 and marks it; then paste M6-P0111 (LOCK_SLICES). Entry-evidence and conflict registers are verified lockable: M6-ENTRY-001..004 correctly decompose extract line 317 with real supporting citations (318/361/263/490/319) plus line 488, the §18 boundary table is verbatim, and all 7 Conflict Matrix rows cite real extract lines with recommendations that delegate to owner decisions (CONF-002->OD-008, CONF-004->OD-009) or are transparently marked OPEN/RESOLVED-BY-READING (owner may veto) - none silently resolves an owner question. No deviations for the judge to reconcile."
+}

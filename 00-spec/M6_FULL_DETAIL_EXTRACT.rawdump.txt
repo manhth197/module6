@@ -1,0 +1,708 @@
+P0001: GINSENGFOOD / MODULE 6 - ADS MEASUREMENT / ATTRIBUTION / ROAS / SCALE GATE / V0.3 CLEAN FINAL - ADS PHASE 1-3 / DATA / CONSENT / HERO SKU / GOLDEN HOUR / DIAMOND / LEARNING ENGINE
+T01R01C01: TRẠNG THÁI KHÓA / READY FOR OWNER / TECH LEAD / DEV REVIEW. NOT PRODUCTION READY. NOT ROAS PASS. NOT SCALE READY. GLOBAL GATEWAY: BLOCKED. Module 6 chỉ đo lường, attribution, dashboard, data quality và đề xuất scale theo gate; không tạo doanh thu, không tạo đơn, không xác nhận thanh toán, không tự tăng ngân sách.
+P0003: [IMAGE]
+P0004: Hình 1. Cấu trúc vận hành kỹ thuật Module 6 - Ads Measurement / Attribution / ROAS / Scale Gate
+P0005: 1. Document Control
+T02R01C01: Trường
+T02R01C02: Nội dung
+T02R02C01: Mã tài liệu
+T02R02C02: GFD-M6-ADS-ROAS-TECHDESC-003
+T02R03C01: Phiên bản
+T02R03C02: V0.3 Clean Final
+T02R04C01: Module trực quan
+T02R04C02: Module 6 - Ads Measurement / Attribution / ROAS / Scale Gate
+T02R05C01: Phase canonical
+T02R05C02: Phase 6 - Ads Measurement / Attribution / ROAS / Scale Gate
+T02R06C01: Pack canonical
+T02R06C02: PACK-07 - Ads / ROAS / Attribution
+T02R07C01: Nguồn bổ sung chính
+T02R07C02: ADS Phase 1-3 Implementation Lock, ADS Execution Playbook, ADS Strategy Input Pack, Keyword/Persona/Behavior/Creative Hook Library, Financial/Live Commerce baselines
+T02R08C01: Không phải
+T02R08C02: Code, migration, dashboard production, Meta config thật, ngân sách ads, go-live approval, scale approval
+T02R09C01: Global Gate
+T02R09C02: BLOCKED until P0 evidence + Owner sign-off
+P0007: 2. Nguồn tài liệu đầu vào và thứ tự ưu tiên
+P0008: MASTER - Source-of-Truth, dependency, evidence, release control.
+P0009: Phase 2 - Operational Core: Inventory, release, recall, sale lock, traceability.
+P0010: Phase 3 / Module 3 - Commerce Runtime: Sellable, QuoteSnapshot, Order, Payment, Shipping, Verified Revenue.
+P0011: Phase 4 / Module 4 - AI Advisor Runtime: Customer context, product recommendation, Quote/Order consumer, Final Response Guard.
+P0012: Phase 5 / Module 5 - Facebook Gateway: Channel identity, public/private boundary, Messenger handoff, delivery log.
+P0013: Phase 6 - Ads Measurement / ROAS: Event taxonomy, attribution, verified revenue, data quality, scale gate.
+P0014: Phase 7 - MC AI Live: Live script runtime and ads-safe live signal boundary.
+P0015: Phase 8 - IVR Order Confirmation: Order confirmation signal, not revenue owner.
+P0016: ADS Phase 1-3 Implementation Lock: data foundation, Golden Hour conversion, Diamond/lifecycle/value optimization.
+P0017: ADS Execution Playbook: Audit -> Implementation -> Verify/Gate delivery rhythm for dev and AI agents.
+P0018: ADS Strategy Input Pack: persona, behavior, keyword, negative keyword, creative hook, landing, CTA, learning and publish governance.
+P0019: Facebook Ads & Live Commerce Operating Model / Financial Baseline: Live Golden Hour, Messenger, Quote, ORDER_VERIFIED, CRM, Diamond and scale economics.
+T03R01C01: SOURCE-OF-TRUTH PRIORITY / Nếu tài liệu ADS Strategy, Playbook hoặc Dashboard lệch với Core event_registry, Commerce Runtime, AI Runtime, CRM Messaging, Golden Hour, 24/7 hoặc Diamond policy, thì Core/Runtime owner thắng. Module 6 không được tự phát minh event, pricing, policy, trigger hoặc scale rule.
+P0021: 3. Mục đích Module 6
+P0022: Đo đúng toàn bộ tín hiệu ads, live, landing, Messenger, quote, order, CRM và Diamond theo cùng một chain attribution.
+P0023: Bảo đảm mọi event đi qua event_registry và các outbox/worker được kiểm soát, không gửi trực tiếp từ runtime request nếu không được phép.
+P0024: Bảo đảm consent fail-closed: thiếu consent hợp lệ thì không sync audience, không gửi external measurement, không gửi CRM.
+P0025: Gắn đúng guest -> customer -> order -> verified revenue để tránh đo sai, double count hoặc scale dựa trên vanity metrics.
+P0026: Chỉ tính ROAS bằng Verified Revenue / ORDER_VERIFIED, không tính bằng comment, inbox, quote, order draft, payment waiting hoặc COD waiting.
+P0027: Tạo Data Quality Gate và Scale Gate để owner quyết định tăng ngân sách sau pilot, không tự động scale.
+P0028: Xây khung learning engine có kiểm soát: seed đúng, chạy đúng, học đúng, review đúng, publish đúng trong safe range.
+P0029: 4. Boundary Lock - Module 6 được làm và không được làm
+T04R01C01: Nhóm
+T04R01C02: Module 6 được làm
+T04R01C03: Module 6 bị cấm
+T04R02C01: Measurement
+T04R02C02: Nhận và chuẩn hóa event; validate event_code; dedup; lưu measurement events
+T04R02C03: Tự tạo event ngoài event_registry; ghi event không rõ consent hoặc identity
+T04R03C01: Attribution
+T04R03C02: Gắn campaign/adset/ad/page/live/comment/Messenger/quote/order/verified revenue
+T04R03C03: Gán doanh thu theo cảm tính; sửa attribution sau khi verified mà không audit
+T04R04C01: Revenue
+T04R04C02: Consume Verified Revenue từ Commerce Runtime
+T04R04C03: Tính revenue từ quote, cart, order draft, payment waiting, COD waiting
+T04R05C01: Google/Meta
+T04R05C02: Gửi Pixel/CAPI/Offline qua outbox/worker khi consent hợp lệ
+T04R05C03: Gửi trực tiếp từ request runtime hoặc gửi dữ liệu không có consent
+T04R06C01: Dashboard
+T04R06C02: Báo cáo Ads Spend, Revenue Verified, ROAS, CPA, AOV, funnel rate
+T04R06C03: Làm đẹp dashboard bằng dữ liệu chưa verified
+T04R07C01: Scale
+T04R07C02: Tính điều kiện scale và tạo scale_request cho owner review
+T04R07C03: Tự tăng ngân sách, tự bật campaign, bỏ qua owner approval
+T04R08C01: Learning
+T04R08C02: Tạo candidate/recommendation trong review queue
+T04R08C03: Cho machine tự publish toàn quyền hoặc bịa persona/keyword/hook gốc
+T04R09C01: Core policy
+T04R09C02: Consume policy từ Core/Runtime
+T04R09C03: Override giá, chương trình, quyền lợi, CRM, Diamond, Golden Hour, 24/7
+T05R01C01: CẢNH BÁO TRIỂN KHAI / Không được hiểu Module 6 là vài đoạn code Pixel/CAPI hoặc một dashboard ROAS. Một hệ đo lường thật phải có identity, consent, event registry, dedup, attribution, verified revenue, data quality, owner approval, audit, smoke và rollback. Copy-paste code rời rạc sẽ dẫn tới đo sai, double count, scale sai ngân sách và không truy vết được khi lỗi.
+P0032: 5. Kiến trúc vận hành tổng thể Module 6
+T06R01C01: Lớp
+T06R01C02: Thành phần
+T06R01C03: Vai trò
+T06R02C01: Source
+T06R02C02: Core event_registry, Customer/Guest identity, Consent snapshot, Commerce Verified Revenue
+T06R02C03: Nguồn sự thật để đo lường và attribution
+T06R03C01: Tracking
+T06R03C02: Web hooks, landing events, Facebook/Meta events, Messenger events, live events, CRM events
+T06R03C03: Thu tín hiệu đầu vào theo event code đã khóa
+T06R04C01: Outbox
+T06R04C02: conversion_events, marketing_measurement_outbox, marketing_audience_outbox
+T06R04C03: Tách runtime request khỏi external sync, chống mất dữ liệu và retry có kiểm soát
+T06R05C01: Integration
+T06R05C02: Pixel, CAPI, Offline Conversion, Google/Meta connectors
+T06R05C03: Gửi dữ liệu ra nền tảng ngoài khi consent và dedup pass
+T06R06C01: Attribution
+T06R06C02: Attribution Resolver, Ads Context Resolver, Live Session Resolver
+T06R06C03: Gắn nguồn ads/live/page/comment/Messenger tới quote/order/verified revenue
+T06R07C01: Dashboard
+T06R07C02: ROAS/CPA/AOV/Funnel/CRM/Diamond dashboards
+T06R07C03: Báo cáo hiệu quả và cảnh báo chất lượng dữ liệu
+T06R08C01: Gate
+T06R08C02: Data Quality Gate, Scale Gate, Owner Approval Gate
+T06R08C03: Chặn scale khi chưa đủ điều kiện
+T06R09C01: Learning
+T06R09C02: Strategy libraries, scoring, candidate generation, review queue, guarded publish
+T06R09C03: Tối ưu có kiểm soát theo dữ liệu thật
+T06R10C01: Evidence
+T06R10C02: Audit log, evidence item, smoke report, release review
+T06R10C03: Chứng minh đủ điều kiện cho từng phase
+P0034: 6. ADS Phase Flow - Không được nhảy phase
+T07R01C01: Phase
+T07R01C02: Mục tiêu
+T07R01C03: Core output
+T07R01C04: Không được làm
+T07R02C01: Phase 1 - Data / Tracking / Consent / Hero SKU
+T07R02C02: Dựng nền đo lường sạch, identity guest->customer, consent fail-closed, outbox measurement, audience sync, Hero SKU ads
+T07R02C03: Data Engine, Acquisition Engine cơ bản, Retargeting Engine cơ bản
+T07R02C04: Không chạy 13 SKU song song; không CRM/audience/external measurement khi thiếu consent; không scale theo doanh thu
+T07R03C01: Phase 2 - Golden Hour / AI Consult / Order Capture / Retargeting
+T07R03C02: Chuyển traffic thành Messenger consult, QuoteSnapshot, order capture, Golden Hour, retargeting
+T07R03C03: Conversion Machine: Ads -> Live -> Comment -> Messenger -> Quote -> Order -> Verified
+T07R03C04: Không public giá cuối; không tư vấn sâu ở comment; không gửi Core nếu stock/trust/policy chưa pass
+T07R04C01: Phase 3 - Diamond / Lifecycle / Repeat / Value Optimization
+T07R04C02: Giảm ads ratio bằng CRM, repeat, dormant/reactivation, Diamond/referral, value optimization
+T07R04C03: Growth Machine: Customer asset, repeat revenue, Diamond growth, learning engine
+T07R04C04: Không để Data Mart làm trigger owner; không auto-publish ngoài safe range; không vượt Core policy
+P0036: 7. Phase 1 - Nền dữ liệu, Tracking, Consent, Hero SKU Ads
+T08R01C01: MỤC TIÊU PHASE 1 / Phase 1 chưa nhằm tối đa hóa sản lượng. Mục tiêu là tạo nền đo lường đúng trước khi scale tiền ads: event hợp lệ, identity đúng, consent đúng, measurement qua outbox, audience qua segment/outbox và Hero SKU ads không làm phân mảnh hệ.
+T09R01C01: Khối
+T09R01C02: Yêu cầu khóa
+T09R01C03: Acceptance
+T09R02C01: Identity
+T09R02C02: customers, customer_profiles, customer_addresses, customer_devices, guest_contacts; map guest -> customer khi có dữ liệu đủ
+T09R02C03: Guest/customer mapping có audit và không ghi đè thiếu bằng chứng
+T09R03C01: Event Registry
+T09R03C02: Mọi event phải tồn tại trong event_registry trước khi log hoặc gửi đi
+T09R03C03: Unknown event bị reject hoặc hold, có audit
+T09R04C01: Web Event Logs
+T09R04C02: Append-only; lưu page, session, source, consent snapshot, event_ts, idempotency
+T09R04C03: Không update/xóa lịch sử event
+T09R05C01: Consent
+T09R05C02: guest_marketing_consent_snapshot bắt buộc; thiếu consent hợp lệ thì fail-closed
+T09R05C03: Không external measurement, audience sync, CRM khi consent missing
+T09R06C01: Conversion
+T09R06C02: conversion_events là source cho marketing_measurement_outbox
+T09R06C03: External measurement chỉ đi qua worker/outbox
+T09R07C01: Audience
+T09R07C02: customer_segments -> customer_segment_members -> marketing_audience_outbox
+T09R07C03: Audience sync không đi trực tiếp từ runtime request
+T09R08C01: Hero SKU
+T09R08C02: Phase 1 chạy Hero SKU theo logic seasonal + functional + nutritional, không 13 SKU ngang hàng
+T09R08C03: Campaign không phân mảnh cold ads
+T10R01C01: Event nền bắt buộc
+T10R01C02: Ý nghĩa
+T10R02C01: VIEW_LANDING
+T10R02C02: Người dùng xem landing/campaign page
+T10R03C01: CLICK_CTA
+T10R03C02: Người dùng bấm CTA
+T10R04C01: SUBMIT_FORM
+T10R04C02: Người dùng gửi form/lead
+T10R05C01: VIEW_ITEM
+T10R05C02: Xem sản phẩm hoặc nội dung sản phẩm
+T10R06C01: ADD_TO_CART
+T10R06C02: Thêm vào giỏ hoặc quote cart
+T10R07C01: BEGIN_CHECKOUT
+T10R07C02: Bắt đầu quy trình đặt hàng
+T10R08C01: ORDER_SUCCESS
+T10R08C02: Order success signal theo Core, chưa dùng thay ORDER_VERIFIED
+T10R09C01: USER_REGISTERED
+T10R09C02: Người dùng đăng ký/tạo identity chính thức
+T10R10C01: ORDER_VERIFIED
+T10R10C02: Order verified - nguồn revenue hợp lệ
+T10R11C01: GOLDEN_HOUR_START / REMINDER
+T10R11C02: Tùy cấu hình khi mở phiên Giờ Vàng
+P0040: 8. Phase 2 - Giờ Vàng, AI Consult, Order Capture, Retargeting
+P0041: Golden Hour phải vận hành theo trạng thái PRE -> LIVE -> POST -> CLOSED.
+P0042: Live comment chỉ quick reply/route, không tư vấn sâu, không báo giá cuối, không lặp PII.
+P0043: Messenger là nơi deep consult, AI Advisor nhận Ads/Live context và gọi QuoteSnapshot từ Commerce.
+P0044: Order capture phải validate stock, fulfillment, trust, policy và customer confirmation trước khi gửi Core.
+P0045: Retargeting chỉ dựa trên event hợp lệ và consent hợp lệ.
+P0046: Quote price priority phải bám Core policy: Golden Hour -> Diamond Buyer Rule -> 24/7 -> List Price nếu policy cho phép.
+T11R01C01: Flow
+T11R01C02: Event / Object
+T11R01C03: Owner / Consumer Boundary
+T11R02C01: Ads -> Live
+T11R02C02: campaign_id, adset_id, ad_id, live_session_id
+T11R02C03: Module 6 đo; Gateway/Live vận hành; không tính revenue
+T11R03C01: Live -> Comment
+T11R03C02: LIVE_VIEW, LIVE_COMMENT
+T11R03C03: Gateway normalize; Module 6 nhận signal
+T11R04C01: Comment -> Messenger
+T11R04C02: MESSENGER_STARTED, messenger_thread_id
+T11R04C03: Gateway handoff; AI tư vấn private
+T11R05C01: Messenger -> Quote
+T11R05C02: AI_PROPOSAL_SENT, QUOTE_CART_CREATED, QUOTE_SNAPSHOT_CREATED, QUOTE_SENT
+T11R05C03: AI chỉ orchestrate; Commerce tạo QuoteSnapshot
+T11R06C01: Quote -> Order
+T11R06C02: ORDER_CONFIRMATION_SENT, CUSTOMER_CONFIRMED_ORDER, ORDER_CREATED
+T11R06C03: Commerce tạo order khi có customer confirmation
+T11R07C01: Order -> Verified
+T11R07C02: ORDER_VERIFIED, PAYMENT_COMPLETED nếu có
+T11R07C03: Commerce/Payment/Shipping xác nhận; Module 6 consume verified revenue
+P0048: 9. Phase 3 - Diamond, Lifecycle, Repeat, Value Optimization
+P0049: Phase 3 chuyển trọng tâm từ mua khách sang vận hành tài sản khách hàng: CRM lifecycle, repeat, dormant/reactivation, Diamond và value optimization.
+P0050: Diamond referral phải gắn link hợp lệ, buyer identity, order verified và commission eligibility từ Core/Finance; Module 6 chỉ đo nguồn và hiệu quả.
+P0051: CRM revenue phải xuất phát từ CRM eligibility, suppression pass và order verified; không dùng click/chat làm revenue.
+P0052: Value optimization được phép tạo recommendation/candidate; việc publish phải qua review queue và owner approval.
+P0053: Data Mart chỉ là support view để phân tích, không được lạm quyền thành trigger owner cho CRM, pricing, Diamond hoặc budget scale.
+T12R01C01: Nhóm tăng trưởng
+T12R01C02: Signal hợp lệ
+T12R01C03: KPI
+T12R02C01: Repeat / Reorder
+T12R02C02: CRM_REORDER_SENT, CRM_REORDER_ORDER_CREATED, ORDER_VERIFIED
+T12R02C03: Repeat rate, CRM Revenue, AOV
+T12R03C01: Dormant / Reactivation
+T12R03C02: Dormant segment, consent pass, CRM eligibility pass, order verified
+T12R03C03: Reactivation rate, CPA reactivation
+T12R04C01: Diamond
+T12R04C02: DIAMOND_LEAD_CREATED, referral_link_id, DIAMOND_REFERRAL_ORDER_VERIFIED
+T12R04C03: Diamond lead rate, Diamond Revenue, commission-ready revenue
+T12R05C01: Value Optimization
+T12R05C02: High-value order, boxes/order, tier upgrade, product affinity
+T12R05C03: AOV, CLV proxy, boxes/order, ads ratio reduction
+T12R06C01: Learning Engine
+T12R06C02: Verified business signals + data quality pass
+T12R06C03: Candidate approval rate, uplift, drift violations
+P0055: 10. Event Taxonomy và Measurement Event Contract
+T13R01C01: Nhóm Event
+T13R01C02: Event Code
+T13R01C03: Quy tắc
+T13R02C01: Awareness / Live
+T13R02C02: LIVE_VIEW, LIVE_COMMENT, PUBLIC_REPLY_SENT
+T13R02C03: Không tính revenue; dùng funnel và attribution
+T13R03C01: Messenger / AI
+T13R03C02: MESSENGER_STARTED, AI_ADVISORY_SENT, AI_PROPOSAL_SENT
+T13R03C03: Chỉ là engagement/consult signal
+T13R04C01: Quote
+T13R04C02: QUOTE_CART_CREATED, QUOTE_SNAPSHOT_CREATED, QUOTE_SENT
+T13R04C03: Quote không phải doanh thu; QuoteSnapshot là price truth
+T13R05C01: Order
+T13R05C02: ORDER_CONFIRMATION_SENT, CUSTOMER_CONFIRMED_ORDER, ORDER_CREATED
+T13R05C03: Order Created chưa chắc verified revenue
+T13R06C01: Verified Revenue
+T13R06C02: ORDER_VERIFIED, PAYMENT_COMPLETED nếu Core policy cho phép
+T13R06C03: Chỉ ORDER_VERIFIED revenue được dùng cho ROAS
+T13R07C01: CRM
+T13R07C02: CRM_REORDER_SENT, CRM_REORDER_ORDER_CREATED
+T13R07C03: CRM chỉ khi suppression/consent pass
+T13R08C01: Diamond
+T13R08C02: DIAMOND_LEAD_CREATED, DIAMOND_REFERRAL_ORDER_VERIFIED
+T13R08C03: Diamond attribution không lẫn với Ads thường
+P0057: ads_measurement_event: /   event_id: string /   event_code: string /   event_ts: datetime /   customer_id: optional string /   guest_id: optional string /   page_id: optional string /   live_session_id: optional string /   campaign_id: optional string /   adset_id: optional string /   ad_id: optional string /   sales_session_id: optional string /   quote_snapshot_id: optional string /   order_code: optional string /   revenue_value: optional number /   currency: VND /   attribution_context: object /   consent_snapshot_id: optional string /   idempotency_key: string /   correlation_id: string /   data_quality_status: PASS | HOLD | FAIL
+P0058: 11. Ads Attribution Context
+P0059: ads_attribution_context: /   campaign_id: optional string /   campaign_name: optional string /   adset_id: optional string /   adset_name: optional string /   ad_id: optional string /   ad_name: optional string /   page_id: string /   live_session_id: optional string /   comment_id: optional string /   messenger_thread_id: optional string /   psid: optional string /   referral_link_id: optional string /   diamond_id: optional string /   entry_channel: FACEBOOK_AD | LIVE_ORGANIC | DIAMOND_LINK | CRM | DIRECT /   attribution_window: string /   first_touch_event_id: optional string /   last_touch_event_id: optional string /   source_confidence: HIGH | MEDIUM | LOW /   conflict_status: NONE | MULTI_TOUCH | MISSING_SOURCE | DUPLICATE_RISK
+P0060: Attribution phải truy ngược được từ campaign/adset/ad/page/live/comment/Messenger tới quote/order/ORDER_VERIFIED.
+P0061: Nếu có Diamond link và Ads cùng xuất hiện, Module 6 phải lưu attribution context đầy đủ; Finance/Commission owner quyết định hoa hồng, không phải Ads Measurement.
+P0062: Nếu thiếu nguồn hoặc dữ liệu conflict, dashboard phải đánh dấu LOW confidence hoặc HOLD, không dùng làm scale evidence.
+P0063: Attribution snapshot phải immutable sau khi order verified; mọi correction phải có adjustment record, actor, reason, audit và evidence.
+P0064: 12. Pixel / CAPI / Offline Conversion / Dedup
+T14R01C01: Luồng
+T14R01C02: Điều kiện gửi
+T14R01C03: Không được làm
+T14R02C01: Pixel Browser
+T14R02C02: Chỉ gửi event public-safe, có consent và idempotency key
+T14R02C03: Không gửi PII thô, không gửi khi consent missing
+T14R03C01: CAPI Server
+T14R03C02: Gửi từ marketing_measurement_outbox worker, có hash policy và dedup key
+T14R03C03: Không gửi trực tiếp từ request runtime
+T14R04C01: Offline Conversion
+T14R04C02: Chỉ gửi conversion sau ORDER_VERIFIED hoặc event được owner phê duyệt
+T14R04C03: Không gửi quote/order draft như purchase
+T14R05C01: Audience Sync
+T14R05C02: Gửi từ customer_segments + marketing_audience_outbox + consent pass
+T14R05C03: Không sync audience từ ad hoc query hoặc data mart
+T14R06C01: Retry / Dead Letter
+T14R06C02: Retry có giới hạn, lưu error_log và next_retry_at
+T14R06C03: Không retry vô hạn, không mất event không dấu vết
+P0066: dedup_key = platform + event_code + customer_or_guest_key + event_ts_bucket + source_event_id / idempotency_key = event_code + page_id + session_id + raw_event_hash + normalized_ts / revenue_value_source = Commerce Verified Revenue only / send_policy = consent_valid AND event_in_registry AND data_quality_pass AND not_duplicate
+P0067: 13. Data Object Contract tối thiểu
+T15R01C01: Object / Table
+T15R01C02: Mục đích
+T15R01C03: Owner / Ghi chú
+T15R02C01: event_registry
+T15R02C02: Danh sách event hợp lệ, owner, channel, data sensitivity, external send policy
+T15R02C03: Core Event Governance
+T15R03C01: web_event_logs
+T15R03C02: Append-only web/landing/tracking logs
+T15R03C03: Module 6, không sửa lịch sử
+T15R04C01: guest_contacts
+T15R04C02: Guest lead identity và contact fingerprint
+T15R04C03: Customer identity
+T15R05C01: guest_marketing_consent_snapshot
+T15R05C02: Consent tại thời điểm event
+T15R05C03: Consent fail-closed
+T15R06C01: conversion_events
+T15R06C02: Source chuyển đổi nội bộ trước khi gửi measurement
+T15R06C03: Module 6/Core
+T15R07C01: marketing_measurement_outbox
+T15R07C02: Hàng đợi gửi Pixel/CAPI/Offline
+T15R07C03: Worker only
+T15R08C01: customer_segments
+T15R08C02: Nguồn segment được duyệt
+T15R08C03: CRM/Ads segmentation
+T15R09C01: customer_segment_members
+T15R09C02: Thành viên trong segment
+T15R09C03: Không lạm dụng làm trigger owner
+T15R10C01: marketing_audience_outbox
+T15R10C02: Hàng đợi sync audience
+T15R10C03: Worker only
+T15R11C01: ads_attribution_context
+T15R11C02: Chain campaign/adset/ad/page/live/comment/messenger/referral
+T15R11C03: Attribution source
+T15R12C01: ads_measurement_events
+T15R12C02: Event đã chuẩn hóa phục vụ dashboard/ROAS
+T15R12C03: Module 6
+T15R13C01: ads_data_quality_check
+T15R13C02: Kết quả kiểm dữ liệu
+T15R13C03: Data Quality Gate
+T15R14C01: ads_scale_request
+T15R14C02: Đề nghị scale ngân sách
+T15R14C03: Owner approval required
+T15R15C01: ads_learning_candidate
+T15R15C02: Candidate keyword/persona/hook/creative/landing/CTA
+T15R15C03: Learning review queue
+P0069: 14. Dashboard KPI Contract
+T16R01C01: Chỉ số
+T16R01C02: Công thức / nguồn
+T16R01C03: Ghi chú
+T16R02C01: Ads Spend
+T16R02C02: Từ Ads platform / approved spend import
+T16R02C03: Phải có campaign/adset/ad mapping
+T16R03C01: Revenue Verified
+T16R03C02: SUM(verified_revenue)
+T16R03C03: Chỉ ORDER_VERIFIED
+T16R04C01: ROAS
+T16R04C02: Revenue Verified / Ads Spend
+T16R04C03: Không dùng order chưa verified
+T16R05C01: CPA
+T16R05C02: Ads Spend / number_of_ORDER_VERIFIED
+T16R05C03: Theo campaign/adset/ad/live/session
+T16R06C01: AOV
+T16R06C02: Revenue Verified / verified_orders
+T16R06C03: Theo verified order
+T16R07C01: Boxes per Order
+T16R07C02: Verified boxes / verified_orders
+T16R07C03: Mục tiêu tăng AOV
+T16R08C01: Comment Rate
+T16R08C02: LIVE_COMMENT / LIVE_VIEW
+T16R08C03: Top funnel
+T16R09C01: Inbox Rate
+T16R09C02: MESSENGER_STARTED / LIVE_COMMENT
+T16R09C03: Handoff quality
+T16R10C01: Quote Rate
+T16R10C02: QUOTE_SENT / MESSENGER_STARTED
+T16R10C03: AI + Commerce quote efficiency
+T16R11C01: Order Rate
+T16R11C02: ORDER_CREATED / QUOTE_SENT
+T16R11C03: Sales conversion
+T16R12C01: Verified Rate
+T16R12C02: ORDER_VERIFIED / ORDER_CREATED
+T16R12C03: Payment/COD/fulfillment quality
+T16R13C01: COD Fail Rate
+T16R13C02: COD fail / COD orders
+T16R13C03: Rủi ro vận hành
+T16R14C01: CRM Revenue
+T16R14C02: Verified revenue từ CRM attribution
+T16R14C03: Lifecycle value
+T16R15C01: Diamond Revenue
+T16R15C02: Verified revenue từ referral/Diamond attribution
+T16R15C03: Growth multiplier
+P0071: 15. Data Quality Gate
+T17R01C01: Gate Item
+T17R01C02: PASS khi
+T17R01C03: FAIL/HOLD khi
+T17R02C01: Event Registry
+T17R02C02: Event code tồn tại, owner rõ, schema đúng
+T17R02C03: Unknown event, event không có owner
+T17R03C01: Consent
+T17R03C02: Consent valid tại thời điểm event/external send
+T17R03C03: Missing/expired/opt-out
+T17R04C01: Dedup
+T17R04C02: No duplicate hoặc duplicate được merge chính xác
+T17R04C03: Pixel/CAPI/Offline double count
+T17R05C01: Identity
+T17R05C02: guest/customer/order mapping rõ
+T17R05C03: Guest merge sai hoặc order không map được
+T17R06C01: Attribution
+T17R06C02: campaign/adset/ad/page/live/messenger chain đủ
+T17R06C03: Nguồn mơ hồ, conflict không xử lý
+T17R07C01: Verified Revenue
+T17R07C02: Revenue lấy từ Commerce Verified Revenue
+T17R07C03: Quote/order draft/unpaid được tính revenue
+T17R08C01: Suppression
+T17R08C02: Recall/Sale Lock/CRM suppression được phản ánh
+T17R08C03: Scale khi đang bị lock/suppression
+T17R09C01: Dashboard
+T17R09C02: Metric có sample evidence và trace
+T17R09C03: Dashboard chỉ là visual không có source trace
+P0073: 16. Scale Gate
+T18R01C01: SCALE GATE LÀ QUYẾT ĐỊNH CỦA OWNER / Module 6 chỉ tính toán và đề xuất. Tăng ngân sách, bật campaign scale, mở audience scale hoặc publish optimization đều cần owner approval, có evidence, có rollback và có giới hạn rủi ro.
+T19R01C01: Điều kiện scale
+T19R01C02: Yêu cầu tối thiểu
+T19R02C01: P3/P5/P6 evidence
+T19R02C02: Verified Revenue boundary, Payment/COD/Order Verified, Channel identity, event identity có evidence
+T19R03C01: Quote/Order
+T19R03C02: QuoteSnapshot hoạt động đúng, order tạo đúng, không tạo order khi chưa xác nhận
+T19R04C01: Public/Privacy
+T19R04C02: AI/Gateway không public giá cuối, không leak PII, không spam
+T19R05C01: Funnel
+T19R05C02: AOV tối thiểu 2 hộp/đơn, CPA trong ngưỡng, verified rate đạt ngưỡng owner đặt
+T19R06C01: Dashboard
+T19R06C02: ROAS đo bằng ORDER_VERIFIED, attribution đủ campaign/adset/ad/live/messenger
+T19R07C01: Quality
+T19R07C02: Data Quality Gate PASS, duplicate thấp, consent pass, outbox ổn định
+T19R08C01: Risk
+T19R08C02: Không recall, không sale lock, không quality hold, không complaint P0, không platform spam flag
+T19R09C01: Approval
+T19R09C02: Owner duyệt scale request, có budget cap, có rollback condition
+P0076: 17. ADS Strategy Input Pack và Learning Engine
+P0077: Chiến lược đầu vào không được tạo theo cảm tính. Persona, behavior, keyword, negative keyword, creative hook, landing và CTA phải được seed từ Content Block canonical, SKU Master, Phase ADS rule và business truth.
+P0078: Learning Engine chỉ được học sau khi có seed chuẩn và dữ liệu verified business signal đủ sạch.
+P0079: Learning Engine được đề xuất candidate, delta recommendation và safe-range optimization; không được tự publish toàn quyền từ đầu.
+P0080: Mọi optimization phải gắn với sellable SKU, program, Golden Hour/24/7 policy, product public claim và brand wording.
+P0081: Mapping là lõi để Ads không chạy cảm tính: SKU/Product line -> Persona -> Behavior -> Keyword -> Creative Hook -> Landing -> CTA -> Event -> Verified Revenue.
+T20R01C01: Thư viện
+T20R01C02: Mục đích
+T20R01C03: Nguồn seed
+T20R02C01: Persona Library
+T20R02C02: Nhóm khách mục tiêu
+T20R02C03: Content Block 20 SKU, customer context, CRM lifecycle
+T20R03C01: Behavior Library
+T20R03C02: Hành vi số và hành vi mua
+T20R03C03: Web/Messenger/Live/CRM events đã pass data quality
+T20R04C01: Keyword Library
+T20R04C02: Từ khóa acquisition/intent
+T20R04C03: Content Block, product public view, search/ads history
+T20R05C01: Negative Keyword Library
+T20R05C02: Chặn tệp/ý định không phù hợp
+T20R05C03: Spam/troll/low-intent/fake order signals
+T20R06C01: Creative Hook Library
+T20R06C02: Hook không sale sốc, đúng brand, đúng claim
+T20R06C03: Product effectiveness, Meta-safe wording, Golden Hour Tri Ân
+T20R07C01: Landing / CTA Library
+T20R07C02: Mapping landing và CTA theo intent
+T20R07C03: Hero SKU, Golden Hour, Diamond, CRM/reorder
+T21R01C01: Giai đoạn
+T21R01C02: Mô tả
+T21R02C01: Seed
+T21R02C02: Fill thư viện từ Content Block/SKU/Rule đã khóa; không để machine tự bịa chiến lược gốc
+T21R03C01: Run
+T21R03C02: Chạy acquisition/retargeting theo mapping active và sellable SKU
+T21R04C01: Learn
+T21R04C02: Đọc signal hiệu quả, score persona/keyword/hook/landing/CTA
+T21R05C01: Review
+T21R05C02: Sinh candidate vào review queue; owner/marketing approve/reject/hold
+T21R06C01: Publish
+T21R06C02: Guarded auto-publish trong safe range, có rollback và audit
+P0084: 18. Tích hợp với Module 3, 4, 5, 7, 8
+T22R01C01: Module
+T22R01C02: Module 6 consume gì
+T22R01C03: Module 6 không được làm gì
+T22R02C01: Module 3 Commerce
+T22R02C02: QuoteSnapshot, Order, Payment, Shipping, ORDER_VERIFIED, Verified Revenue
+T22R02C03: Không tính giá, tạo đơn, xác nhận payment hoặc doanh thu
+T22R03C01: Module 4 AI Advisor
+T22R03C02: AI advisory/proposal/quote sent/order confirmation events, sales_session context
+T22R03C03: Không can thiệp nội dung tư vấn hoặc tự gợi ý sản phẩm ngoài AI
+T22R04C01: Module 5 Gateway
+T22R04C02: Page, live, comment, messenger, handoff, delivery logs
+T22R04C03: Không xử lý raw webhook hoặc public reply
+T22R05C01: Module 7 MC AI Live
+T22R05C02: Live session, script segment, board_id, segment signal
+T22R05C03: Không dùng live signal làm doanh thu/ROAS
+T22R06C01: Module 8 IVR
+T22R06C02: IVR result only when Order Core accepts as confirmation signal
+T22R06C03: Không tự chuyển order state hoặc verified revenue
+T22R07C01: CRM / Member
+T22R07C02: CRM reorder, suppression state, lifecycle events
+T22R07C03: Không gửi CRM hoặc quyết định member rights
+T22R08C01: Finance / Diamond
+T22R08C02: Commission-ready/verified revenue signals, referral attribution context
+T22R08C03: Không tính final commission hoặc payout
+P0086: 19. API / Worker / Queue Boundary
+T23R01C01: Contract
+T23R01C02: Mục đích
+T23R01C03: Ghi chú
+T23R02C01: POST /api/ads/events/track
+T23R02C02: Nhận event nội bộ đã qua client/server validation
+T23R02C03: Không gửi external trực tiếp
+T23R03C01: POST /api/ads/conversions
+T23R03C02: Tạo conversion_event nội bộ
+T23R03C03: Nguồn cho measurement outbox
+T23R04C01: GET /api/admin/ads/dashboard
+T23R04C02: Dashboard ROAS/CPA/AOV/funnel
+T23R04C03: Chỉ đọc data mart/support view
+T23R05C01: POST /api/admin/ads/scale-requests
+T23R05C02: Tạo đề nghị scale
+T23R05C03: Owner approval required
+T23R06C01: POST /api/admin/ads/learning-candidates
+T23R06C02: Review candidate/hook/keyword/audience
+T23R06C03: Không auto-publish nếu chưa safe range
+T23R07C01: worker: marketing_measurement_dispatcher
+T23R07C02: Gửi Pixel/CAPI/Offline
+T23R07C03: Retry, dedup, error log
+T23R08C01: worker: marketing_audience_dispatcher
+T23R08C02: Sync audience
+T23R08C03: Consent fail-closed
+T23R09C01: worker: attribution_materializer
+T23R09C02: Tổng hợp attribution snapshots
+T23R09C03: Không ghi đè verified revenue
+T23R10C01: worker: data_quality_checker
+T23R10C02: Kiểm data quality và scale readiness
+T23R10C03: Output PASS/HOLD/FAIL
+P0088: 20. Implementation Roadmap theo Slice
+T24R01C01: Slice
+T24R01C02: Tên
+T24R01C03: Scope
+T24R01C04: Done Gate
+T24R02C01: M6.2A
+T24R02C02: ADS Phase 1 Data Foundation
+T24R02C03: customers/guest identity/consent/event registry/web logs
+T24R02C04: Event + consent + identity tests PASS
+T24R03C01: M6.2B
+T24R03C02: Tracking & Event Contract
+T24R03C03: frontend hooks, backend event validation, append-only logs
+T24R03C04: Unknown event fail, duplicate event handled
+T24R04C01: M6.2C
+T24R04C02: Outbox Workers
+T24R04C03: conversion_events, measurement_outbox, audience_outbox
+T24R04C04: No direct external send, retry/dead-letter pass
+T24R05C01: M6.2D
+T24R05C02: Pixel/CAPI/Offline Dedup
+T24R05C03: Dedup key, hash policy, platform result logs
+T24R05C04: No double count, no PII thô
+T24R06C01: M6.2E
+T24R06C02: Attribution Resolver
+T24R06C03: campaign/adset/ad/page/live/comment/messenger/quote/order/verified
+T24R06C04: Order Verified trace to source
+T24R07C01: M6.2F
+T24R07C02: Dashboard & Data Quality
+T24R07C03: ROAS/CPA/AOV/funnel/data quality gate
+T24R07C04: Dashboard shows verified-only revenue
+T24R08C01: M6.2G
+T24R08C02: Scale Request
+T24R08C03: scale threshold, approval, rollback
+T24R08C04: No auto scale, owner approval required
+T24R09C01: M6.2H
+T24R09C02: ADS Strategy Libraries
+T24R09C03: persona/behavior/keyword/hook/landing/CTA mapping
+T24R09C04: Seed framework pass, no auto-publish
+T24R10C01: M6.2I
+T24R10C02: Phase 2 Golden Hour Funnel
+T24R10C03: live/comment/Messenger/quote/order retargeting measurement
+T24R10C04: Golden Hour conversion smoke pass
+T24R11C01: M6.2J
+T24R11C02: Phase 3 CRM/Diamond/Lifecycle
+T24R11C03: repeat/CRM/Diamond/value attribution
+T24R11C04: CRM/Diamond revenue verified
+T24R12C01: M6.2K
+T24R12C02: Smoke & Evidence Pack
+T24R12C03: P0 tests, evidence registry, owner review package
+T24R12C04: Evidence pack ready for review
+P0090: 21. P0 Smoke Test Matrix
+T25R01C01: Test ID
+T25R01C02: Kịch bản
+T25R01C03: Kết quả phải đạt
+T25R02C01: ADS-P0-001
+T25R02C02: Event không có trong event_registry
+T25R02C03: Reject/HOLD, audit rõ
+T25R03C01: ADS-P0-002
+T25R03C02: Event hợp lệ nhưng thiếu consent
+T25R03C03: Không external measurement, không audience sync
+T25R04C01: ADS-P0-003
+T25R04C02: Duplicate Pixel/CAPI/Offline
+T25R04C03: Dedup, không double count
+T25R05C01: ADS-P0-004
+T25R05C02: Quote được tạo nhưng chưa order
+T25R05C03: Không revenue, không ROAS
+T25R06C01: ADS-P0-005
+T25R06C02: Order Draft / Order Created chưa verified
+T25R06C03: Không tính Revenue Verified
+T25R07C01: ADS-P0-006
+T25R07C02: ORDER_VERIFIED có campaign/adset/ad đầy đủ
+T25R07C03: ROAS/CPA/AOV dashboard cập nhật
+T25R08C01: ADS-P0-007
+T25R08C02: ORDER_VERIFIED thiếu source
+T25R08C03: Revenue vẫn lưu, attribution confidence LOW/HOLD
+T25R09C01: ADS-P0-008
+T25R09C02: CRM opt-out
+T25R09C03: Không sync CRM audience/CRM event outbound
+T25R10C01: ADS-P0-009
+T25R10C02: Recall/Sale Lock active
+T25R10C03: Scale Gate FAIL/HOLD
+T25R11C01: ADS-P0-010
+T25R11C02: Data Mart tạo trigger CRM/scale
+T25R11C03: Fail - Data Mart chỉ support view
+T25R12C01: ADS-P0-011
+T25R12C02: Learning candidate ngoài safe range
+T25R12C03: Hold review, không publish
+T25R13C01: ADS-P0-012
+T25R13C02: Scale request không owner approval
+T25R13C03: Không scale
+T25R14C01: ADS-P0-013
+T25R14C02: Live/Comment/Messenger chain
+T25R14C03: Trace được live_session_id, comment_id, messenger_thread_id
+T25R15C01: ADS-P0-014
+T25R15C02: Diamond referral order verified
+T25R15C03: Gắn referral attribution, không tự tính commission
+T25R16C01: ADS-P0-015
+T25R16C02: Dashboard hiển thị quote/order draft như revenue
+T25R16C03: Fail
+P0092: 22. Evidence Plan
+T26R01C01: Evidence
+T26R01C02: Nội dung bắt buộc
+T26R02C01: Event Registry Evidence
+T26R02C02: Screenshot/API/DB record chứng minh event codes, owner, policy
+T26R03C01: Consent Evidence
+T26R03C02: Case consent pass/fail-closed, opt-out handling
+T26R04C01: Outbox Evidence
+T26R04C02: conversion/audience outbox queued, sent, retry, error, dead-letter
+T26R05C01: Dedup Evidence
+T26R05C02: Pixel/CAPI/Offline duplicate event xử lý đúng
+T26R06C01: Attribution Evidence
+T26R06C02: Order Verified trace ngược campaign/adset/ad/page/live/comment/Messenger
+T26R07C01: Dashboard Evidence
+T26R07C02: Revenue Verified, ROAS, CPA, AOV lấy đúng nguồn
+T26R08C01: Scale Gate Evidence
+T26R08C02: PASS/HOLD/FAIL with owner approval flow
+T26R09C01: Learning Evidence
+T26R09C02: candidate -> review -> approve/reject/hold -> rollback
+T26R10C01: Security/Privacy Evidence
+T26R10C02: No PII thô, consent, hash policy, access control
+T26R11C01: Smoke Report
+T26R11C02: P0 smoke result with correlation_id and evidence_id
+P0094: 23. Done Gate / Fail Gate
+T27R01C01: Done Gate
+T27R01C02: Điều kiện
+T27R02C01: Documentation Done
+T27R02C02: Source-of-truth, boundary, phase flow, data model, event taxonomy, gates, smoke/evidence đầy đủ
+T27R03C01: Technical Design Done
+T27R03C02: API/object/worker/dashboard contracts được review, không conflict Core owner
+T27R04C01: Implementation Slice Done
+T27R04C02: Mỗi slice có Audit -> Implementation -> Verify/Gate, test pass, rollback ready
+T27R05C01: ROAS Pass
+T27R05C02: Chỉ khi ORDER_VERIFIED revenue, attribution pass, dashboard pass, data quality pass
+T27R06C01: Scale Ready
+T27R06C02: Chỉ khi pilot pass, no P0, AOV/CPA/ROAS đạt, owner approve
+T28R01C01: Fail Gate
+T28R01C02: Chặn ngay nếu
+T28R02C01: Revenue misuse
+T28R02C02: Quote/cart/order draft/payment waiting/COD waiting bị tính revenue
+T28R03C01: Consent violation
+T28R03C02: External measurement hoặc audience sync khi thiếu consent
+T28R04C01: Event drift
+T28R04C02: Tự phát minh event ngoài event_registry
+T28R05C01: Core override
+T28R05C02: Override pricing/policy/Golden Hour/24-7/Diamond/CRM owner
+T28R06C01: Data Mart abuse
+T28R06C02: Dùng Data Mart làm trigger owner
+T28R07C01: Auto scale
+T28R07C02: Tự tăng ngân sách hoặc publish optimization không approval
+T28R08C01: No evidence
+T28R08C02: Không có audit/evidence/smoke mà gọi PASS
+P0097: 24. Dev / AI Agent Handoff Playbook
+T29R01C01: NHỊP THI CÔNG BẮT BUỘC / Mỗi phase chạy 3 prompt riêng: Audit Prompt -> Implementation Prompt -> Verify/Gate Prompt. Không dùng một prompt làm hết. Không nhảy Phase 2 nếu Phase 1 chưa pass. Không nhảy Phase 3 nếu Phase 2 chưa pass.
+T30R01C01: Bước
+T30R01C02: Yêu cầu output
+T30R02C01: Audit
+T30R02C02: Đọc repo hiện tại, mapping file/table/service/test, gap report, conflict report, owner decision required
+T30R03C01: Implementation
+T30R03C02: Liệt kê exact files, migrations, configs, workers, services, tests; thay đổi tối thiểu đúng phase
+T30R04C01: Verify/Gate
+T30R04C02: Chạy test, output PASS/FAIL từng item, evidence, rollback, không mark done nếu thiếu acceptance
+P0100: Working mode for dev / AI agents: / - Do not guess. / - Read the current repository structure first. / - Reuse existing conventions and test patterns. / - Keep owner and boundary aligned with ADS phase lock. / - Do not invent event codes outside Core event_registry. / - Do not invent pricing or policy outside Core policy resolver. / - Do not override Core, AI Runtime, CRM Messaging, Golden Hour, 24/7 or Diamond. / - Do not jump ahead to future phase scope except safe extension seams. / - Output required: repo summary, files touched, code/migration/config/jobs/tests, commands, PASS/FAIL checklist, rollback steps.
+P0101: 25. Open Decision Register
+T31R01C01: ID
+T31R01C02: Câu hỏi Owner cần chốt
+T31R01C03: Ghi chú
+T31R02C01: M6-OD-001
+T31R02C02: Danh sách Hero SKU Phase 1 chính thức là gì?
+T31R02C03: Không chạy 13/20 SKU song song nếu chưa có Hero SKU lock
+T31R03C01: M6-OD-002
+T31R03C02: Ngưỡng CPA/ROAS/AOV/Verified Rate chính thức cho từng giai đoạn?
+T31R03C03: Dùng cho Scale Gate và dashboard alert
+T31R04C01: M6-OD-003
+T31R04C02: Hash policy và trường dữ liệu được phép gửi Pixel/CAPI/Offline?
+T31R04C03: Cần privacy/legal review
+T31R05C01: M6-OD-004
+T31R05C02: Google/Meta connector nào dùng trước trong pilot?
+T31R05C03: Meta trước hay Google song song
+T31R06C01: M6-OD-005
+T31R06C02: Attribution model chính thức: first touch, last touch, weighted hay cohort?
+T31R06C03: Dashboard có thể hiển thị nhiều model nhưng scale gate cần một model chính
+T31R07C01: M6-OD-006
+T31R07C02: Safe range cho guarded auto-publish là gì?
+T31R07C03: Cần trước khi bật learning engine publish
+T31R08C01: M6-OD-007
+T31R08C02: Danh sách persona/keyword/hook fill từ Content Block 20 SKU đã khóa chưa?
+T31R08C03: Nếu chưa khóa, chỉ dừng ở framework
+P0103: 26. Phụ lục A - Checklist bàn giao nhanh cho Dev
+P0104: Không bắt đầu Module 6 implementation nếu chưa có P3 Verified Revenue boundary và P5 channel/event identity evidence.
+P0105: Tạo/kiểm event_registry trước mọi tracking hook.
+P0106: Thiếu consent hợp lệ = fail-closed, không gửi external measurement hoặc audience sync.
+P0107: Tất cả external measurement đi qua outbox/worker, không gửi trực tiếp từ request runtime.
+P0108: Tất cả revenue trong dashboard lấy từ ORDER_VERIFIED / Verified Revenue.
+P0109: Scale request chỉ là đề xuất, owner approval mới được tăng ngân sách.
+P0110: Learning engine chỉ recommend; publish phải review/approval hoặc guarded auto-publish trong safe range.
+P0111: Data Mart là support view, không làm trigger owner.
+P0112: Không bỏ qua recall, sale lock, quality hold, suppression để scale.
+P0113: Không gọi Module 6 PASS nếu chưa có evidence, smoke, dashboard trace và rollback.
+P0114: 27. Kết luận khóa Module 6
+T32R01C01: KẾT LUẬN / Module 6 là lớp đo lường, attribution, data quality, dashboard, learning và scale governance cho hệ ADS Ginsengfood. Module này giúp biến Ads từ hoạt động đốt ngân sách thành hệ tăng trưởng có đo lường, có kiểm soát và có học máy an toàn. Tuy nhiên, Module 6 không phải Commerce, không phải AI Advisor, không phải Gateway, không phải CRM, không phải Finance và không được tự scale. Mọi quyết định doanh thu, quote, order, payment, shipping, member, Diamond và payout phải quay về Core owner tương ứng.

@@ -1,0 +1,43 @@
+{
+  "prompt_id": "M6-PC0201",
+  "status": "PASS",
+  "summary": "RESEARCH_EVENT_REGISTRY_INTEGRATION_CRITIC (BOUNDARY_ADVERSARY, analysis_only). Entry gate verified: ledger M6-PC0201=RUNNING, dependency M6-P0201=PASS. Adversarially red-teamed 04-artifacts/analysis/research/RESEARCH_EVENT_REGISTRY_INTEGRATION.md via direct citation verification + a find->refute-verify pass (5 finder lenses -> 11 candidates -> 11 adversarial verifiers). CITATION FIDELITY: strong -- all six DOC anchors verified FAITHFUL and correctly section-tagged against the extract/registers: [DOC S13 L263] event_registry fields owner/channel/data_sensitivity/external_send_policy (extract L263 under ##13, exact); [DOC S12 L257] send_policy=consent_valid AND event_in_registry AND data_quality_pass AND not_duplicate (extract L257, exact); [DOC S7 L116] registry gate unknown->reject/hold (exact); [DOC S26 L490] registry-before-hook (exact); [REG FAIL-003] Event drift (FAIL_GATE_REGISTER L15, exact); [REG M6-ENTRY-003] Core registry exists w/ those fields OPEN (ENTRY_EVIDENCE_REGISTER L18, exact). Boundary handling explicit and clean (read-only, never writes/invents registry, CONSUMED shape deferred to Core via M6-P0701, PII masked, external send not enabled, gateway BLOCKED/production OFF unchanged). OUTCOME: NO BLOCKER; 1 MAJOR + 1 MINOR. F1 MAJOR (fail-closed-correctness): S2 step2 (L56-57) evaluates the send-policy chain [DOC L257] AT the tracking hook and S3 (L86-87) pins a single hook-time validation recording registry_version, but nowhere requires event_in_registry to be RE-EVALUATED at outbox-send time; since RULE-004 forces external send through the async outbox worker (never from a runtime request), a code Core de-registers during the hook->enqueue->drain gap is FALSE-ALLOWED for external send -- the exact removal false-ALLOW S3's own invariant forbids; S3's removal remedies are all cache-lookup-time and do not close the outbox gap. MAJOR not BLOCKER because S3 states the never-false-ALLOW-removals invariant (mitigation a careful architect would catch); not MINOR because the consequence is an external Pixel/CAPI send of a de-registered event (RULE-004/RULE-002/FAIL-003 territory). Fix: require send-time re-evaluation of event_in_registry (and the full L257 chain) against the current registry at outbox drain; hook only gates eligibility-to-enqueue; pinned registry_version is audit metadata not send authorization; flag the hand-off to M6-P0203 (outbox/worker research) so the send-time gate is not lost. F2 MINOR (unsupported-claim): S1 L36 tags the channel value-set (web/landing/live/comment/messenger/CRM/diamond) as [REG] (=locked pack register per the file's own legend L14), but no locked register enumerates these as event_registry channel codes -- closest is M6-ENTRY-002 (page,live,comment,messenger; omits web/landing/CRM/diamond, research omits page) and the only locked channel enum is the disjoint M6-owned M6-CTR-002 entry_channel (extract L229); unlike sibling rows anchored to RULE-001/OD-003/RULE-004, L36's [REG] has no resolvable anchor. MINOR because non-load-bearing (M6 reads channel from Core, never validates against the list) and channel kept Core-owned throughout; fix: retag as [EXT]/illustrative or anchor to a real register, mark value-domain Core-owned/to-be-reconciled in M6-P0701, keep distinct from M6-CTR-002 entry_channel. Six candidates attacked and DISMISSED (report S5): OD-009 omission (governs emission/M6.2I, generic fail-closed handling deferred to M6-P0701), cache-TTL-fallback (S3 is [EXT] proposal; real detection is S2 step3; OPEN integration dependency BLOCKS the leg), status/enabled fields dictate Core schema (deferred to Core, read!=own), registry_version-on-web_event_logs (aligns-with is a principle citation not a schema instruction; field's home is the S2 audit record), FOUND-but-disabled unimplementable (S1 tags it [EXT] & cross-links; S2 unions disabled with NOT-FOUND; same fail-closed outcome). Deliverable analysis-only; no application code/migration/external call/state write; no raw secrets/PII; global_gateway_state=BLOCKED and production_flag=OFF unchanged. Honest self-report; the runner EVIDENCE_GATE decides PASS. Findings feed Phase-0 design and producing prompt M6-P0701; the research author does not respond here.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/analysis/research/RESEARCH_EVENT_REGISTRY_INTEGRATION.md",
+    "04-artifacts/evidence/prompts/M6-P0201.json",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/boundary-reports/RESEARCH_EVENT_REGISTRY_INTEGRATION_critique.md",
+    "04-artifacts/evidence/prompts/M6-PC0201.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): brief; RESEARCH_EVENT_REGISTRY_INTEGRATION.md; M6-P0201.json; extract L244-276 (S12 send_policy L257, S13 Data Object Contract L263); FAIL_GATE_REGISTER.md (FAIL-003 event drift); ENTRY_EVIDENCE_REGISTER.md (M6-ENTRY-003); ledger rows 30-32 (entry gate: M6-P0201=PASS, M6-PC0201=RUNNING). CONTRACT_REGISTER/DECISION_REGISTER/RULES_LOCKED + extract S7/S24/S25 carried from the immediately prior M6-PC0200 reads this session (00-spec is locked/unchanged)",
+    "Grep (read-only): confirmed ledger rows for M6-P0201 (PASS) and M6-PC0201 (RUNNING)",
+    "Workflow (analysis only, 16 subagents, 0 errors): 5 adversarial finder lenses (citation-fidelity, boundary-overreach, owner-decisions, fail-closed-caching, executability) -> deduped to 11 candidates -> 11 adversarial verifiers each attempting refutation and grading BLOCKER/MAJOR/MINOR; verdicts read from journal.jsonl and synthesized (3 CONFIRMED across 2 distinct issues, 8 REJECTED)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/research/RESEARCH_EVENT_REGISTRY_INTEGRATION.md",
+    "04-artifacts/boundary-reports/RESEARCH_EVENT_REGISTRY_INTEGRATION_critique.md",
+    "04-artifacts/evidence/prompts/M6-P0201.json",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-PC0201 and marks it. Critique (1 MAJOR + 1 MINOR, 0 BLOCKER) is advisory for Phase-0 design and producing prompt M6-P0701 (CONTRACT_EVENT_REGISTRY), not a gate on M6-P0201: F1 (require send-time re-evaluation of event_in_registry at outbox drain; coordinate with M6-P0203 outbox/worker research) and F2 (retag the channel value-set, keep it Core-owned/distinct from M6-CTR-002 entry_channel) should be folded into M6-P0701 and the outbox-worker design. Then paste the next prompt M6-P0202 (RESEARCH_IDENTITY_CONSENT). No tracking hook or external send runs until M6-ENTRY-003 (Core registry) is READY_FOR_JUDGE and the M6.2A entry gate passes."
+}

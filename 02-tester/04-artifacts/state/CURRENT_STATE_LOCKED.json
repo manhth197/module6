@@ -1,0 +1,8 @@
+{
+  "module": "M6",
+  "global_gateway_state": "BLOCKED",
+  "production_flag": "OFF",
+  "prompts_total": 198,
+  "generated_at": "2026-07-10T21:46:52",
+  "note": "State ledger is operator-script-only. Executors never write here."
+}

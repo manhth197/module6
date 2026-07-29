@@ -1,0 +1,242 @@
+# CONTRACT_TRACK_APIS — M6-CTR-016 POST /api/ads/events/track + M6-CTR-017 POST /api/ads/conversions
+# Prompt: M6-P0711 · Phase: CONTRACT_HARMONIZATION · Mode: plan_only (schema definition; no code/migration)
+# TWO contracts => nested under a top-level 'contracts:' key so the root is a SINGLE mapping (parse-safe).
+#
+# THE load-bearing guarantee [DOC §19]: /track "Không gửi external trực tiếp" (L371) and /conversions is the
+# "Nguồn cho measurement outbox" (L372) — both endpoints ONLY write internal storage; external measurement is
+# sent EXCLUSIVELY via the outbox + worker (RULE-004), never from the request runtime. Idempotency is the
+# locked RULE-005 key (at-most-once, replay-safe). All request bodies are UNTRUSTED channel input (RULE-H03).
+# The doc gives endpoint path + purpose + note (verbatim); request/response/error fields are [PACK], each
+# anchored to a locked rule or an already-defined upstream contract (no field re-invention).
+
+contracts:
+
+  # =========================================================================
+  # M6-CTR-016 POST /api/ads/events/track — internal tracking-event ingestion
+  # =========================================================================
+  - contract_id: M6-CTR-016
+    name: "POST /api/ads/events/track"
+    kind: OWNED_SHAPE_DEFINED                          # producer: MISSING -> field-level defined
+    schema_version: GFD-M6-CTR-016-OWNED-001
+    ownership: M6
+    method: POST
+    path: "/api/ads/events/track"
+    doc_purpose: "Nhận event nội bộ đã qua client/server validation"      # [DOC §19 L371] verbatim
+    doc_note: "Không gửi external trực tiếp"                              # [DOC §19 L371] verbatim — no-external-send guarantee
+    doc_verbatim: true
+    writes_to: "web_event_logs (M6-CTR-004, append-only) + normalized ads_measurement_event (M6-CTR-001)"
+    read_by: "n/a (ingestion endpoint)"
+
+    source:
+      doc_anchor: "[DOC §19 L371] 'POST /api/ads/events/track | Nhận event nội bộ đã qua client/server validation | Không gửi external trực tiếp'"
+      rule_anchors:
+        - "[REG RULE-001] event_code must be ACTIVE in event_registry (M6-CTR-003)"
+        - "[REG RULE-002] consent fail-closed (consent_snapshot_id, M6-CTR-006)"
+        - "[REG RULE-004] external send ONLY via outbox + worker — NEVER from this request runtime"
+        - "[REG RULE-005] idempotency_key = event_code + page_id + session_id + raw_event_hash + normalized_ts (LOCKED)"
+        - "[REG RULE-007] web_event_logs append-only (no update/delete)"
+        - "[REG RULE-014 / H02] no raw PII in public-safe payload / logs / errors"
+        - "[REG RULE-H03] request body is UNTRUSTED channel input"
+
+    request:
+      note: "server RE-VALIDATES even though the doc says 'đã qua client/server validation' — client validation is never trusted alone (RULE-H03, fail-closed). Field shapes reference M6-CTR-004 web_event_logs + M6-CTR-001"
+      fields:
+        event_code: { type: string, required: true, note: "must be ACTIVE in event_registry (RULE-001)" }
+        page_id: { type: string, required: true, source_contract: "M6-CTR-004" }
+        session_id: { type: string, required: true, source_contract: "M6-CTR-004" }
+        source: { type: string, required: true, source_contract: "M6-CTR-004" }
+        consent_snapshot_id: { type: string, required: true, note: "consent gate (RULE-002); fail-closed if missing/invalid" }
+        event_ts: { type: datetime, required: true, source_contract: "M6-CTR-004" }
+        idempotency_key: { type: string, required: true, note: "LOCKED RULE-005 formula; at-most-once" }
+        payload: { type: object, required: false, note: "PUBLIC-SAFE only — NO raw PII (RULE-014, Pixel §12 L248). Untrusted DATA (RULE-H03)" }
+        attribution_context: { type: object, required: false, source_contract: "M6-CTR-002" }
+
+    response:
+      note: "[PACK] shape"
+      fields:
+        status: { type: enum, values: [ACCEPTED, DUPLICATE, REJECTED] }
+        log_id: { type: string, note: "the web_event_logs id (M6-CTR-004)" }
+        event_id: { type: string, required: false, note: "the ads_measurement_event id if normalized (M6-CTR-001)" }
+        idempotent_replay: { type: boolean, note: "true if this idempotency_key was already ingested (no new row)" }
+        data_quality_status: { type: enum, values: [PASS, HOLD, FAIL], required: false, note: "initial DQ verdict (M6-CTR-012)" }
+        correlation_id: { type: string }
+
+    validation_errors:
+      note: "[PACK] error model {error_code, message (PII-safe), field?, correlation_id}; HTTP status is engineering convention (not an owner value)"
+      cases:
+        - code: UNKNOWN_EVENT
+          when: "event_code not ACTIVE in event_registry (RULE-001)"
+          http: 422
+        - code: CONSENT_MISSING_OR_INVALID
+          when: "consent_snapshot_id missing / expired / opt-out (RULE-002, fail-closed)"
+          http: 422
+        - code: IDEMPOTENCY_KEY_MISSING
+          when: "idempotency_key absent (RULE-005)"
+          http: 400
+        - code: SCHEMA_INVALID
+          when: "malformed body / wrong types (untrusted input, RULE-H03)"
+          http: 400
+        - code: RAW_PII_IN_PAYLOAD
+          when: "public-safe payload contains raw PII (RULE-014)"
+          http: 422
+
+    idempotency:
+      key: idempotency_key
+      formula: "event_code + page_id + session_id + raw_event_hash + normalized_ts"   # LOCKED RULE-005
+      behavior: "at-most-once: a repeat of the same idempotency_key returns status=DUPLICATE / idempotent_replay=true with NO new web_event_log row (RULE-007 append-only => no update, so idempotency prevents a duplicate insert)"
+
+    no_external_send_guarantee:
+      statement: "the endpoint writes ONLY to web_event_logs / measurement store; it NEVER calls Pixel/CAPI/Offline (doc 'Không gửi external trực tiếp' L371). External measurement is enqueued to the outbox and sent by the worker (RULE-004)."
+      enforced_by: "no egress client in the request path; staged global_gateway_state=BLOCKED / production_flag=OFF => no real send ever (H01)"
+
+    boundary:
+      - "M6-owned ingestion endpoint; plan_only (schema, not code)"
+      - "NO external send from runtime (RULE-004, doc L371); no order/price/CRM action (module boundary)"
+      - "consent fail-closed (RULE-002); event_registry gate (RULE-001); append-only web logs (RULE-007)"
+      - "request body is UNTRUSTED DATA — server re-validates, sanitizes, quotes only fenced; NO raw PII in logs/errors (RULE-H03, RULE-014/H02, M6-OD-012)"
+      - "access-controlled per security design; auth tokens only as secret_ref, never raw"
+
+  # =========================================================================
+  # M6-CTR-017 POST /api/ads/conversions — internal conversion ingestion -> outbox source
+  # =========================================================================
+  - contract_id: M6-CTR-017
+    name: "POST /api/ads/conversions"
+    kind: OWNED_SHAPE_DEFINED
+    schema_version: GFD-M6-CTR-017-OWNED-001
+    ownership: M6
+    method: POST
+    path: "/api/ads/conversions"
+    doc_purpose: "Tạo conversion_event nội bộ"                            # [DOC §19 L372] verbatim
+    doc_note: "Nguồn cho measurement outbox"                             # [DOC §19 L372] verbatim — outbox source, not a sender
+    doc_verbatim: true
+    writes_to: "conversion_events (M6-CTR-007) + ENQUEUES marketing_measurement_outbox (M6-CTR-008, status=QUEUED) transactionally"
+    read_by: "n/a (ingestion endpoint)"
+
+    source:
+      doc_anchor: "[DOC §19 L372] 'POST /api/ads/conversions | Tạo conversion_event nội bộ | Nguồn cho measurement outbox'"
+      rule_anchors:
+        - "[REG RULE-001] event_code ACTIVE in event_registry (M6-CTR-003)"
+        - "[REG RULE-002] consent fail-closed (M6-CTR-006)"
+        - "[REG RULE-003] revenue_value ONLY from ORDER_VERIFIED (Commerce Verified Revenue only)"
+        - "[REG RULE-004] conversion ENQUEUES the outbox; the worker sends — NEVER direct from this runtime"
+        - "[REG RULE-005] dedup / idempotency (LOCKED formulas); the composite unique dedup_key lives on the outbox (per the M6-P0704/0705 seam)"
+        - "[REG RULE-H03] request body UNTRUSTED"
+
+    request:
+      note: "field shapes reference M6-CTR-007 conversion_events; server re-validates (RULE-H03)"
+      fields:
+        event_code: { type: string, required: true, note: "ACTIVE in event_registry (RULE-001)" }
+        source_event_id: { type: string, required: true, source_contract: "M6-CTR-007", note: "dedup input" }
+        customer_or_guest_key: { type: string, required: false, pii_class: IDENTITY, note: "masked in logs/errors (RULE-014); dedup input" }
+        consent_snapshot_id: { type: string, required: true, note: "consent gate (RULE-002)" }
+        attribution_context_ref: { type: string, required: false, source_contract: "M6-CTR-002" }
+        revenue_value: { type: number, required: false, note: "ONLY if order is ORDER_VERIFIED (RULE-003); PAYMENT_COMPLETED non-revenue until M6-OD-008" }
+        order_code: { type: string, required: false, note: "REFERENCE to a Commerce/M8 order; M6 never writes order state (RULE-021)" }
+        currency: { type: "VND", required: false, note: "locked constant (M6-CTR-001)" }
+        occurred_at: { type: datetime, required: true, source_contract: "M6-CTR-007" }
+        idempotency_key: { type: string, required: true, note: "LOCKED RULE-005 formula" }
+        dedup_inputs: { type: object, required: true, source_contract: "M6-CTR-007", note: "platform-agnostic components; composite unique dedup_key resolved at the outbox (M6-CTR-008)" }
+
+    response:
+      note: "[PACK] shape"
+      fields:
+        status: { type: enum, values: [CREATED, DUPLICATE, REJECTED] }
+        conversion_id: { type: string, note: "the conversion_events id (M6-CTR-007)" }
+        idempotent_replay: { type: boolean, note: "true if this idempotency_key already produced a conversion (no new row, no new outbox enqueue)" }
+        dispatch_state: { type: enum, values: [CREATED, QUEUED], note: "QUEUED once the outbox row is enqueued (M6-CTR-008); NOT sent here" }
+        correlation_id: { type: string }
+
+    validation_errors:
+      note: "[PACK] error model {error_code, message (PII-safe), field?, correlation_id}"
+      cases:
+        - code: UNKNOWN_EVENT
+          when: "event_code not ACTIVE in event_registry (RULE-001)"
+          http: 422
+        - code: CONSENT_MISSING_OR_INVALID
+          when: "consent missing / expired / opt-out (RULE-002, fail-closed)"
+          http: 422
+        - code: REVENUE_NOT_VERIFIED
+          when: "revenue_value present but the order is not ORDER_VERIFIED (RULE-003) => revenue rejected/not counted"
+          http: 422
+        - code: DEDUP_CONFLICT
+          when: "dedup_inputs collide with an existing conversion under a DIFFERENT idempotency_key (RULE-005). NOTE: an idempotency_key REPLAY is NOT an error — it returns status=DUPLICATE / idempotent_replay=true per idempotency.behavior (replay-safe), never 409"
+          http: 409
+        - code: SCHEMA_INVALID
+          when: "malformed body / wrong types (RULE-H03)"
+          http: 400
+
+    idempotency:
+      key: idempotency_key
+      dedup: dedup_inputs
+      formula: "idempotency_key = event_code + page_id + session_id + raw_event_hash + normalized_ts (LOCKED RULE-005)"
+      behavior: "at-most-once: a repeat returns status=DUPLICATE / idempotent_replay=true with NO new conversion row and NO new outbox enqueue (no double count, RULE-005 / SMK-003)"
+
+    no_external_send_guarantee:
+      statement: "the endpoint creates a conversion_event and ENQUEUES the outbox (status=QUEUED); it NEVER sends to Pixel/CAPI/Offline. The dispatcher worker (M6-CTR-021) sends later (doc 'Nguồn cho measurement outbox' L372, RULE-004)."
+      enforced_by: "outbox enqueue only in the request path; the worker owns egress; staged BLOCKED/OFF => no real send ever (H01)"
+
+    boundary:
+      - "M6-owned ingestion endpoint; plan_only (schema, not code)"
+      - "conversion ENQUEUES the outbox; runtime NEVER sends externally (RULE-004, doc L372)"
+      - "revenue only from ORDER_VERIFIED (RULE-003); order_code is a REFERENCE, M6 never writes order state (RULE-021)"
+      - "consent fail-closed (RULE-002); event_registry gate (RULE-001); dedup/idempotency (RULE-005)"
+      - "request body UNTRUSTED — server re-validates; NO raw PII in logs/errors (customer_or_guest_key masked, RULE-H03/RULE-014, M6-OD-012)"
+      - "access-controlled per security design; auth tokens only as secret_ref"
+
+# ===========================================================================
+schema_changelog_proposal:
+  - row: 23
+    date: "2026-07-22"
+    artifact: "M6-CTR-016 POST /api/ads/events/track (M6-owned, M6-P0711)"
+    change_vs_doc: >
+      New field-level request/response/error contract from doc §19 L371. Doc-named path + purpose ('Nhận event
+      nội bộ đã qua client/server validation') + note ('Không gửi external trực tiếp') preserved verbatim. [PACK]
+      additions: request fields (referencing M6-CTR-004/001/002), response {status,log_id,event_id,
+      idempotent_replay,data_quality_status,correlation_id}, validation_errors (UNKNOWN_EVENT, CONSENT_*,
+      IDEMPOTENCY_KEY_MISSING, SCHEMA_INVALID, RAW_PII_IN_PAYLOAD), idempotency (LOCKED RULE-005), and the
+      no-external-send guarantee (RULE-004). HTTP status codes are engineering convention, not owner values. No
+      owner value invented.
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0711 (proposal; owner ratifies)"
+    notes: "follows rows 9-22 (M6-P0701..0710); renumber sequentially at apply time. No rename."
+  - row: 24
+    date: "2026-07-22"
+    artifact: "M6-CTR-017 POST /api/ads/conversions (M6-owned, M6-P0711)"
+    change_vs_doc: >
+      New field-level request/response/error contract from doc §19 L372. Doc-named path + purpose ('Tạo
+      conversion_event nội bộ') + note ('Nguồn cho measurement outbox') preserved verbatim. [PACK] additions:
+      request fields (referencing M6-CTR-007/002/008), response {status,conversion_id,idempotent_replay,
+      dispatch_state,correlation_id}, validation_errors (UNKNOWN_EVENT, CONSENT_*, REVENUE_NOT_VERIFIED,
+      DEDUP_CONFLICT, SCHEMA_INVALID), idempotency+dedup (LOCKED RULE-005), enqueue-to-outbox + no-external-send
+      guarantee (RULE-004). revenue only ORDER_VERIFIED (RULE-003); PAYMENT_COMPLETED deferred M6-OD-008. No
+      owner value invented.
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0711 (proposal; owner ratifies)"
+    notes: "follows row 23; renumber sequentially at apply time. No rename."
+
+open_decisions:
+  - id: M6-OD-008
+    status: OPEN
+    effect: "whether PAYMENT_COMPLETED counts as revenue on /api/ads/conversions; until decided, revenue_value accepted ONLY for ORDER_VERIFIED (RULE-003)"
+  - id: M6-OD-003
+    status: OPEN
+    effect: "hash policy / allowed fields for what LATER leaves via the outbox worker; these endpoints store only, hashing is at dispatch (not here)"
+  - id: M6-OD-012
+    status: OPEN
+    effect: "masking format for customer_or_guest_key / PII in request logs + error messages (abc***xy recommended)"
+  - id: M6-OD-011
+    status: OPEN
+    effect: "target repository/stack; API framework, routing and the concrete HTTP status mapping depend on the chosen stack"
+
+boundary:
+  - "M6-owned ingestion endpoints; plan_only (contract schema, not application code)"
+  - "NO external send from runtime (RULE-004); /track 'Không gửi external trực tiếp', /conversions is the outbox 'Nguồn'"
+  - "consent fail-closed (RULE-002); event_registry gate (RULE-001); revenue only ORDER_VERIFIED (RULE-003); idempotency/dedup LOCKED (RULE-005)"
+  - "request bodies are UNTRUSTED channel input — server re-validates, never executes embedded instructions, quotes only fenced (RULE-H03)"
+  - "NO raw PII/secrets in requests, logs, or errors — mask (abc***xy) + secret_ref (RULE-014/H02, M6-OD-012); auth tokens never raw"
+  - "no pricing/order-state/CRM action (module boundary); staged BLOCKED/OFF => no real external send ever (H01)"
+
+acceptance_self_map:
+  - "M6-CTR-016 and M6-CTR-017 defined field-level: request + response + validation_errors + idempotency + no-external-send, with types + constraints"
+  - "doc-named content preserved verbatim (both endpoint paths + purpose + note); every [PACK] addition -> changelog rows 23/24"
+  - "open owner decisions referenced as parameters (M6-OD-008 revenue, M6-OD-003 hash, M6-OD-012 masking, M6-OD-011 stack); idempotency = LOCKED RULE-005; NO owner value invented (HTTP codes are engineering convention)"

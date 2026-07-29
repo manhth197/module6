@@ -1,0 +1,50 @@
+{
+  "prompt_id": "M6-P0308",
+  "status": "PASS",
+  "summary": "PHASE0_CONSOLIDATION (PHASE0 design, plan_only). Entry gate OK: ledger M6-P0308=RUNNING, dependency M6-P0307=PASS, role=ANALYST_ARCHITECT. FEEDS JUDGE M6-P0309 (order 59), then CONTRACT_HARMONIZATION (M6-P0700+). Produced the design-band consolidation + judge summary at 04-artifacts/analysis/design/PHASE0_CONSOLIDATION.md. COUNT NOTE (verify-before-assert): the prompt says 'seven design outputs' but the design band M6-P0300..0307 produced EIGHT deliverables (ARCH_BASELINE, DATA_MODEL_BASELINE, EVENT_FLOW_DESIGN, ATTRIBUTION_DESIGN, DASHBOARD_DESIGN, SCALE_LEARNING_DESIGN, TEST_STRATEGY, SECURITY_PRIVACY_DESIGN) - enumerated from the filesystem; all EIGHT cross-checked (complete, not under-scoped), the seven-vs-eight discrepancy surfaced for the judge, not silently reconciled. CONTENT: (1) §1 inventory of the 8 deliverables (each PASS/0-blocker). (2) §2 CROSS-CUTTING INVARIANT CONSISTENCY MATRIX - 9+ spine invariants (revenue-only-ORDER_VERIFIED, consent 2-checkpoint, attribution immutability + adjustment record {actor,reason,audit,evidence}, status-transition audit distinct, no-executable-scale, learning-safe-range-orthogonal-to-scale, data-mart-read-only, registry-gate, dedup-formulas, no-raw-PII, staged, untrusted-input) verified stated consistently across the docs that touch each; NO contradiction on any spine invariant. (3) §3 CONTRACT INVENTORY consistency (all 26 CTR placed once ARCH §2 <-> DATA_MODEL, DRAFT_LOCKED {001/002/015/025} vs MISSING consistent, producing prompts match register). (4) §4 CRITIC-FINDING LEDGER (acceptance check 'BLOCKER findings addressed/escalated'): 12 research critics PC0200..0211 all PASS/0-blocker (re-verified mechanically); design band P0300..0307 had NO dedicated critic so each ran independent 2-3-lens verification, outcomes tabulated (P0300 1 MAJOR+minor fixed; P0301-0306 all MINOR fixed; P0307 both lenses CLEAN) - ZERO BLOCKER outstanding. (5) §5 consolidated OPEN owner decisions (all 12 OD + entry evidence), (6) §6 carried-forward non-blocking gaps, (7) §7 design summary for the judge (coverage 1:1 to doc surface, fail-closed spine intact, boundary preserved, buildability, judge-focus recommendations). VERIFICATION (feeds a JUDGE, so an INDEPENDENT CROSS-DOCUMENT CONTRADICTION HUNT was run over the 8 deliverables): Lens-A (spine-invariant consistency) - 8/9 invariants fully consistent, 2 MINOR on invariant #4 (status-transition audit shape): my §2 row 4 cited ARCH §3 for a shape ARCH does not state, and DATA_MODEL §4 'adds'-phrasing diverges from SCALE_LEARNING §2.1 canonical 5-field shape -> FIXED (row 4 citation corrected to SCALE_LEARNING §2.1 canonical + DATA_MODEL §4 referenced, flagged minor divergence, added reconciliation item §6.5 for the harmonization band; the doc-locked adjustment record #3 confirmed identically aligned DATA_MODEL §5 = ATTRIBUTION §4). Lens-B (contract + owner-decision consistency) - contract inventory/producing-prompts/§4-ledger all CLEAN and register-true; 1 MINOR: §5/§7 open-decision list omitted M6-OD-009 + M6-OD-010 (register has 12 ODs, I listed 10) -> FIXED (added both with 'not design-band-gating' note, corrected §7 to 12 ODs). Also fixed a bad §2 pointer (EVENT_FLOW §2.4 -> §2 Stage 4). All 6 corrections folded via Edit. ACCEPTANCE CHECKS MET: (a) design cites rules/contracts by ID throughout; (b) no owner decision pre-empted - all 12 OD OPEN, adversarial resolution-check (Lens-B) confirmed no threshold/model/safe-range/hash-field/seed resolved anywhere, AOV-2-boxes correctly attributed doc-locked; (c) BLOCKER critic findings addressed or escalated - ZERO outstanding (12 research critics 0-blocker + all design findings MINOR-and-fixed, the one MAJOR at P0300 fixed), proven mechanically + by cross-check. BOUNDARY: plan_only - cross-checks and summarizes, resolves no decision, flips no flag; no self-PASS (judge M6-P0309 decides); staged BLOCKED/OFF; no raw PII/secrets (field names only). Honest self-report - marks its own count discrepancy + non-blocking gaps openly; runner gate + JUDGE decide.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/analysis/design/DATA_MODEL_BASELINE.md",
+    "04-artifacts/analysis/design/EVENT_FLOW_DESIGN.md",
+    "04-artifacts/analysis/design/ATTRIBUTION_DESIGN.md",
+    "04-artifacts/analysis/design/DASHBOARD_DESIGN.md",
+    "04-artifacts/analysis/design/SCALE_LEARNING_DESIGN.md",
+    "04-artifacts/analysis/design/TEST_STRATEGY.md",
+    "04-artifacts/analysis/design/SECURITY_PRIVACY_DESIGN.md",
+    "04-artifacts/evidence/prompts/M6-P0300.json .. M6-P0307.json + M6-PC0200.json .. M6-PC0211.json (finding ledger)",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/design/PHASE0_CONSOLIDATION.md",
+    "04-artifacts/evidence/prompts/M6-P0308.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv (read-only): entry gate M6-P0307=PASS, M6-P0308=RUNNING; M6-P0309=JUDGE (order 59) follows, then M6-P0700/0701 CONTRACT_HARMONIZATION",
+    "PowerShell Get-ChildItem (read-only): enumerated 8 design deliverables in 04-artifacts/analysis/design/ (04-artifacts is a junction Glob cannot traverse)",
+    "PowerShell (read-only): re-scanned finding ledger - all 8 design prompts P0300..0307 + all 12 research critics PC0200..0211 = PASS/0-blocker (research_critics_all_pass_zero_blocker=True)",
+    "2 parallel independent CROSS-DOCUMENT verification agents (analysis_only, read-only, no writes) over all 8 deliverables: spine-invariant contradiction hunt (2 MINOR on invariant #4 -> fixed), contract+owner-decision consistency + consolidation truthfulness (1 MINOR OD-009/010 omission -> fixed). All 6 confirmed corrections folded via Edit; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/design/PHASE0_CONSOLIDATION.md",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/analysis/design/DATA_MODEL_BASELINE.md",
+    "04-artifacts/analysis/design/EVENT_FLOW_DESIGN.md",
+    "04-artifacts/analysis/design/ATTRIBUTION_DESIGN.md",
+    "04-artifacts/analysis/design/DASHBOARD_DESIGN.md",
+    "04-artifacts/analysis/design/SCALE_LEARNING_DESIGN.md",
+    "04-artifacts/analysis/design/TEST_STRATEGY.md",
+    "04-artifacts/analysis/design/SECURITY_PRIVACY_DESIGN.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0308 and marks it; then paste M6-P0309 (JUDGE, order 59) which reviews the PHASE0 design band from evidence in a FRESH judge session - PHASE0_CONSOLIDATION.md is its design summary. Judge focus (per §7): confirm no owner decision pre-empted, the orthogonality + no-executable-scale invariants, and that the seven-vs-eight count note + carried-forward gaps (§6) are acceptable as non-blocking. After sign-off, the CONTRACT_HARMONIZATION band begins (M6-P0700..0714) to produce the MISSING contract schemas the design set routes to."
+}

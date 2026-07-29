@@ -1,0 +1,43 @@
+{
+  "prompt_id": "M6-P0711",
+  "status": "PASS",
+  "summary": "CONTRACT_TRACK_APIS (CONTRACT_HARMONIZATION, plan_only). Entry gate OK: ledger M6-P0711=RUNNING, dependency M6-P0710 (learning candidate)=PASS, role=ANALYST_ARCHITECT, no downstream critic. Produced TWO contracts in one file at 04-artifacts/analysis/contracts/CONTRACT_TRACK_APIS.contract.yaml (nested under 'contracts:' => single root mapping, parse-safe): M6-CTR-016 POST /api/ads/events/track + M6-CTR-017 POST /api/ads/conversions. Doc-named (verbatim, doc §19): CTR-016 purpose 'Nhận event nội bộ đã qua client/server validation' + note 'Không gửi external trực tiếp' (L371); CTR-017 purpose 'Tạo conversion_event nội bộ' + note 'Nguồn cho measurement outbox' (L372). LOAD-BEARING GUARANTEE: no-external-send — BOTH endpoints ONLY write internal storage; external measurement is sent EXCLUSIVELY via outbox+worker (RULE-004). CTR-016 writes web_event_logs (CTR-004 append-only) + normalized ads_measurement_event (CTR-001); never calls Pixel/CAPI/Offline ('Không gửi external trực tiếp' L371). CTR-017 creates conversion_events (CTR-007) + ENQUEUES marketing_measurement_outbox (CTR-008, status=QUEUED) transactionally; the dispatcher worker (CTR-021) sends later ('Nguồn cho measurement outbox' L372). CONTENT [PACK]: request fields REFERENCE the already-locked upstream contracts (CTR-004/007/001/002/008 — no field re-invention); response {status, id, idempotent_replay, dispatch_state/data_quality_status, correlation_id}; validation_errors (CTR-016: UNKNOWN_EVENT/CONSENT_MISSING_OR_INVALID/IDEMPOTENCY_KEY_MISSING/SCHEMA_INVALID/RAW_PII_IN_PAYLOAD; CTR-017: UNKNOWN_EVENT/CONSENT_MISSING_OR_INVALID/REVENUE_NOT_VERIFIED/DEDUP_CONFLICT/SCHEMA_INVALID); idempotency = LOCKED RULE-005 formula (event_code+page_id+session_id+raw_event_hash+normalized_ts), at-most-once replay-safe (repeat => DUPLICATE/idempotent_replay=true, no new row, CTR-017 no new outbox enqueue => no double count SMK-003). GATES: consent fail-closed (RULE-002), event_registry gate (RULE-001), revenue ONLY ORDER_VERIFIED (RULE-003; PAYMENT_COMPLETED deferred M6-OD-008); request bodies UNTRUSTED (RULE-H03 — server RE-validates, never trusts client validation alone, PII masked in logs/errors RULE-014). VERIFICATION (2 independent read-only analysis-only lenses, hermetic): LENS-1 fidelity+upstream-consistency+no-invented-values = CLEAN 0 findings (both endpoints verbatim vs L371/L372; agent cross-read all 4 upstream contracts and confirmed EVERY source_contract field exists upstream + idempotency formula matches RULE-005 verbatim; HTTP codes are engineering convention not owner values; rows 23/24). LENS-2 boundary+idempotency+untrusted-input = 1 MINOR (genuine replay-safety wart): CTR-017 DEDUP_CONFLICT (409) was triggered by 'dedup_inputs / idempotency_key collide' but idempotency.behavior says an idempotency_key repeat returns DUPLICATE/idempotent_replay=true (success) => a literal impl could 409 a benign idempotent retry (no double-count risk, but a clarity/replay wart); FIXED by scoping DEDUP_CONFLICT to dedup_inputs collisions under a DIFFERENT idempotency_key only, with an explicit note that an idempotency_key REPLAY is never 409 (always DUPLICATE/idempotent_replay); re-parsed PARSE_OK. All other boundary dimensions CLEAN (no-external-send both endpoints, consent/registry gates, revenue ORDER_VERIFIED, untrusted-input+PII-safe errors, order_code REFERENCE RULE-021, no invented values). ACCEPTANCE CHECKS MET: (a) M6-CTR-016 + M6-CTR-017 defined field-level (request+response+validation_errors+idempotency+no-external-send) with types + constraints; (b) doc-named content preserved verbatim (both paths+purpose+note), every [PACK] addition -> changelog rows 23/24; (c) open owner decisions referenced as parameters (M6-OD-008 revenue, M6-OD-003 hash, M6-OD-012 masking, M6-OD-011 stack); idempotency=LOCKED RULE-005; NO owner value invented (HTTP codes engineering convention). BOUNDARY: plan_only; NO external send from runtime (RULE-004); consent/registry gates; revenue ORDER_VERIFIED; UNTRUSTED input server-revalidated; NO raw PII/secrets (masked + secret_ref); no pricing/order/CRM action; staged BLOCKED/OFF => no real send (H01). Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "04-artifacts/analysis/contracts/CONTRACT_WEB_EVENT_LOGS.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_CONVERSION_EVENTS.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_OUTBOX.contract.yaml",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/contracts/CONTRACT_TRACK_APIS.contract.yaml",
+    "04-artifacts/evidence/prompts/M6-P0711.json"
+  ],
+  "commands_run": [
+    "Read (read-only): entry gate M6-P0710=PASS, M6-P0711=RUNNING (ledger rows 72-73); extract §19 L367-372 (API/Worker/Queue boundary; /track + /conversions purpose+note verbatim)",
+    "Bash python PyYAML safe_load (read-only) x2: pre-verify PARSE_OK (root single mapping, 2 contracts, both purpose+note VERBATIM vs L371/L372, both no_external_send_guarantee, idempotency RULE-005 key, revenue ORDER_VERIFIED, rows 23/24); post-fold PARSE_OK (DEDUP_CONFLICT scoped to dedup_inputs only, idempotency_key replay never 409)",
+    "2 independent verification agents (general-purpose, analysis_only, read-only, hermetic): LENS-1 fidelity+upstream-consistency CLEAN 0 findings (cross-read CTR-004/007/001/008, RULE-005 formula verbatim); LENS-2 boundary+idempotency+untrusted-input 1 MINOR (DEDUP_CONFLICT vs idempotency replay contradiction) -> folded via 1 edit; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/contracts/CONTRACT_TRACK_APIS.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_WEB_EVENT_LOGS.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_CONVERSION_EVENTS.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_OUTBOX.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_EVENTS_STORAGE.contract.yaml",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0711 and marks it, AND (out-of-band) appends SCHEMA_CHANGELOG rows 23 (M6-CTR-016) and 24 (M6-CTR-017) per the contract's schema_changelog_proposal (after rows 9-22). Then paste M6-P0712 (CONTRACT_ADMIN_APIS, order 72, ANALYST_ARCHITECT) which produces CTR-018 GET /api/admin/ads/dashboard + CTR-019 POST /api/admin/ads/scale-requests + CTR-020 POST /api/admin/ads/learning-candidates (extract L373-375; admin/read + scale-request + candidate-review endpoints; dashboard read-only data-mart/support-view RULE-012, scale owner-approval RULE-010, candidate no-auto-publish-without-safe-range). CONTRACT_TRACK_APIS feeds slices M6.2B (/track) and M6.2C (/conversions)."
+}

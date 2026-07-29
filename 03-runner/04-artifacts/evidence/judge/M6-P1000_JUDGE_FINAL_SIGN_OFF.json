@@ -1,0 +1,47 @@
+{
+  "prompt_id": "M6-P1000",
+  "verdict": "BLOCKED",
+  "fail_gate_tripped": false,
+  "open_blockers": [
+    "ENTRY-001 (P3 Commerce Verified Revenue boundary) self-graded PARTIAL (all 4 assertions PARTIAL after verify+refute); NOT PROVEN. Open blockers stand: NO_RUNTIME_PROOF (no integration/e2e driving a real order to ORDER_VERIFIED; all Mockito/@WebMvcTest/static); FAIL_OPEN_RECALL (SellableGateAdminServiceImpl:805 — WMS snapshot null bypasses recall/sale_lock/quality_hold, recalled SKU resolves SELLABLE, test-confirmed); PREPAID_TO_VERIFIED_NO_E2E; QUOTESNAPSHOT_PRODUCER_MISSING. Commerce/M3 owner (Phuc/PhucApu) independent confirmation PENDING.",
+    "ENTRY-003 (P6 Core event_registry identity) self-graded 2 PARTIAL + 3 GAP; NOT PROVEN. GAPs are the exact governance dimensions M6 needs: CHANNEL_ATTRIBUTION_MISSING (no per-event attribution channel; event_source_allowed is an emitter allowlist, not attribution), DATA_SENSITIVITY_MISSING (no per-event sensitivity classification in the registry), EXTERNAL_SEND_POLICY_MISSING (no per-event external-send policy; only is_ads_conversion boolean FALSE on every seed row) — the external_send_policy + data_sensitivity fields are named in the M6-CTR-003 consumed shape this slice depends on. Plus OWNER_NOT_ENFORCED (owner seeded but not schema-enforced; runtime Admin create omits owner => UNASSIGNED) and OWNERSHIP (registry is Platform/P0-06-owned, not Module-3-Core-owned). Source/registry owner confirmation PENDING.",
+    "Cross-module owner confirmation absent for ENTRY-001 and ENTRY-003: the only mitigation on file is an M6-program/business-owner risk-acceptance (Nguyen Duc Manh), which by its own terms does NOT close the gaps, does NOT self-certify PASS, and explicitly defers the verdict to this judge. Source-module owners (Commerce/M3; Core/platform governance) have not independently attested."
+  ],
+  "evidence_reviewed": [
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/evidence/decisions/M6-OD-011.json",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/slices/M6.2A.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/contracts/README.md",
+    "00-spec/contracts/CONTRACT_EVENT_REGISTRY.contract.yaml",
+    "00-spec/contracts/CONTRACT_WEB_EVENT_LOGS.contract.yaml",
+    "00-spec/contracts/CONTRACT_IDENTITY_CONSENT.contract.yaml",
+    "04-artifacts/evidence/prompts/M6-P0715.json",
+    "04-artifacts/evidence/judge/M6-P0715_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/entry/M6-ENTRY-001.json",
+    "04-artifacts/evidence/entry/M6-ENTRY-002.json",
+    "04-artifacts/evidence/entry/M6-ENTRY-003.json",
+    "04-artifacts/evidence/entry/M6-ENTRY-001/_OWNER_RISK_ACCEPTANCE_M3_GAPS.md",
+    "04-artifacts/evidence/entry/M6-ENTRY-003/_OWNER_RISK_ACCEPTANCE_CORE_GAPS.md",
+    "04-artifacts/evidence/entry/M6-ENTRY-003/_CORE_FIX_SPEC.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "required_inputs_reviewed": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2A.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "04-artifacts/evidence/prompts/M6-P0715.json",
+    "04-artifacts/evidence/entry/M6-ENTRY-001.json",
+    "04-artifacts/evidence/entry/M6-ENTRY-002.json",
+    "04-artifacts/evidence/entry/M6-ENTRY-003.json"
+  ],
+  "required_outputs_reviewed": [
+    "04-artifacts/evidence/prompts/M6-P1000.json",
+    "04-artifacts/evidence/judge/M6-P1000_JUDGE_FINAL_SIGN_OFF.json"
+  ],
+  "judge_notes": "VERDICT BLOCKED (fail-closed), materially narrower than the prior M6-P1000 BLOCKED: the mechanical preconditions are now cleared and the block is isolated to two cross-module entry-evidence rows that are honestly graded below the PROVEN bar. Fresh judge session, strictly from current evidence files. ENTRY GATE (ledger): M6-P1000=RUNNING; dependency M6-P0715=SIGNED. global_gateway_state=BLOCKED, production_flag=OFF unchanged (not touched). CHECK 1 (previous gate from sign-off): PASS -- M6-P0715 SIGNED, verdict PASS. CHECK 2 (target LOCKED + M6-OD-011 decided): PASS -- IMPLEMENTATION_TARGET_LOCKED.json status='LOCKED', workspace_mode=STAGED_ONLY, safety all false; M6-OD-011 status='DECIDED' (2026-07-23) consistent across the manifest, DECISION_REGISTER (row now 'DECIDED 2026-07-23'), and evidence 04-artifacts/evidence/decisions/M6-OD-011.json (GREENFIELD staged, python 3.12 stdlib-first, conditions keep BLOCKED/OFF + impl staged). CHECK 3 (slice contracts resolved): PASS -- CONTRACT_REGISTER shows M6-CTR-003/004/005/006 = DRAFT_LOCKED, and the operator applied the covering schemas to 00-spec/contracts/ (CONTRACT_EVENT_REGISTRY=CTR-003, CONTRACT_WEB_EVENT_LOGS=CTR-004, CONTRACT_IDENTITY_CONSENT=CTR-005/006); these were judged PASS at M6-P0715. CHECK 4 (entry evidence reviewed): MIXED -> overall BLOCKED. All three ENTRY rows now exist under 04-artifacts/evidence/entry/ with status READY_FOR_JUDGE, code-pinned and self-red-teamed (verify+refute). Reviewed each: (a) M6-ENTRY-002 (P5 Gateway channel identity): CLEAN -- 6 assertions, open_blockers=[], signed by the actual Module 5/Gateway owner (Nguyen Duc Manh IS the M5 owner), commit 87fad53, PII-safe (psidHash/userRef/customerRef hashed). This leg PASSES. (b) M6-ENTRY-001 (P3 Commerce Verified Revenue boundary): self-graded overall PARTIAL -- the M6-needed boundary (revenue only from ORDER_VERIFIED; ORDER_VERIFIED fail-closed) holds at CODE level but is NOT runtime-proven and carries 4 open blockers incl. a code-confirmed FAIL_OPEN_RECALL (SellableGateAdminServiceImpl:805: WMS-null bypasses recall/sale_lock/quality_hold => a recalled SKU can resolve SELLABLE and later reach verified revenue). Commerce/M3 owner (Phuc) has NOT independently confirmed. (c) M6-ENTRY-003 (P6 Core event identity): self-graded 2 PARTIAL + 3 GAP -- the event_registry exists and is governed with real owner/source seeds, but is MISSING per-event attribution_channel, data_sensitivity, and external_send_policy (the last two are named fields of the M6-CTR-003 consumed shape this slice depends on; the registry's only external signal is is_ads_conversion=FALSE on every seed row), owner is not schema-enforced (runtime create => UNASSIGNED), and the registry is Platform/P0-06-owned rather than Core-owned. Source/registry owner has NOT confirmed. WHY BLOCKED not PASS: doc extract line 488 (ENTRY_EVIDENCE_REGISTER, verbatim) makes P3 Verified Revenue boundary + P5/P6 identity evidence a HARD precondition for starting Module 6 implementation, and the register rule is fail-closed ('missing/inadequate entry evidence => affected slices stay BLOCKED'). ENTRY-001 and ENTRY-003 are, by their own authors' honest grading, NOT proven (PARTIAL/GAP) and their source-module owners have not attested. The sole mitigation on file is an M6-program/business-owner written risk-acceptance (Nguyen Duc Manh) covering the ENTRY-001 4-gap set and the ENTRY-003 5-blocker set, scoped ONLY to opening M6.2A staged with production BLOCKED/OFF, external-send held OFF, and a MANDATORY re-gate at M6.2G Scale Gate (B-without-A explicitly void). I read both acceptance documents (_OWNER_RISK_ACCEPTANCE_M3_GAPS.md, _OWNER_RISK_ACCEPTANCE_CORE_GAPS.md) and the remediation spec (_CORE_FIX_SPEC.md): they are well-formed, bounded, and honest -- and they EXPLICITLY state they do not close the gaps, do not self-certify PASS, and 'verdict thuoc Judge M6-P1000'. Consistent with judge independence + fail-closed, I therefore render the honest technical verdict: the entry criteria are NOT objectively met for ENTRY-001 and ENTRY-003, so the gate is BLOCKED. The owner risk-acceptance is a legitimate governance decision recorded ABOVE the gate; it does not convert PARTIAL/GAP evidence into an entry-gate PASS, and (per the owner's own words) is not a request for me to do so. WHAT CLEARS IT -- Direction A (the real fix), then re-run M6-P1000: (1) Commerce/M3 owner fixes FAIL_OPEN_RECALL at SellableGateAdminServiceImpl:805, adds >=1 e2e order->ORDER_VERIFIED, and signs owner attestation; re-extract M6-ENTRY-001 to PROVEN. (2) Core/platform adds attribution_channel + data_sensitivity + external_send_policy (default BLOCKED, fail-closed) to event_registry, tightens owner (CHECK against sentinel + owner on runtime create), seeds per-event per _CORE_FIX_SPEC.md; re-extract M6-ENTRY-003 to 5/5 PROVEN with a real registry-owner sign. Regardless of path, the MANDATORY M6.2G Scale Gate re-gate stands before any real ads-scale or external-send. GOVERNANCE NOTE: whether to (A) execute the fixes now, or proceed under the owner's documented, bounded risk-acceptance as an explicit owner-level override recorded on top of this honest BLOCKED, is an OWNER decision outside this entry-gate judge's mandate; the judge's role is to report the true state so any such override is made against an accurate assessment, not a laundered PASS. Module boundary intact; no slice code/migration/flag change; no judged artifact modified; 04-artifacts/state/ not touched; no raw secrets/PII (entry dossiers are code excerpts + file:line, PII masked). fail_gate_tripped=false (BLOCKED is the designed fail-closed hold; M6-FAIL-002/M6-FAIL-003 not triggered)."
+}

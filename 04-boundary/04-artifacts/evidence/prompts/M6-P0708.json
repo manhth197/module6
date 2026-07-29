@@ -1,0 +1,42 @@
+{
+  "prompt_id": "M6-P0708",
+  "status": "PASS",
+  "summary": "CONTRACT_DATA_QUALITY_CHECK (CONTRACT_HARMONIZATION, plan_only). Entry gate OK: ledger M6-P0708=RUNNING, dependency M6-P0707 (measurement events storage)=PASS, role=ANALYST_ARCHITECT, no downstream critic (band judges once at M6-P0715). Produced field-level M6-CTR-012 ads_data_quality_check at 04-artifacts/analysis/contracts/CONTRACT_DATA_QUALITY_CHECK.contract.yaml (single-contract file => single root mapping, parse-safe). NATURE: M6-owned Data Quality Gate record [DOC §13 L274]; produced by data_quality_checker worker (M6-CTR-024); sets/feeds data_quality_status on ads_measurement_event (M6-CTR-001 §10 Zone C). CONTENT: the 8 doc §15 gate items (L299-308) reproduced VERBATIM (Event Registry / Consent / Dedup / Identity / Attribution / Verified Revenue / Suppression / Dashboard), each with pass_when + fail_or_hold_when EXACTLY as the doc, GROUPED as the doc groups the single 'FAIL/HOLD khi' column (NOT split). CHECK RECORD shape ([PACK] completions): check_id (PK), subject_type [ADS_MEASUREMENT_EVENT|CONVERSION_EVENT|OUTBOX_ITEM|DASHBOARD_METRIC|SCALE_REQUEST|AUDIENCE_SYNC], subject_ref (PII-masked), gate_item (enum of the 8), status [PASS|HOLD|FAIL] (locked tri-state §10.1 L211), reason_code, evidence_ref (sample evidence + trace, per Dashboard item L308), correlation_id, checked_at, checker (M6-CTR-024). AGGREGATE: per-subject data_quality_status = worst-of applicable gate items (FAIL>HOLD>PASS, worst-status propagation); any non-PASS is NEVER scale evidence (RULE-009), invariant regardless of the HOLD/FAIL label. KEY DISCIPLINE (top-0.1% lens): the doc groups FAIL/HOLD in one column and never splits per item => I did NOT invent a per-item owner FAIL-vs-HOLD matrix. non_pass_severity is DERIVED from the cited governing locked rule/doc-line (EVENT_REGISTRY=FAIL RULE-001; CONSENT=FAIL RULE-002; DEDUP=FAIL RULE-005/SMK-003; VERIFIED_REVENUE=FAIL RULE-003; SUPPRESSION=FAIL RULE-017+§16 L323; ATTRIBUTION=HOLD §11 L240+RULE-009; IDENTITY=HOLD ratifiable RULE-006/009; DASHBOARD=HOLD ratifiable RULE-012), each labelled owner_ratifiable, with the fail-closed scale-block holding regardless of label. Severity dist: 5 FAIL / 3 HOLD; owner_ratifiable=[IDENTITY, DASHBOARD]. VERIFICATION (2 independent read-only analysis-only lenses, hermetic): LENS-1 fidelity+no-invented-values = CLEAN, 0 findings (all 8 items verbatim vs L301-308; FAIL/HOLD split lives ONLY in the labelled-DERIVED non_pass_severity, not presented as doc wording; no thresholds/owner values invented; all [PACK] additions -> changelog row 19; doc_source + cross-refs L211/L240/L256/L323/L274 accurate). LENS-2 severity soundness = 1 MINOR (genuine): EVENT_REGISTRY hard-coded FAIL with severity_basis that DROPPED the 'or held' branch, but RULE-001 verbatim says 'Unknown events are rejected OR held, with audit' (VERIFIED myself via grep of RULES_LOCKED before folding) => the rule sanctions a HOLD disposition, inconsistent with how DEDUP models its transient HOLD sub-case; FIXED by rewriting EVENT_REGISTRY.severity_basis to cite the 'rejected or held' verbatim + a held-pending-registry-resolution=HOLD sub-case (FAIL kept as fail-closed default, mirroring DEDUP); re-parsed PARSE_OK (basis_mentions_held=True, 5 FAIL/3 HOLD unchanged). ACCEPTANCE CHECKS MET: (a) M6-CTR-012 defined field-level (8 gate items + record shape with types + constraints + aggregate); (b) doc-named content preserved verbatim (8 items, PASS + FAIL/HOLD grouped as doc), every [PACK] addition -> changelog row 19; (c) open owner decisions referenced as parameters (M6-OD-008 revenue, M6-OD-002 thresholds N/A here, M6-OD-012 masking, M6-OD-011 stack, M6-OD-003 hash); per-item HOLD/FAIL severity DERIVED from locked rules, NO owner value invented (no thresholds). BOUNDARY: plan_only schema; measure/flag only (records verdicts; consent/registry/dedup ENFORCED at their own checkpoints, not by this record); scale stays owner decision (RULE-010, §16); NO raw PII/secrets (subject_ref/reason_code masked + secret_ref, RULE-014/H02); channel content untrusted DATA quoted only fenced; staged BLOCKED/OFF. Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_EVENTS_STORAGE.contract.yaml",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/contracts/CONTRACT_DATA_QUALITY_CHECK.contract.yaml",
+    "04-artifacts/evidence/prompts/M6-P0708.json"
+  ],
+  "commands_run": [
+    "Read (read-only): entry gate M6-P0707=PASS, M6-P0708=RUNNING (ledger rows 69-70); extract §15 L297-308 (8 Data Quality Gate items verbatim), §11 L240 (attribution LOW/HOLD), §16 L310-324 (Scale Gate + Risk row L323), object anchor L274",
+    "Grep (read-only): RULE-001 in RULES_LOCKED.md — verified verbatim 'Unknown events are rejected or held, with audit' (the fact behind the LENS-2 fold)",
+    "Bash python PyYAML safe_load (read-only) x2: pre-verify PARSE_OK (root single mapping, 8 gate items, all 16 pass/fail-hold conditions match doc VERBATIM zero-mismatch, gate_item enum=8 ids, status [PASS,HOLD,FAIL], severity 5 FAIL/3 HOLD, row 19); post-fold PARSE_OK (EVENT_REGISTRY basis includes 'rejected or held' + held sub-case, dist unchanged)",
+    "2 independent verification agents (general-purpose, analysis_only, read-only, hermetic): LENS-1 fidelity+no-invented-values CLEAN 0 findings; LENS-2 severity soundness 1 MINOR (EVENT_REGISTRY dropped 'or held' branch) -> verified vs real RULE-001 text -> folded; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/contracts/CONTRACT_DATA_QUALITY_CHECK.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_EVENTS_STORAGE.contract.yaml",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0708 and marks it, AND (out-of-band) appends SCHEMA_CHANGELOG row 19 per the contract's schema_changelog_proposal (after rows 9-18). Then paste M6-P0709 (CONTRACT_SCALE_REQUEST, order 69, ANALYST_ARCHITECT) which produces CTR-013 ads_scale_request + CTR-026 Scale Gate approval flow (doc §16 conditions L315-324; owner-approval + budget cap + rollback; RULE-009/010/017; thresholds = M6-OD-002 referenced as parameters, never invented). CONTRACT_DATA_QUALITY_CHECK feeds slice M6.2F and the data_quality_checker worker (M6-P0713 M6-CTR-024)."
+}

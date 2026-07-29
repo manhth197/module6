@@ -1,0 +1,40 @@
+{
+  "prompt_id": "M6-P0306",
+  "status": "PASS",
+  "summary": "TEST_STRATEGY (PHASE0 design, plan_only). Entry gate OK: ledger M6-P0306=RUNNING, dependency M6-P0305=PASS, role=ANALYST_ARCHITECT. Produced the smoke-test strategy for M6-SMK-001..018 at 04-artifacts/analysis/design/TEST_STRATEGY.md. GOVERNING FRAME: every smoke asserts a FAIL-CLOSED decision, not a delivery - in staging (04-artifacts/impl, production_flag=OFF/gateway BLOCKED) nothing really sends; the Pixel/CAPI/Offline sink is a STUB, each smoke asserts the internal decision (rejected/held/deduped/not-counted/not-scaled); fixtures carry synthetic+masked identity only; every run emits a Smoke Report {correlation_id, evidence_id} or it is not evidence; smokes on a MISSING contract are BLOCKED, not faked green. CONTENT covers all requested areas: (1) BUILD/RUN PLAN for all 18 smokes (§2): scenario+expected reproduced VERBATIM from SMOKE_REGISTER (001-015 owner doc §21; 016/017/018 the pack's proposed HARDENING rows), each with fixture-class + stub + contract-dep + slice-verify point; buildable-now (all deps DRAFT_LOCKED) = {004,005,006,007,013,014,015,018}, BLOCKED on a MISSING contract = {001,002,003(dispatcher-side dedup CTR-021),008,009,010(dashboard API CTR-018),011,012,016,017}. (2) FIXTURE CATALOG (§3) for consent (VALID/MISSING/EXPIRED/OPT_OUT), dedup (dedup_key/idempotency_key collisions), attribution (FULL_CHAIN/MISSING_SOURCE/MULTI_TOUCH-Diamond+Ads/LIVE_CHAIN/POST_VERIFY_CORRECTION) + registry/revenue/scale-risk/learning/pii/dashboard - all synthetic+masked identity, no real PII; SMK-017 pii fixture uses a SYNTHETIC raw-PII-shaped token and asserts the stub payload contains no raw-PII token. (3) correlation_id + evidence_id CAPTURE (§4) per §22 L430 verbatim 'Smoke Report | P0 smoke result with correlation_id and evidence_id'; correlation_id traced to real ads_measurement_event.correlation_id field (§10 L210); a smoke without both is not evidence (mirrors dashboard DQ item 8 / RULE-015); the 10 §22 evidence categories are the buckets. (4) CONTRACT-DEPENDENCY GATING (§5): each smoke's slice entry gate stays BLOCKED until its dep is DRAFT_LOCKED - the test plan is itself fail-closed, never asserts against a non-existent schema. VERIFICATION (this prompt has NO downstream critic: M6-P0306->M6-P0307, no M6-PC0306; scoped 2-lens pass): Lens-A (18-smoke fidelity + §22-L430 + contract-dep + buildable/blocked split) 5 MINOR: 016/017/018 expected/scenario were paraphrased under a 'verbatim' header -> FIXED to register-verbatim; §5 glosses + two §2 cells (003/010) mislabeled buildable vs the corrected split -> FIXED (BLOCKED markers added, §5 glosses corrected, CTR-018 row added to §5); 001-015 verbatim, §22-L430 correct, correlation_id traced to real field, contract statuses/prompts all match, split itself correct. Lens-B (no-preemption + staged + no-raw-PII + honest gating) CLEAN - SMK-011 safe-range placeholder (M6-OD-006 OPEN), SMK-017 hash-field BLOCKED (M6-OD-003 OPEN), no threshold/repo invented, egress stubbed, synthetic PII only, no flag flipped; 1 MINOR (§5 missing CTR-018 row -> same fix). All 7 confirmed corrections folded via Edit. ACCEPTANCE CHECKS MET: (a) design cites rules/contracts by ID (SMK-001..018, CTR-001..022, RULE-005/014/015/H01/H02/H03, DQ item 8, OD-002/003/006/011); (b) no owner decision pre-empted - M6-OD-002/003/006/011 all OPEN, fixtures use placeholders not values, no threshold/safe-range/hash-field/repo invented; (c) BLOCKER critic findings - none: 12 prior research critics PASS/0-blocker and this prompt's 2-lens pass found 0 BLOCKER/0 MAJOR (6 MINOR fixed). BOUNDARY: plan_only - no test code, no smoke run, no external call; staged BLOCKED/OFF, egress stubbed; no raw PII in fixtures (synthetic/masked/secret_ref); channel fixture text untrusted DATA; measure-only. Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/SPEC.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "04-artifacts/analysis/design/EVENT_FLOW_DESIGN.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/design/TEST_STRATEGY.md",
+    "04-artifacts/evidence/prompts/M6-P0306.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv (read-only): entry gate M6-P0305=PASS, M6-P0306=RUNNING, M6-P0307=TODO (no M6-PC0306 critic between 0306 and 0307)",
+    "Read (read-only): SMOKE_REGISTER (M6-SMK-001..018 verbatim scenario/expected + bound slices), extract §22 Evidence Plan L417-430 (L430 Smoke Report correlation_id+evidence_id), §10 correlation_id field L210; CONTRACT_REGISTER (contract statuses + producing prompts), DECISION_REGISTER (M6-OD-002/003/006/011), RULES_LOCKED",
+    "2 parallel independent verification agents (analysis_only, read-only, no writes): 18-smoke/§22-L430/contract-dep/split fidelity (5 MINOR -> fixed), no-preemption/staged/no-raw-PII/honest-gating (CLEAN + 1 MINOR -> fixed). All 7 confirmed corrections folded via Edit; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/design/TEST_STRATEGY.md",
+    "04-artifacts/analysis/design/EVENT_FLOW_DESIGN.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0306 and marks it; then paste M6-P0307 (next PHASE0 design prompt, order 57, ANALYST_ARCHITECT). NOTE: M6-P0306 has no dedicated critic; the scoped 2-lens verification pass (§6) substitutes and its six confirmed MINOR findings were folded in. TEST_STRATEGY.md governs how the smokes are built in 04-artifacts/impl during slice verify stages (M6.2A..K) and re-run at M6.2K; SMK-016/017/018 remain proposed HARDENING pending owner review."
+}

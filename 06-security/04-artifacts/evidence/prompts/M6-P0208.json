@@ -1,0 +1,35 @@
+{
+  "prompt_id": "M6-P0208",
+  "status": "PASS",
+  "summary": "RESEARCH_SCALE_GATE_WORKFLOW. Entry gate OK: ledger M6-P0208=RUNNING, dependency M6-PC0207 (dashboard/DQ critic)=PASS, role=ANALYST_ARCHITECT, mode=analysis_only. Produced the Scale Gate owner-approval workflow research at 04-artifacts/analysis/research/RESEARCH_SCALE_GATE_WORKFLOW.md (contracts CTR-013 ads_scale_request + CTR-026 approval flow -> M6-P0709, CTR-019 API -> M6-P0712; slice M6.2G). GOVERNING INVARIANT (spine of the whole doc): Module 6 COMPUTES conditions + BUNDLES evidence + PROPOSES only - it has NO code path that raises a budget, enables a campaign, or opens audience scale (M6.2G done gate, RULE-010, FAIL-006); approval is the owner's, executed OUTSIDE M6, and in this pack gateway BLOCKED/production OFF mean nothing scales at all - an approved ads_scale_request is still only data. CONTENT covers all requested areas: (1) PROPOSAL OBJECT [DOC §16 L324]: ads_scale_request with budget_cap (hard ceiling) + rollback_condition (predefined machine-checkable revert), condition_results[8], evidence_refs, risk_state, status, owner_decision, audit[] - inert data, finalized in M6-P0709. (2) EVIDENCE BUNDLING [DOC §16 L317-324, RULE-009/015]: PASS/HOLD/FAIL + evidence ref per each of the 8 condition rows (P3/P5/P6->ENTRY-001/002/003, Quote/Order, Public/Privacy->ENTRY-004, Funnel->M6-OD-002 thresholds, Dashboard->M6-P0207 bundle+single-primary-model M6-P0206, Quality->ads_data_quality_check, Risk->§4, Approval->owner); only PASS+HIGH-confidence may support a scale case (RULE-009), no PASS without trace (RULE-015). (3) RISK-OVERRIDE VETO [DOC §16 L323, §15 L307, RULE-017]: recall / sale lock / quality hold / complaint P0 / platform spam flag / CRM suppression = HARD veto - if any active, Scale Gate FAIL/HOLD regardless of every other green condition (fail-closed), re-checked at approval time and used as a rollback trigger; exercised by smoke M6-SMK-009. (4) LIFECYCLE + AUDIT [RULE-010/008]: DRAFT->PROPOSED->APPROVED|REJECTED|HOLD->[external scale by owner]->ROLLED_BACK, every transition append-only immutable-audited {actor, from->to, reason, evidence_ref, ts}; owner approval EXPLICIT by an authorized actor, never inferred or self-approved by M6; no transition inside M6 performs an external budget/campaign action. BOUNDARY: no executable scale path (RULE-010/FAIL-006); staged (BLOCKED/OFF - even an approved request changes no budget); no pricing/order/CRM/commission side effects; no raw PII/secrets (ids by reference, tokens secret_ref). ACCEPTANCE CHECKS MET: (a) every claim labeled via [DOC]/[REG]/[BRIEF]/[PACK]/[EXT] legend, '[DOC]=only owner requirements'; (b) owner-decision dependencies listed in §7 (CTR-013/026->M6-P0709, CTR-019->M6-P0712, M6-OD-002 thresholds, M6-ENTRY-001..004, approval roles candidate, rollback/budget-cap catalog candidate, M6-OD-005 primary model); (c) §8 traceability separates owner-mandated (L312/L317-324/L323/L307 + RULE-009/010/017) from [EXT]/[PACK] proposals. Honest self-report; runner gate + downstream critic M6-PC0208 review.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/research/RESEARCH_SCALE_GATE_WORKFLOW.md",
+    "04-artifacts/evidence/prompts/M6-P0208.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): ledger rows 43-45 (entry gate: M6-PC0207=PASS, M6-P0208=RUNNING, critic M6-PC0208=TODO next)",
+    "Sourced from prior DOC_LOCK reads (this session): extract lines 311-324 (§16 Scale Gate banner + 8 conditions incl. L323 Risk row, L324 Approval), 307 (§15 Suppression); RULES_LOCKED RULE-008/009/010/017 + FAIL-006; CONTRACT_REGISTER CTR-013/019/026; slice_definitions M6.2G; SMOKE_REGISTER M6-SMK-009; ENTRY_EVIDENCE_REGISTER M6-ENTRY-001..004; DECISION_REGISTER M6-OD-002/005",
+    "Workflow/lifecycle/audit patterns drawn from general engineering knowledge tagged [EXT]; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/research/RESEARCH_SCALE_GATE_WORKFLOW.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0208 and marks it; then paste M6-PC0208 (RESEARCH_SCALE_GATE_WORKFLOW_CRITIC, BOUNDARY_ADVERSARY) which red-teams 04-artifacts/analysis/research/RESEARCH_SCALE_GATE_WORKFLOW.md for ANY executable scale path (must be propose-only, RULE-010/FAIL-006), a risk-override that is weighted rather than a hard veto (RULE-017), scale-on-LOW/HOLD evidence (RULE-009), or M6 self-approving. This research feeds M6-P0709 (ads_scale_request + approval-flow contracts) and slice M6.2G."
+}

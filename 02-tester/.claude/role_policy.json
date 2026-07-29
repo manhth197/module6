@@ -1,0 +1,19 @@
+{
+  "role_name": "TESTER",
+  "allowed_write_roots": [
+    "work",
+    "04-artifacts/evidence/prompts",
+    "04-artifacts/impl",
+    "04-artifacts/test-reports"
+  ],
+  "deny_write_roots": [
+    "00-spec",
+    "04-artifacts/state",
+    "registry",
+    "scripts",
+    "scripts-win",
+    "_source_snapshot",
+    ".claude",
+    "CLAUDE.md"
+  ]
+}

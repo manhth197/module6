@@ -1,0 +1,32 @@
+{
+  "prompt_id": "M6-P0202",
+  "status": "PASS",
+  "summary": "RESEARCH_IDENTITY_CONSENT. Entry gate OK: ledger M6-P0202=RUNNING, dependency M6-PC0201 (event-registry research critic)=PASS, role=ANALYST_ARCHITECT, mode=analysis_only. Produced identity+consent research for M6-CTR-005 (guest_contacts, Customer-identity owned) and M6-CTR-006 (guest_marketing_consent_snapshot, Consent owned) - both CONSUMED, MISSING -> producing prompt M6-P0702, needed before M6.2A - at 04-artifacts/analysis/research/RESEARCH_IDENTITY_CONSENT.md. CONTENT covers the three requested areas: (1) GUEST->CUSTOMER MAPPING WITH AUDIT [DOC §7 L115, §3 L62 / RULE-006]: the chain guest->customer->order->verified revenue prevents mis-measurement/double-count; M6 CONSUMES the Identity-owned mapping (never creates/reassigns); mappings are audited and NEVER overwritten without evidence (mirrors RULE-008 immutability); [EXT] proposal of an append-only link history (guest_key->customer_id, effective-from, evidence_ref) labeled as owner-review not requirement. (2) CONSENT SNAPSHOT SEMANTICS EVENT-TIME vs SEND-TIME [DOC §7 L118, §13 L266 / RULE-002] - the crux: L266 captures 'consent tại thời điểm event' (event-time immutable snapshot referenced by ads_measurement_event.consent_snapshot_id) BUT RULE-002 requires consent valid 'at event/send time', so TWO distinct checkpoints - event-time snapshot capture AND a fresh send-time re-validation in the outbox worker; a consent that was valid at event time but withdrawn/expired before send MUST NOT be sent (send-time check is a fresh read, not a re-use of the stale snapshot verdict); consent_valid is one AND-term of send_policy [DOC L257] evaluated at send time. (3) FAIL-CLOSED ENFORCEMENT POINTS [DOC §3 L60, §7 L118 / RULE-002, FAIL-002] - default DENY external when consent missing/invalid/withdrawn/expired, across 5 gates: tracking hook (attach snapshot; missing => internal-only, nothing external queued), conversion-event creation, measurement outbox worker (send-time re-validation), audience outbox worker (re-validation + consent-passing approved segments only), CRM path (consent + suppression RULE-017; M6 never sends CRM itself). Each denial writes a FAIL-002-style PII-safe audit record. BOUNDARY: read-only on identity/consent; M6 never creates/reassigns identity, never edits consent, never sends CRM/decides member rights; no raw guest_id/customer_id/psid or PII (RULE-014 - masked + secret_ref); gateway BLOCKED/production OFF unchanged. ACCEPTANCE CHECKS MET: (a) every externally-sourced claim labeled via [DOC]/[REG]/[STATE]/[BRIEF]/[PACK]/[EXT] legend with '[DOC] = only owner requirements'; (b) owner-decision dependencies explicitly listed in §6 (M6-CTR-005/006->M6-P0702, M6-OD-003 hash policy, consent-scope granularity candidate, consent-expiry/re-consent candidate, internal-only-logging question, guest->customer re-link authority); (c) §7 traceability separates owner-mandated (L115/L62/L118/L266/L60/L257 + RULE-002/006) from [EXT]/[PACK] proposals. Honest self-report; runner gate + downstream critic M6-PC0202 review.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/research/RESEARCH_IDENTITY_CONSENT.md",
+    "04-artifacts/evidence/prompts/M6-P0202.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): ledger rows 31-33 (entry gate: M6-PC0201=PASS, M6-P0202=RUNNING, critic M6-PC0202=TODO next)",
+    "Sourced from prior DOC_LOCK reads (this session): extract lines 115 (§7 identity), 62 (§3 chain), 118 (§7 consent), 266 (§13 consent snapshot), 60 (§3 consent fail-closed), 257 (§12 send_policy); RULES_LOCKED RULE-002/006/008/014/017 + FAIL-002; CONTRACT_REGISTER CTR-005/006 + producing prompt M6-P0702; SPEC §10.1 consent_snapshot_id/customer_id/guest_id fields; DECISION_REGISTER M6-OD-003"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/research/RESEARCH_IDENTITY_CONSENT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0202 and marks it; then paste M6-PC0202 (RESEARCH_IDENTITY_CONSENT_CRITIC, BOUNDARY_ADVERSARY) which red-teams 04-artifacts/analysis/research/RESEARCH_IDENTITY_CONSENT.md for boundary leaks (M6 owning identity/consent or sending CRM), raw-PII exposure, and the correctness of the event-time-vs-send-time fail-closed model. This research feeds M6-P0702 (CONTRACT_IDENTITY_CONSENT) which defines the CTR-005/006 consumed shapes."
+}

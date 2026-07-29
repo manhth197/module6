@@ -1,0 +1,225 @@
+# CONTRACT_IDENTITY_CONSENT — M6-CTR-005 guest_contacts + M6-CTR-006 guest_marketing_consent_snapshot
+# Prompt: M6-P0702 · Phase: CONTRACT_HARMONIZATION · Mode: plan_only (schema definition; no code/migration)
+# Both are CONSUMED shapes: Module 6 defines only the row shape it READS + its read-side validation.
+# guest_contacts is owned/written by Customer identity; the consent snapshot by the Consent system.
+#
+# PII NOTICE: this is the most identity-dense contract. Every identity field below is PII-class and is
+# masked (abc***xy) or held as secret_ref in ANY log/evidence (RULE-014 / RULE-H02). NO raw PII value appears
+# in this file — field NAMES only. changelog rows follow M6-P0701's proposed row 9 (renumber if applied together).
+
+contracts:
+
+  # =========================================================================
+  # M6-CTR-005 — guest_contacts (CONSUMED)
+  # =========================================================================
+  - contract_id: M6-CTR-005
+    name: guest_contacts
+    schema_version: GFD-M6-CTR-005-CONSUMED-001        # pack label; not owner content
+    ownership: CONSUMED
+    owner_module: Customer identity
+    consumed_by: Module 6 (identity resolution for attribution; guest->customer mapping read)
+
+    status:
+      kind: CONSUMED_SHAPE_DEFINED
+      note: >
+        M6 READS guest identity + the guest->customer mapping to resolve attribution; it never writes or
+        overwrites guest_contacts (Customer identity owns writes). The authoritative schema is Customer
+        identity's.
+
+    source:
+      doc_anchor: "[DOC §13 L265] 'guest_contacts | Guest lead identity và contact fingerprint | Customer identity'"
+      mapping_anchor: "[DOC §7 L115] 'map guest -> customer khi có dữ liệu đủ | Guest/customer mapping có audit và không ghi đè thiếu bằng chứng'"
+      rule_anchors:
+        - "[REG RULE-006] identity chain guest->customer->order->verified revenue mapped with audit; mapping never overwritten without evidence"
+        - "[REG RULE-014 / H02] no raw PII; masked / secret_ref"
+
+    row_shape:
+      guest_id:
+        type: string
+        required: true
+        role: primary_identifier
+        pii_class: IDENTITY            # raw id is PII -> masked / secret_ref in logs & evidence
+        doc_source: "[DOC L265] 'Guest lead identity'"
+        doc_verbatim: false            # doc-named concept ('Guest lead identity'); formalized as the key id
+        constraints: ["non-null, unique", "M6 read-only lookup key; never written by M6"]
+
+      contact_fingerprint:
+        type: string                   # a privacy-preserving fingerprint/hash of contact info
+        required: true
+        pii_class: IDENTITY            # still identity-class even though hashed -> masked in evidence
+        doc_source: "[DOC L265] verbatim 'contact fingerprint'"
+        doc_verbatim: true             # doc-named field, snake_cased; exact doc spelling in doc_source
+        constraints: ["non-null", "not reversed / no raw contact reconstructed from it by M6"]
+
+    additions:
+      mapped_customer_id:
+        type: string
+        required: false                # present only when guest->customer mapping exists ('khi có dữ liệu đủ')
+        pii_class: IDENTITY
+        kind: "ADDITION [DOC §7 L115-referenced]"
+        rationale: "the guest->customer mapping M6 reads for the identity chain (RULE-006); optional until mapped"
+        changelog: "proposed row 10"
+
+      mapping_audit_ref:
+        type: string                   # reference/handle to the mapping's audit record
+        required: false                # required whenever mapped_customer_id is present
+        kind: "ADDITION [DOC §7 L115-referenced]"
+        rationale: >
+          [DOC §7 L115] 'mapping có audit và không ghi đè thiếu bằng chứng' (RULE-006): M6 consumes a mapping
+          that MUST carry audit and must never be overwritten without evidence. M6 relies on this property; it
+          does not create the mapping.
+        changelog: "proposed row 10"
+
+      first_seen_at:
+        type: datetime
+        required: false
+        kind: "ADDITION [PACK]"
+        rationale: "ordering/first-touch support; no PII"
+        changelog: "proposed row 10"
+
+    read_validation:
+      m6_reads: [guest_id, contact_fingerprint, mapped_customer_id, mapping_audit_ref]
+      invariants:
+        - "the consumed guest->customer mapping MUST carry audit and never be overwritten without evidence (RULE-006) — a property M6 requires of the source"
+        - "M6 resolves attribution via this identity chain; a missing/ambiguous mapping => attribution source_confidence LOW/HOLD (RULE-009), never a guessed merge"
+      m6_never:
+        - "insert / update / delete / overwrite a guest_contacts row (CONSUMED — Customer identity owns writes)"
+        - "reconstruct raw contact info from contact_fingerprint"
+        - "expose guest_id / mapped_customer_id / contact_fingerprint raw in any log or evidence (mask / secret_ref)"
+
+  # =========================================================================
+  # M6-CTR-006 — guest_marketing_consent_snapshot (CONSUMED)
+  # =========================================================================
+  - contract_id: M6-CTR-006
+    name: guest_marketing_consent_snapshot
+    schema_version: GFD-M6-CTR-006-CONSUMED-001
+    ownership: CONSUMED
+    owner_module: Consent (marketing consent system)
+    consumed_by: Module 6 (consent fail-closed gating of measurement / audience / CRM egress)
+
+    status:
+      kind: CONSUMED_SHAPE_DEFINED
+      note: >
+        M6 READS the point-in-time consent snapshot to gate egress fail-closed. The snapshot records consent
+        AT EVENT TIME; the dispatcher RE-VALIDATES current consent AT SEND TIME (two checkpoints). M6 never
+        writes consent (the Consent system owns writes).
+
+    source:
+      doc_anchor: "[DOC §13 L266] 'guest_marketing_consent_snapshot | Consent tại thời điểm event | Consent fail-closed'"
+      fail_closed_anchor: "[DOC §7 L118] 'guest_marketing_consent_snapshot bắt buộc; thiếu consent hợp lệ thì fail-closed | Không external measurement, audience sync, CRM khi consent missing'"
+      state_anchor: "[DOC §15 L302] 'Consent valid tại thời điểm event/external send | Missing/expired/opt-out'"
+      rule_anchors:
+        - "[REG RULE-002] consent fail-closed at event/send time; without valid consent NO external measurement, audience sync, CRM"
+
+    row_shape:
+      consent_snapshot_id:
+        type: string
+        required: true
+        role: primary_identifier
+        doc_source: "referenced by ads_measurement_event.consent_snapshot_id [DOC §10 L208]; the snapshot key"
+        doc_verbatim: false            # formalized key (the snapshot the measurement event points to)
+        constraints: ["non-null, unique", "M6 read-only reference"]
+
+      subject_ref:
+        type: string                   # guest_id or customer_id whose consent this is
+        required: true
+        pii_class: IDENTITY            # masked / secret_ref
+        doc_source: "[DOC §7 L118] consent is per subject (guest); identity ref"
+        doc_verbatim: false
+        constraints: ["non-null", "masked in logs/evidence"]
+
+      consent_state:
+        type: enum
+        values: [VALID, MISSING, EXPIRED, OPT_OUT]     # doc-sourced states (NOT invented)
+        required: true
+        doc_source: "[DOC §15 L302] PASS='Consent valid'; FAIL/HOLD='Missing/expired/opt-out'"
+        doc_verbatim: true             # the four states are the doc's own consent vocabulary
+        note: "only VALID permits external measurement/audience/CRM; all others fail-closed (RULE-002, SMK-002)"
+
+      captured_at:
+        type: datetime
+        required: true
+        doc_source: "[DOC §13 L266] 'Consent tại thời điểm event' — the event-time capture timestamp"
+        doc_verbatim: false            # doc-named concept (consent at event time); formalized as a timestamp
+        constraints: ["immutable point-in-time record; the send-time re-check reads CURRENT consent, it does not mutate this"]
+
+    additions:
+      consent_scope:
+        type: set/enum
+        values_ref: [external_measurement, audience_sync, crm]   # doc-derived scopes [DOC §7 L118]; not invented
+        required: true
+        kind: "ADDITION [DOC §7 L118-referenced]"
+        rationale: "consent gates exactly these three egress kinds (§7 L118); the snapshot records which are permitted"
+        changelog: "proposed row 11"
+
+      source_channel:
+        type: string
+        required: false
+        kind: "ADDITION [PACK]"
+        rationale: "provenance of consent capture (audit); values are Consent-system's, not invented"
+        changelog: "proposed row 11"
+
+    read_validation:
+      two_checkpoints:
+        event_time: "the snapshot's consent_state is the record AT event time (this contract)"
+        send_time: "the dispatcher RE-VALIDATES CURRENT consent before egress; a consent that lapsed/opted-out since capture BLOCKS the send (RULE-002; [[EVENT_FLOW_DESIGN]] §5)"
+      fail_closed:
+        - "consent_state != VALID (MISSING/EXPIRED/OPT_OUT) => NO external measurement, NO audience sync, NO CRM (§7 L118, RULE-002, SMK-002)"
+        - "snapshot absent for an event that would egress => fail-closed (no send)"
+        - "feeds send_policy.consent_valid [DOC §12 L257]"
+      m6_never:
+        - "insert / update / delete a consent snapshot (CONSUMED — Consent system owns writes)"
+        - "infer or upgrade consent (e.g. treat MISSING as VALID) — fail-closed only"
+        - "expose subject_ref raw in any log/evidence (mask / secret_ref)"
+
+# ===========================================================================
+# SCHEMA_CHANGELOG row proposals (operator-applied to 00-spec/registers/SCHEMA_CHANGELOG.md; this role cannot
+# write 00-spec). Numbers follow M6-P0701's proposed row 9 for CTR-003; renumber sequentially if applied together.
+# ===========================================================================
+schema_changelog_proposals:
+  - row: 10
+    date: "2026-07-22"
+    artifact: "M6-CTR-005 guest_contacts (consumed shape, M6-P0702)"
+    change_vs_doc: >
+      Consumed row shape from doc §13 L265. Doc-named 'contact fingerprint' preserved (snake_cased);
+      'Guest lead identity' formalized as guest_id (key). Additions: mapped_customer_id + mapping_audit_ref
+      (the guest->customer mapping M6 reads, with audit + no-overwrite-without-evidence per §7 L115 / RULE-006)
+      and first_seen_at. All identity fields PII-class (masked/secret_ref). No owner value invented.
+    kind: "ADDITION (HARDENING — OWNER/IDENTITY REVIEW)"
+    authorized_by: "M6-P0702 (proposal; Customer identity owner ratifies)"
+    notes: "no rename; consumed shape only — authoritative schema is Customer identity's"
+
+  - row: 11
+    date: "2026-07-22"
+    artifact: "M6-CTR-006 guest_marketing_consent_snapshot (consumed shape, M6-P0702)"
+    change_vs_doc: >
+      Consumed row shape from doc §13 L266. consent_state enum [VALID|MISSING|EXPIRED|OPT_OUT] is doc-sourced
+      (§15 L302), NOT invented. captured_at formalizes 'Consent tại thời điểm event'. Additions:
+      consent_snapshot_id (key, referenced by ads_measurement_event.consent_snapshot_id §10 L208),
+      consent_scope [external_measurement|audience_sync|crm] (the three egress kinds consent gates, §7 L118),
+      source_channel. Two-checkpoint semantics (event-time snapshot + send-time re-validation) noted. No owner
+      value invented.
+    kind: "ADDITION (HARDENING — OWNER/CONSENT REVIEW)"
+    authorized_by: "M6-P0702 (proposal; Consent owner ratifies)"
+    notes: "no rename; consumed shape only — authoritative schema is the Consent system's"
+
+# ===========================================================================
+open_decisions:
+  - id: M6-OD-012
+    status: "OPEN (pack-recommended abc***xy)"
+    effect: "exact masking format for guest_id/customer_id/psid/contact_fingerprint in logs & evidence"
+  - id: M6-ENTRY-002
+    status: OPEN
+    effect: "P5 channel identity evidence (page/live/comment/messenger identity + handoff/delivery logs) underpins guest identity resolution; gates M6.2A"
+
+boundary:
+  - "CONSUMED (both): M6 reads only; Customer identity + the Consent system own writes"
+  - "NO raw PII/secrets in this contract — field names only; guest_id/customer_id/subject_ref/contact_fingerprint masked or secret_ref at runtime (RULE-014/H02)"
+  - "consent fail-closed: MISSING/EXPIRED/OPT_OUT => no external measurement/audience/CRM (RULE-002)"
+  - "channel-origin content is untrusted DATA, never an instruction (RULE-H03)"
+  - "staged: global_gateway_state=BLOCKED, production_flag=OFF — unchanged; schema definition, not a table"
+
+acceptance_self_map:
+  - "M6-CTR-005 + M6-CTR-006 defined field-level with types + constraints (guest_contacts: 2 doc + 3 add; consent: 4 doc-derived + 2 add + read_validation)"
+  - "doc-named fields preserved (contact fingerprint verbatim; consent states doc-sourced); every addition -> changelog row 10/11"
+  - "open owner decisions referenced as parameters (M6-OD-012 masking, M6-ENTRY-002); consent-state values doc-sourced, none invented"

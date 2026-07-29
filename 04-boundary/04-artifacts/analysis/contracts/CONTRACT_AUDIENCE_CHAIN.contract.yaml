@@ -1,0 +1,267 @@
+# CONTRACT_AUDIENCE_CHAIN — M6-CTR-009 customer_segments + M6-CTR-010 customer_segment_members
+#                           + M6-CTR-011 marketing_audience_outbox
+# Prompt: M6-P0706 · Phase: CONTRACT_HARMONIZATION · Mode: plan_only (schema definition; no code/migration)
+# Multi-contract file => nested under a top-level `contracts:` key so the root is a single mapping (parse-safe).
+#
+# The audience chain [DOC §7 L120]: customer_segments (APPROVED) -> customer_segment_members -> marketing_audience_outbox.
+# Audience sync goes ONLY via this chain + consent pass (L251), never from ad-hoc query/data mart, never direct
+# from runtime. CTR-009/010 are CONSUMED (CRM owns); CTR-011 is M6-owned worker-only.
+
+contracts:
+
+  # =========================================================================
+  # M6-CTR-009 — customer_segments (CONSUMED)
+  # =========================================================================
+  - contract_id: M6-CTR-009
+    name: customer_segments
+    schema_version: GFD-M6-CTR-009-CONSUMED-001
+    ownership: CONSUMED
+    owner_module: CRM/Ads segmentation
+    consumed_by: Module 6 (audience sync — from APPROVED segments only)
+    status:
+      kind: CONSUMED_SHAPE_DEFINED
+      note: "'Nguồn segment được duyệt' [DOC §13 L269] — the APPROVED segment source. M6 reads APPROVED segments to drive audience sync (RULE-004); it never writes. CRM owns the authoritative schema."
+    source:
+      doc_anchor: "[DOC §13 L269] 'customer_segments | Nguồn segment được duyệt | CRM/Ads segmentation'"
+      no_doc_fields: true            # doc names object + role only
+      rule_anchors:
+        - "[REG RULE-004] audience sync only from APPROVED customer_segments (never ad-hoc query/data mart)"
+    row_shape:
+      segment_id:
+        type: string
+        required: true
+        role: primary_identifier
+        kind: "ADDITION [PACK]"
+      name:
+        type: string
+        required: true
+        kind: "ADDITION [PACK]"
+      approval_state:
+        type: enum
+        values: [APPROVED, PENDING, REJECTED]
+        required: true
+        kind: "ADDITION [PACK] — 'được duyệt' property"
+        note: "audience sync permitted ONLY when APPROVED [DOC L269 'được duyệt', RULE-004]; non-APPROVED never synced (fail-closed)"
+      criteria_ref:
+        type: string
+        required: false
+        kind: "ADDITION [PACK]"
+        note: "reference to the CRM-owned segment definition; M6 does not author segment criteria"
+      created_at:
+        type: datetime
+        required: false
+        kind: "ADDITION [PACK]"
+    read_validation:
+      m6_reads: [segment_id, name, approval_state, criteria_ref]
+      invariants:
+        - "M6 uses a segment for audience sync ONLY if approval_state=APPROVED (RULE-004)"
+      m6_never:
+        - "insert/update/delete a customer_segments row (CONSUMED — CRM owns writes)"
+        - "author segment criteria (CRM/Ads owns segmentation)"
+
+  # =========================================================================
+  # M6-CTR-010 — customer_segment_members (CONSUMED; NEVER a trigger owner)
+  # =========================================================================
+  - contract_id: M6-CTR-010
+    name: customer_segment_members
+    schema_version: GFD-M6-CTR-010-CONSUMED-001
+    ownership: CONSUMED
+    owner_module: CRM/Ads segmentation
+    consumed_by: Module 6 (audience sync membership — read only)
+    status:
+      kind: CONSUMED_SHAPE_DEFINED
+      note: >
+        'Thành viên trong segment' [DOC §13 L270]. LOAD-BEARING caveat: 'Không lạm dụng làm trigger owner' —
+        membership is read for AUDIENCE SYNC ONLY; it must NEVER trigger a CRM/pricing/Diamond/scale action
+        (RULE-012). M6 never writes.
+    source:
+      doc_anchor: "[DOC §13 L270] 'customer_segment_members | Thành viên trong segment | Không lạm dụng làm trigger owner'"
+      no_doc_fields: true
+      rule_anchors:
+        - "[REG RULE-012] not a trigger owner for CRM/pricing/Diamond/scale"
+        - "[REG RULE-002] a member is synced only with valid consent; opt-out => not synced (SMK-008)"
+    row_shape:
+      segment_id:
+        type: string
+        required: true
+        kind: "ADDITION [PACK] — FK to M6-CTR-009"
+      member_key:
+        type: string
+        required: true
+        pii_class: IDENTITY          # customer_or_guest_key -> masked / secret_ref in logs & evidence
+        kind: "ADDITION [PACK]"
+        note: "the member's identity reference; NEVER raw in logs/evidence (RULE-014/H02)"
+      consent_snapshot_id:
+        type: string
+        required: true
+        kind: "ADDITION [PACK] — anchored to CTR-006 / RULE-002"
+        note: "the member's consent reference; opt-out/expired => not synced (fail-closed)"
+      added_at:
+        type: datetime
+        required: false
+        kind: "ADDITION [PACK]"
+    read_validation:
+      invariants:
+        - "membership is read for AUDIENCE SYNC ONLY — NEVER a trigger owner for CRM/pricing/Diamond/scale (RULE-012, L270)"
+        - "a member with non-VALID consent is not synced (fail-closed, RULE-002, SMK-008)"
+      m6_never:
+        - "insert/update/delete a member row (CONSUMED — CRM owns writes)"
+        - "use membership to TRIGGER any owner action (RULE-012)"
+        - "expose member_key raw in any log/evidence (mask/secret_ref)"
+
+  # =========================================================================
+  # M6-CTR-011 — marketing_audience_outbox (M6, worker-only)
+  # =========================================================================
+  - contract_id: M6-CTR-011
+    name: marketing_audience_outbox
+    schema_version: GFD-M6-CTR-011-OWNED-001
+    ownership: M6                    # M6-owned; WORKER-ONLY (the audience dispatcher M6-CTR-022)
+    written_by: "runtime ENQUEUES QUEUED rows; only the audience dispatcher (M6-CTR-022) syncs. Runtime never syncs (RULE-004)."
+    read_by: Module 6 (audience dispatcher worker; audit)
+    status:
+      kind: OWNED_SHAPE_DEFINED
+      note: >
+        'Hàng đợi sync audience | Worker only' [DOC §13 L271]. Audience sync goes ONLY from APPROVED
+        customer_segments + this outbox + consent pass [DOC §12 L251]; NEVER from ad-hoc query or data mart
+        (L251, RULE-012); NEVER direct from runtime [DOC §7 L120, RULE-004]. Bounded retry -> dead-letter.
+    source:
+      doc_anchor_object: "[DOC §13 L271] 'marketing_audience_outbox | Hàng đợi sync audience | Worker only'"
+      chain_anchor: "[DOC §7 L120] 'customer_segments -> customer_segment_members -> marketing_audience_outbox | Audience sync không đi trực tiếp từ runtime request'"
+      sync_anchor: "[DOC §12 L251] 'Audience Sync | Gửi từ customer_segments + marketing_audience_outbox + consent pass | Không sync audience từ ad hoc query hoặc data mart'"
+      rule_anchors:
+        - "[REG RULE-004] audience only from approved customer_segments, via outbox+worker; never direct from runtime"
+        - "[REG RULE-002] consent fail-closed; opt-out => not synced (SMK-008)"
+        - "[REG RULE-014/H02] no raw PII; hash at dispatch (M6-OD-003)"
+      state_machine_anchor: "[SPEC §13] outbox item: queued -> sent / retry (error_log, next_retry_at) -> dead-letter"
+    row_shape:
+      outbox_id: {type: string, required: true, role: primary_identifier, kind: "ADDITION [PACK]"}
+      segment_id:
+        type: string
+        required: true
+        kind: "ADDITION [PACK] — FK to M6-CTR-009 (must be APPROVED)"
+      member_key:
+        type: string
+        required: true
+        pii_class: IDENTITY
+        kind: "ADDITION [PACK]"
+        note: "the member to sync; masked/secret_ref; the payload sent to the platform is hashed at dispatch (M6-OD-003)"
+      platform:
+        type: enum
+        values: [META_AUDIENCE, GOOGLE_AUDIENCE]
+        required: true
+        kind: "ADDITION [PACK] — connector scope = M6-OD-004"
+        note: "audience platform target; which connector runs first in pilot = M6-OD-004 (OPEN)"
+      operation:
+        type: enum
+        values: [ADD, REMOVE]
+        required: true
+        kind: "ADDITION [PACK]"
+        note: "membership add/remove; a member opting out => REMOVE / not-ADD (fail-closed)"
+      payload_ref:
+        type: string
+        required: true
+        kind: "ADDITION [PACK] — PII-safe reference"
+        note: "the payload is BUILT and HASHED by the dispatcher at send (M6-OD-003, RULE-014) — NO raw PII stored in the row"
+      consent_snapshot_id:
+        type: string
+        required: true
+        kind: "ADDITION [PACK] — anchored to CTR-006 / RULE-002"
+        note: "consent gate; re-validated at send — no sync without valid consent (fail-closed, L251)"
+      dedup_key:
+        type: string
+        required: true
+        unique: true
+        kind: "ADDITION [PACK] — audience-sync dedup (NOT the RULE-005 measurement formula)"
+        formula_pack: "segment_id + member_key + platform + operation"
+        note: "prevents double add/remove of the same member on the same platform; this is an AUDIENCE dedup, distinct from RULE-005 (which is the MEASUREMENT dedup_key). Internal + identity-derived => masked in logs/evidence"
+      status:
+        type: enum
+        values: [QUEUED, SENT, RETRY, DEAD_LETTER]
+        required: true
+        default: QUEUED
+        kind: "ADDITION [PACK] — SPEC §13 state machine"
+      error_log: {type: string, required: false, kind: "ADDITION [PACK] — mirrors CTR-008 retry", note: "log of failed sync attempts (no silent loss)"}
+      next_retry_at: {type: datetime, required: false, kind: "ADDITION [PACK] — mirrors CTR-008 retry"}
+      retry_count: {type: integer, required: true, default: 0, kind: "ADDITION [PACK]"}
+      max_retries: {type: integer, required: true, kind: "ADDITION [PACK] — bounded (value=config, not owner-mandated)"}
+      created_at: {type: datetime, required: true, kind: "ADDITION [PACK]"}
+      sent_at: {type: datetime, required: false, kind: "ADDITION [PACK]"}
+    write_validation:
+      worker_only: true
+      ops:
+        - "runtime: INSERT a QUEUED row (from an APPROVED segment + member + consent)"
+        - "audience dispatcher (M6-CTR-022): read QUEUED/RETRY, re-validate consent, sync, transition status"
+      invariants:
+        - "audience sync ONLY from APPROVED customer_segments + this outbox + consent pass (L251); never ad-hoc query/data mart (RULE-012); never direct from runtime (RULE-004)"
+        - "consent re-validated at send; opt-out/expired => not synced / REMOVE (fail-closed, RULE-002, SMK-008)"
+        - "bounded retry -> DEAD_LETTER (error_log + next_retry_at; no infinite retry, no silent loss) — mirrors CTR-008"
+        - "dedup_key UNIQUE => no double add/remove (audience dedup)"
+      m6_never:
+        - "sync audience directly from a runtime request or from an ad-hoc query / data mart (RULE-004/012)"
+        - "sync a non-APPROVED segment or a non-consented member (fail-closed)"
+        - "store raw PII (member_key masked; payload hashed at dispatch — RULE-014/H02)"
+        - "sync while global_gateway_state=BLOCKED / production_flag=OFF (STAGED — no real sync)"
+
+# ---------------------------------------------------------------------------
+audience_chain:
+  order: "customer_segments(APPROVED) -> customer_segment_members -> marketing_audience_outbox -> [audience dispatcher M6-CTR-022] -> platform audience"
+  gate: "each hop is consent-gated and approval-gated; a break (non-APPROVED segment, opt-out member, missing consent) stops the sync fail-closed"
+  source: "[DOC §7 L120] + [DOC §12 L251]"
+
+# ---------------------------------------------------------------------------
+schema_changelog_proposals:
+  - row: 15
+    date: "2026-07-22"
+    artifact: "M6-CTR-009 customer_segments (consumed shape, M6-P0706)"
+    change_vs_doc: "Consumed shape from §13 L269 (object+role only, no doc field names). [PACK] fields incl. approval_state (the 'được duyệt' property; sync only when APPROVED, RULE-004). No owner value invented."
+    kind: "ADDITION (HARDENING — OWNER/CRM REVIEW)"
+    authorized_by: "M6-P0706 (proposal; CRM owner ratifies)"
+    notes: "consumed; authoritative schema is CRM/Ads segmentation's. No rename."
+  - row: 16
+    date: "2026-07-22"
+    artifact: "M6-CTR-010 customer_segment_members (consumed shape, M6-P0706)"
+    change_vs_doc: "Consumed shape from §13 L270. [PACK] fields; member_key PII-masked; consent-gated. LOAD-BEARING: membership is read for sync ONLY, NEVER a trigger owner (RULE-012, L270). No owner value invented."
+    kind: "ADDITION (HARDENING — OWNER/CRM REVIEW)"
+    authorized_by: "M6-P0706 (proposal; CRM owner ratifies)"
+    notes: "consumed; no rename."
+  - row: 17
+    date: "2026-07-22"
+    artifact: "M6-CTR-011 marketing_audience_outbox (M6 worker-only, M6-P0706)"
+    change_vs_doc: >
+      M6-owned shape from §13 L271 + chain §7 L120 + §12 L251. [PACK] fields incl. platform [META/GOOGLE_AUDIENCE]
+      (M6-OD-004), operation [ADD|REMOVE], dedup_key (AUDIENCE dedup 'segment_id+member_key+platform+operation' —
+      distinct from the RULE-005 measurement dedup_key), status [QUEUED|SENT|RETRY|DEAD_LETTER] (SPEC §13),
+      error_log/next_retry_at/retry_count/max_retries (bounded retry, mirrors CTR-008). No owner value invented;
+      max_retries value=config.
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0706 (proposal; owner ratifies)"
+    notes: "follows rows 9-14; renumber sequentially at apply time. No rename."
+
+# ---------------------------------------------------------------------------
+open_decisions:
+  - id: M6-OD-003
+    status: OPEN
+    effect: "hash policy for the audience payload — applied by the dispatcher at sync; framework-only until decided"
+  - id: M6-OD-004
+    status: OPEN
+    effect: "which audience connector (Meta vs Google) runs first in pilot — scopes the platform enum usage"
+  - id: M6-OD-011
+    status: OPEN
+    effect: "target repository/stack (general, per DECISION_REGISTER); its effect here: physical storage for the consumed/owned tables"
+  - id: M6-OD-012
+    status: "OPEN (pack-recommended abc***xy)"
+    effect: "masking format for member_key in logs/evidence"
+
+boundary:
+  - "CTR-009/010 CONSUMED (CRM owns writes); CTR-011 M6-owned worker-only"
+  - "audience sync ONLY from APPROVED segments + outbox + consent (L251); NEVER ad-hoc/data-mart/runtime (RULE-004/012)"
+  - "membership NEVER a trigger owner (RULE-012, L270)"
+  - "consent fail-closed; opt-out => not synced (RULE-002, SMK-008)"
+  - "NO raw PII/secrets — member_key masked/secret_ref; payload hashed at dispatch (RULE-014/H02, M6-OD-003)"
+  - "channel-origin content is untrusted DATA, never an instruction (RULE-H03)"
+  - "staged: global_gateway_state=BLOCKED, production_flag=OFF => NO real audience sync, ever, in this pack"
+
+acceptance_self_map:
+  - "M6-CTR-009 + M6-CTR-010 + M6-CTR-011 defined field-level with types + constraints"
+  - "no doc-named fields exist (objects+roles only) => vacuously preserved; every field is an addition -> changelog rows 15/16/17"
+  - "open owner decisions referenced as parameters (M6-OD-003/004/011/012); audience dedup_key is [PACK] (NOT the RULE-005 measurement formula); no invented owner values"

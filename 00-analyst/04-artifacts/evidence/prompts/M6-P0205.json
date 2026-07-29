@@ -1,0 +1,33 @@
+{
+  "prompt_id": "M6-P0205",
+  "status": "PASS",
+  "summary": "RESEARCH_OFFLINE_CONVERSIONS. Entry gate OK: ledger M6-P0205=RUNNING, dependency M6-PC0204 (Meta dedup critic)=PASS, role=ANALYST_ARCHITECT, mode=analysis_only. Produced offline-conversion research at 04-artifacts/analysis/research/RESEARCH_OFFLINE_CONVERSIONS.md (Offline is one channel of M6-CTR-008 marketing_measurement_outbox -> M6-P0705; slice M6.2D). CONTENT covers all requested areas: (1) TRIGGER GATE [DOC §12 L250, RULE-003, FAIL-001] - the load-bearing boundary: an offline conversion claims a purchase/revenue, so it may derive ONLY from ORDER_VERIFIED (consumed from Commerce Verified Revenue; M6 never confirms payment/sets order state) OR an explicitly owner-approved event (default none); NEVER quote/cart/order draft/payment-waiting/COD-waiting ('Không gửi quote/order draft như purchase') which is revenue misuse FAIL-001; the outbox row is created ON the ORDER_VERIFIED transition (fail-closed trigger), not filtered later. (2) BATCHING [EXT/PLATFORM]: batch window/size [PLATFORM verify], per-row shared event_id idempotency so overlapping batches don't double-count (RULE-005), individual partial-failure handling (accepted rows SENT, rejected retried/dead-lettered per M6-P0203), attribution/lookback-window timing so late uploads still attribute [PLATFORM verify]. (3) MATCH RATE UNDER PENDING HASH POLICY [PLATFORM + M6-OD-003]: platforms match via hashed identifiers; match rate rises with more/better PII fields = a genuine privacy<->measurement tradeoff; BECAUSE M6-OD-003 is OPEN the match rate is UNDETERMINED and NOT promised - fail-closed until it resolves (no PII-bearing upload; at most consent-gated click-id matching with lower match); choosing 'send more PII for higher match' is an owner/privacy-legal decision, not made here; low match rate is a data-quality SIGNAL to surface, not a number to inflate. (4) RESULT LOGGING [DOC slice M6.2D 'platform result logs', RULE-007]: append-only PII-free platform result logs {batch_id, uploaded/matched/rejected counts, match_rate, error_summary, platform_response_id, ts} feeding the Data Quality Gate and smokes; immutable (corrections = new adjustment records, RULE-008); platform responses are untrusted DATA. BOUNDARY: no real upload (gateway BLOCKED/production OFF - staged); offline conversion derives from ORDER_VERIFIED only (M6 consumes, never creates revenue); no raw PII uploaded/logged (RULE-014, hashed per M6-OD-003 only); tokens as secret_ref; no CRM/commission. ACCEPTANCE CHECKS MET: (a) every externally-sourced/platform claim labeled via [DOC]/[REG]/[BRIEF]/[PACK]/[PLATFORM]/[EXT] legend, '[DOC]=only owner requirements', [PLATFORM]=verify-before-implementation; (b) owner-decision dependencies listed in §7 (M6-OD-003 hash/match, owner-approved-events candidate, M6-OD-004 connector, CTR-008->M6-P0705, M6-ENTRY-001 ORDER_VERIFIED definition, [PLATFORM] timing facts); (c) §8 traceability separates owner-mandated (L250 + RULE-003/FAIL-001) from [PLATFORM]/[EXT]/[PACK]. No web fetch; no project data sent externally. Honest self-report; runner gate + downstream critic M6-PC0205 review.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/research/RESEARCH_OFFLINE_CONVERSIONS.md",
+    "04-artifacts/evidence/prompts/M6-P0205.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): ledger rows 37-39 (entry gate: M6-PC0204=PASS, M6-P0205=RUNNING, critic M6-PC0205=TODO next)",
+    "Sourced from prior DOC_LOCK reads (this session): extract line 250 (§12 Offline Conversion gate); RULES_LOCKED RULE-003/007/008/014 + FAIL-001; CONTRACT_REGISTER CTR-008 + producing prompt M6-P0705; slice_definitions M6.2D (platform result logs, no double count/no PII); DECISION_REGISTER M6-OD-003/004; ENTRY_EVIDENCE_REGISTER M6-ENTRY-001",
+    "Platform facts (batch upload, attribution window, hashed-identifier match rate) drawn from general knowledge and tagged [PLATFORM]=verify-against-current-Meta/Google-docs; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/research/RESEARCH_OFFLINE_CONVERSIONS.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0205 and marks it; then paste M6-PC0205 (RESEARCH_OFFLINE_CONVERSIONS_CRITIC, BOUNDARY_ADVERSARY) which red-teams 04-artifacts/analysis/research/RESEARCH_OFFLINE_CONVERSIONS.md for any pre-ORDER_VERIFIED upload (FAIL-001), raw-PII-in-offline-upload leak, or silent resolution of the match-rate/hash-policy tradeoff. This research feeds M6-P0705 (measurement outbox contract) and the M6-OD-003 hash-policy decision."
+}

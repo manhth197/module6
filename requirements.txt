@@ -1,0 +1,15 @@
+# ============================================================================
+# M6 BUILD PACK - CANONICAL REQUIREMENTS (root venv + every execution role venv)
+# ============================================================================
+# POLICY (LOCKED): STDLIB-ONLY.
+# All pack tooling (scripts/, scripts-win/, hooks) uses the Python standard
+# library exclusively. NO package may be added here until a GATED prompt
+# selects frameworks for the implementation slices (owner decision M6-OD-011
+# target repo/stack), and any addition requires:
+#   1. an owner-decision reference (M6-OD-xxx),
+#   2. a SCHEMA_CHANGELOG.md row,
+#   3. re-running: powershell -NoProfile -ExecutionPolicy Bypass -File setup\New-M6RoleVenvs.ps1
+#
+# 05-judge NEVER gets a venv (output-only folder, by design).
+# ----------------------------------------------------------------------------
+# -- intentionally no packages below this line --

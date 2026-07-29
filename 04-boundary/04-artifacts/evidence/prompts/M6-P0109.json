@@ -1,0 +1,29 @@
+{
+  "prompt_id": "M6-P0109",
+  "status": "PASS",
+  "summary": "LOCK_MONITORING. Entry gate OK: ledger M6-P0109=RUNNING, dependency M6-P0108=PASS, role=ANALYST_ARCHITECT. Verified registers/MONITORING_REGISTER.md against 00-spec/M6_FULL_DETAIL_EXTRACT.md and cross-checked the threshold status against M6-OD-002. RESULT: all three checks PASS; no deviations. CHECK 1 - metric table VERBATIM vs extract lines 280-295 (all 14 rows): the register 'Metrics (doc §14, verbatim)' table reproduces all 14 KPI rows byte-identical (both the 'Công thức / nguồn' and 'Ghi chú' columns) with correct per-row extract-line citations 282-295: Ads Spend(282), Revenue Verified(283 'SUM(verified_revenue)'), ROAS(284 'Revenue Verified / Ads Spend'), CPA(285 'Ads Spend / number_of_ORDER_VERIFIED'), AOV(286), Boxes per Order(287), Comment Rate(288 'LIVE_COMMENT / LIVE_VIEW'), Inbox Rate(289), Quote Rate(290), Order Rate(291), Verified Rate(292 'ORDER_VERIFIED / ORDER_CREATED'), COD Fail Rate(293), CRM Revenue(294), Diamond Revenue(295). CHECK 2 - quality alerts (Data Quality Gate) VERBATIM vs extract lines 299-308: the register 'Data Quality Gate (doc §15, verbatim - full table, both PASS and FAIL/HOLD columns)' reproduces all 8 gate rows byte-identical with citations 301-308: Event Registry(301), Consent(302), Dedup(303), Identity(304), Attribution(305), Verified Revenue(306), Suppression(307), Dashboard(308) - both the 'PASS khi' and 'FAIL/HOLD khi' columns exact (e.g. Verified Revenue 'Revenue lấy từ Commerce Verified Revenue | Quote/order draft/unpaid được tính revenue'). Extract §15 header at 299, separator 300, 8 data rows 301-308 - all reproduced. CHECK 3 - thresholds correctly marked MISSING -> M6-OD-002: the '## Threshold status' section states 'All numeric alert thresholds (CPA/ROAS/AOV/Verified Rate per stage, duplicate rate, outbox failure rate): MISSING / OWNER_DECISION_REQUIRED -> M6-OD-002. The pack does not invent thresholds.' and the register header reiterates 'Alert thresholds are NOT in the document - they are owner decision M6-OD-002 (OPEN)'. Consistent with M6-OD-002 (verified in M6-P0107; Blocks include M6-CTR-015 thresholds and M6.2G exit). The quality-gate CONDITIONS are locked verbatim while the numeric alert THRESHOLDS are correctly deferred to the owner - the distinction is handled honestly. BONUS (beyond the task's explicit scope, verified for register completeness): the register's additional 'Phase 3 growth KPIs (doc §9, verbatim)' table reproduces all 5 rows byte-identical vs extract lines 173-177: Repeat/Reorder(173), Dormant/Reactivation(174), Diamond(175), Value Optimization(176), Learning Engine(177) - also clean, no deviation. No missing/contradictory input and no OPEN owner decision in THIS prompt's own scope => not BLOCKED (the threshold MISSING->M6-OD-002 is the documented, correctly-marked state being verified, not a blocker of this verification). global_gateway_state=BLOCKED and production_flag=OFF unchanged; no enabling tokens written. No raw secrets/PII. Honest self-report only; the runner machine gate and the DOC_LOCK judge decide PASS.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/registers/MONITORING_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/prompts/M6-P0109.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): registers/MONITORING_REGISTER.md; extract §15 296-311 (Data Quality Gate 299-308); extract §9 168-178 (Phase 3 growth KPIs 173-177); (§14 metric table 280-295 read in M6-P0105); ledger rows 22-23",
+    "Cross-check: threshold status MISSING->M6-OD-002 vs DECISION_REGISTER M6-OD-002 (verified M6-P0107)"
+  ],
+  "evidence_refs": [
+    "00-spec/registers/MONITORING_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0109 and marks it; then paste M6-P0110 (LOCK_ENTRY_EVIDENCE). Monitoring register is verified lockable: the 14-row Dashboard KPI metric table (extract 282-295) and the 8-row Data Quality Gate (extract 301-308) are both verbatim with correct per-row citations, numeric alert thresholds are correctly MISSING/OWNER_DECISION_REQUIRED->M6-OD-002 (pack invents none), and the bonus Phase 3 growth KPI table (extract 173-177) is also verbatim. No deviations for the judge to reconcile."
+}

@@ -1,0 +1,43 @@
+{
+  "prompt_id": "M6-PC0206",
+  "status": "PASS",
+  "summary": "RESEARCH_ATTRIBUTION_MODELS_CRITIC (BOUNDARY_ADVERSARY, analysis_only). Entry gate verified: ledger M6-PC0206=RUNNING, dependency M6-P0206=PASS. Adversarially red-teamed 04-artifacts/analysis/research/RESEARCH_ATTRIBUTION_MODELS.md (a BRIEFING for owner decision M6-OD-005) via citation/schema verification + a find->refute-verify pass (5 finder lenses model-neutrality/scale-evidence-fidelity/boundary/citation-exec/owner-decisions -> 12 candidates -> 12 adversarial verifiers). HERMETIC (no web fetch). All citations verified faithful: [DOC S25 L482] OD-005 (multi-model display, one primary for scale), [DOC S11 L236] attribution trace-back campaign->ORDER_VERIFIED, the ads_attribution_context 19 fields (extract L215-234) incl first/last_touch_event_id/attribution_window/source_confidence/conflict_status, RULE-008 (L242)/RULE-009 (L240)/RULE-019 (L238). OUTCOME: 0 BLOCKER, 0 MAJOR, 2 MINOR (7 confirmations across 2 distinct issues; 5 refuted). CRUX ATTACKS REFUTED (research strengths): (a) OD-005 NEUTRALITY holds - the briefing genuinely compares models without picking one; the 'S3 readiness asymmetry (first/last cheap, weighted/cohort data-gap) soft-steers toward cheaper models' attack was REFUTED (asymmetry is factually true vs the 19-field schema, the tick appears only on clean-YES rows, disclaimers hold; OD-005 stays OPEN S6 L102). (b) BOUNDARY tight - Diamond/referral recorded but commission Finance-owned (RULE-019), no cohort/LTV computes commission, attribution feeds a scale PROPOSAL never auto-scale (RULE-010), the 'budget shifts toward acquisition/retargeting' language correctly explains WHY the owner decides (not M6 allocating). CONFIRMED (both MINOR): F1 (scale-evidence-rule/internal-inconsistency, confirmed by ~5 verifiers; one finder proposed MAJOR, all verifiers landed MINOR): S1 L38 and S4 L79-80 assert 'only source_confidence=HIGH and conflict_status=NONE may count as scale evidence' tagged [REG RULE-009], but RULE-009 (RULES_LOCKED L18 / extract L240) only mandates that MISSING-source OR CONFLICT => LOW/HOLD => excluded - it contains NO 'HIGH-only' language and is SILENT on MEDIUM (schema L233 source_confidence: HIGH|MEDIUM|LOW). So S4 (a) silently excludes all MEDIUM attributions RULE-009 would not exclude, (b) mis-attributes the stricter threshold to the locked reg, and (c) is internally inconsistent with S6 L104 which lists the confidence threshold as an OWNER-pending candidate [PACK] (S6 L108 'resolves nothing') - a soft-resolution of the MEDIUM-eligibility question in a briefing meant to leave it open. MINOR because the direction is fail-closed (excluding MEDIUM is conservative -> cannot cause scale-on-low-confidence) and no model is recommended; fix: state S4/S1 as RULE-009's actual mandate (missing/conflict->LOW/HOLD->excluded) and defer the exact usable-confidence cutoff (whether MEDIUM counts) to the owner per S6, not assert HIGH-only as register-locked. F2 (citation precision, confirmed 2x): S5 header L89 '[BRIEF / REG S18]' labels an owner-DOC section as a register section (registers are ID-keyed; S18 is extract L355 '## 18. Tich hop voi Module 3,4,5,7,8'); correct tag [BRIEF / DOC S18]; pack-wide header nit (same as M6-PC0204 F5 / M6-PC0205 F2). DISMISSED (report S5): S3-readiness-asymmetry-soft-recommends x2 (factually true, disclaimed, tick only on clean-YES), S4-conflict_status=NONE-nullifies-weighted x2 (MULTI_TOUCH is a conflict_status VALUE by schema design; nothing links model=weighted to MULTI_TOUCH on every record; gating orthogonal to model selection), S6-mis-scopes-OD-002 (OD-002 IS present in S6, confidence gating correctly routed to RULE-009; loose word 'confidence' only, cosmetic). Deliverable analysis-only; no application code/migration/external call/state write; no model selected on M6's behalf; no raw secrets/PII; global_gateway_state=BLOCKED and production_flag=OFF unchanged. Honest self-report; the runner EVIDENCE_GATE decides PASS. Findings feed Phase-0 design, the M6-OD-005 owner decision, and slice M6.2E; the research author does not respond here.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/analysis/research/RESEARCH_ATTRIBUTION_MODELS.md",
+    "04-artifacts/evidence/prompts/M6-P0206.json",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/boundary-reports/RESEARCH_ATTRIBUTION_MODELS_critique.md",
+    "04-artifacts/evidence/prompts/M6-PC0206.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): brief; RESEARCH_ATTRIBUTION_MODELS.md; M6-P0206.json; extract L234-243 (S11 attribution trace-back L236, Diamond-commission L238, RULE-009 source L240, RULE-008 source L242); ledger rows 40-41 (entry gate: M6-P0206=PASS, M6-PC0206=RUNNING). CONTRACT_REGISTER/DECISION_REGISTER/RULES_LOCKED/FAIL_GATE_REGISTER/ENTRY_EVIDENCE_REGISTER + extract S11 schema L215-234 + S25 L482 carried from prior M6-PC0200..0205 reads this session (00-spec is locked/unchanged)",
+    "Grep (read-only): confirmed ledger rows for M6-P0206 (PASS) and M6-PC0206 (RUNNING)",
+    "Workflow (analysis only, 17 subagents, 0 errors, HERMETIC - no web fetch): 5 adversarial finder lenses -> deduped to 12 candidates -> 12 adversarial verifiers each attempting refutation and grading BLOCKER/MAJOR/MINOR; verdicts read from journal.jsonl and synthesized (7 CONFIRMED across 2 distinct issues, 5 REJECTED)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/research/RESEARCH_ATTRIBUTION_MODELS.md",
+    "04-artifacts/boundary-reports/RESEARCH_ATTRIBUTION_MODELS_critique.md",
+    "04-artifacts/evidence/prompts/M6-P0206.json",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-PC0206 and marks it. Critique (0 BLOCKER, 0 MAJOR, 2 MINOR) is advisory for Phase-0 design + the M6-OD-005 owner decision + slice M6.2E: F1 (restate the S4/S1 scale-evidence rule as RULE-009's actual missing/conflict->LOW/HOLD exclusion and defer the exact usable-confidence cutoff (MEDIUM?) to the owner rather than asserting HIGH-only as [REG RULE-009]) and F2 (retag [REG S18]->[DOC S18], pack-wide) are low-priority fixes. Then paste the next prompt M6-P0207 (RESEARCH_DASHBOARD_DATA_QUALITY). The attribution scale-evidence model stays owner-pending under M6-OD-005; multi-model display is built in M6.2E, single-model scale evidence waits on the owner."
+}

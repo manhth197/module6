@@ -1,0 +1,40 @@
+{
+  "prompt_id": "M6-P0703",
+  "status": "PASS",
+  "summary": "CONTRACT_WEB_EVENT_LOGS (CONTRACT_HARMONIZATION, plan_only). Entry gate OK: ledger M6-P0703=RUNNING, dependency M6-P0702 (identity/consent contracts)=PASS, role=ANALYST_ARCHITECT. Produced the field-level shape of M6-CTR-004 web_event_logs at 04-artifacts/analysis/contracts/CONTRACT_WEB_EVENT_LOGS.contract.yaml. NATURE: CTR-004 is the FIRST M6-OWNED contract of the band (ownership=M6; Module 6 owns AND writes, append-only) - distinct from the prior consumed shapes (CTR-003/005/006). CONTENT: (1) ROW SHAPE - the 6 doc-named fields from [DOC §7 L117] verbatim: page->page_id, session->session_id, source, consent snapshot->consent_snapshot_id (references CTR-006), event_ts, idempotency->idempotency_key (formula = LOCKED RULE-005 'event_code + page_id + session_id + raw_event_hash + normalized_ts', unaltered). (2) COMPLETION ADDITIONS (4, each -> changelog row 12): log_id (PK), event_code (registry lookup RULE-001 + idempotency component), ingested_at (append/write time, distinct from event_ts), correlation_id (trace to ads_measurement_event §10 L210 + smoke report §22 L430). (3) WRITE VALIDATION (append-only, the load-bearing M6-owned constraint): allowed_ops=[INSERT], forbidden_ops=[UPDATE,DELETE] per [DOC L117 'Khong update/xoa lich su event', L264 'khong sua lich su', RULE-007]; durable record (consent-missing events still logged internally, never silently lost); dedup at ingest by idempotency_key (RULE-005, SMK-003); M6 never updates/deletes a row, never writes raw PII, never alters the locked idempotency formula. (4) PII: session_id flagged pii_class=PSEUDONYMOUS (mask if identity-linked, M6-OD-012); source = untrusted channel DATA (RULE-H03/014); no raw PII anywhere (field names only). OPEN decisions as parameters: M6-OD-011 (storage stack for append-only table), M6-OD-012 (session_id masking). VERIFICATION (no downstream critic M6-PC0703): PyYAML safe_load parse-check = PARSE_OK (single root mapping, 6 doc fields + 4 additions, changelog row 12, append_only=true forbidden [UPDATE,DELETE]) - done proactively after the M6-P0702 YAML-structure lesson. 1 independent verification agent checked all 8 dimensions (doc-verbatim / idempotency-formula / append-only / ownership / no-invented-values / PII / completions / YAML) - substantively CLEAN, 0 BLOCKER/0 MAJOR. 1 MINOR (cosmetic): rule IDs cited short-form (RULE-007) vs registers' locked M6-RULE-007 - NOT folded, deliberately: short-form is the convention used consistently across the ENTIRE pack corpus (all research/design + CTR-003/005/006 contracts), is unambiguous in a Module-6-only pack, and already passed the machine gate (M6-P0701=PASS with short form); normalizing this one file would make it the inconsistent outlier. Flagged here so the operator/judge may normalize band-wide if preferred. ACCEPTANCE CHECKS MET: (a) M6-CTR-004 defined field-level with types + constraints (6 doc + 4 completions + write_validation); (b) doc-named fields preserved verbatim + every addition -> changelog row 12; (c) open owner decisions referenced as parameters (M6-OD-011/012); no invented values; idempotency_key = locked RULE-005 formula. BOUNDARY: plan_only - schema definition not a table/migration; M6-OWNED append-only (INSERT only); NO raw PII/secrets; measure-only (logging != sending, egress via outbox+worker RULE-004); staged BLOCKED/OFF; channel content untrusted DATA. Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "04-artifacts/analysis/design/EVENT_FLOW_DESIGN.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/contracts/CONTRACT_WEB_EVENT_LOGS.contract.yaml",
+    "04-artifacts/evidence/prompts/M6-P0703.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv (read-only): entry gate M6-P0702=PASS, M6-P0703=RUNNING, M6-P0704=TODO (no M6-PC0703 critic); max_applied_changelog_row=8 (operator applies proposed rows 9-12 out-of-band)",
+    "Read (read-only): extract §7 L117 (web_event_logs 6 fields), §13 L264 (object append-only), §12 L254-255 (idempotency_key formula), §10 L210 (correlation_id); CONTRACT_REGISTER (CTR-004 M6/MISSING/P0703, partial L117), SCHEMA_CHANGELOG, DECISION_REGISTER (M6-OD-011/012)",
+    "Bash python PyYAML safe_load (read-only): PARSE_OK - single root mapping, row_shape 6 fields, additions 4, changelog row 12, append_only=true forbidden [UPDATE,DELETE]",
+    "1 independent verification agent (analysis_only, read-only): 8 dimensions CLEAN, 1 MINOR cosmetic (short-form rule IDs) NOT folded (corpus consistency); NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/contracts/CONTRACT_WEB_EVENT_LOGS.contract.yaml",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "04-artifacts/analysis/design/EVENT_FLOW_DESIGN.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0703 and marks it, AND (out-of-band) appends SCHEMA_CHANGELOG row 12 per the contract's schema_changelog_proposal (after M6-P0701 row 9 + M6-P0702 rows 10/11). Then paste M6-P0704 (CONTRACT_CONVERSION_EVENTS, order 64, ANALYST_ARCHITECT) which produces CTR-007 conversion_events (M6/Core, the internal conversion source for the measurement outbox). CONTRACT_WEB_EVENT_LOGS feeds slice M6.2A (tracking ingest) and the track-API contract (M6-P0711). OPTIONAL band-normalization note for the operator/judge: all M6-analyst deliverables cite rule/contract IDs in short form (RULE-007, CTR-004) rather than the registers' M6-prefixed form (unambiguous in a Module-6-only pack, accepted by the M6-P0701 gate); normalize band-wide if desired."
+}

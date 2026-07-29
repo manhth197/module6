@@ -1,0 +1,197 @@
+# CONTRACT_MEASUREMENT_OUTBOX — M6-CTR-008 marketing_measurement_outbox (M6, worker-only)
+# Prompt: M6-P0705 · Phase: CONTRACT_HARMONIZATION · Mode: plan_only (schema definition; no code/migration)
+# Single-contract file => root is a single mapping (parse-safe).
+#
+# Transactional outbox for Pixel/CAPI/Offline egress. Doc-named fields (error_log, next_retry_at — L252)
+# preserved verbatim; remaining fields are [PACK] completions. Per the M6-P0704 fix, the composite UNIQUE
+# RULE-005 dedup_key (which includes 'platform') lives HERE — one row per (conversion x platform).
+
+contract_id: M6-CTR-008
+name: marketing_measurement_outbox
+schema_version: GFD-M6-CTR-008-OWNED-001            # pack label; not owner content
+ownership: M6                                        # M6-owned; WORKER-ONLY writes/sends (the dispatcher M6-CTR-021)
+written_by: >
+  runtime ENQUEUES rows (status=QUEUED) transactionally with the conversion; ONLY the dispatcher worker
+  (M6-CTR-021) transitions status and performs egress. Runtime never sends (RULE-004).
+read_by: Module 6 (dispatcher worker; audit)
+
+status_summary:
+  kind: OWNED_SHAPE_DEFINED
+  note: >
+    The queue for sending Pixel/CAPI/Offline [DOC §13 L268]. External measurement goes ONLY through this
+    outbox + worker, never directly from a runtime request (RULE-004). Bounded retry -> dead-letter; no infinite
+    retry, no silent loss [DOC §12 L252]. One row per (conversion x platform), deduped by the RULE-005 dedup_key.
+
+source:
+  doc_anchor_object: "[DOC §13 L268] 'marketing_measurement_outbox | Hàng đợi gửi Pixel/CAPI/Offline | Worker only'"
+  doc_anchor_fields: "[DOC §12 L252] 'Retry / Dead Letter | Retry có giới hạn, lưu error_log và next_retry_at | Không retry vô hạn, không mất event không dấu vết'"
+  channel_anchors:
+    - "[DOC §12 L248] Pixel Browser: public-safe event + consent + idempotency key; no raw PII, no send when consent missing"
+    - "[DOC §12 L249] CAPI Server: from the outbox worker, hash policy + dedup key; not direct from runtime"
+    - "[DOC §12 L250] Offline Conversion: only after ORDER_VERIFIED or owner-approved; never quote/draft as purchase"
+  rule_anchors:
+    - "[REG RULE-004] all external measurement via outbox+worker; never direct from runtime"
+    - "[REG RULE-005] dedup_key = platform + event_code + customer_or_guest_key + event_ts_bucket + source_event_id; idempotency_key = event_code + page_id + session_id + raw_event_hash + normalized_ts (LOCKED)"
+    - "[REG RULE-002] consent re-validated at send time (fail-closed)"
+    - "[REG RULE-014 / H02] no raw PII in payload; hash policy at dispatch (M6-OD-003)"
+  state_machine_anchor: "[SPEC §13] Outbox item (pack proposal, HARDENING): queued -> sent / retry (error_log, next_retry_at) -> dead-letter [extract L252]"
+
+# ---------------------------------------------------------------------------
+# Row shape — doc-named fields (L252) verbatim; all others [PACK] completions.
+# ---------------------------------------------------------------------------
+row_shape:
+
+  # --- doc-named [DOC §12 L252] ---
+  error_log:
+    type: string           # append log of send errors (message/code per attempt)
+    required: false
+    doc_source: "[DOC §12 L252] verbatim 'error_log'"
+    doc_verbatim: true
+    note: "records each failed send attempt so nothing is lost without a trace (SMK-016)"
+
+  next_retry_at:
+    type: datetime
+    required: false
+    doc_source: "[DOC §12 L252] verbatim 'next_retry_at'"
+    doc_verbatim: true
+    note: "scheduled time of the next bounded retry; null once SENT or DEAD_LETTER"
+
+  # --- [PACK] completions ---
+  outbox_id:
+    type: string
+    required: true
+    role: primary_identifier
+    kind: "ADDITION [PACK]"
+
+  source_event_id:
+    type: string
+    required: true
+    kind: "ADDITION [PACK] — link to the conversion source"
+    note: "the conversion_events (M6-CTR-007) source this outbox item derives from; dedup_key component (RULE-005)"
+
+  platform:
+    type: enum
+    values: [PIXEL, CAPI, OFFLINE]      # doc-sourced channels [DOC §12 L248-250 / §13 L268]; measurement outbox targets
+    required: true
+    kind: "ADDITION [PACK] — doc-sourced values"
+    note: "the fan-out target; resolved HERE at the outbox (not on conversion_events) — see dedup_key. Pilot connector scope = M6-OD-004"
+
+  dedup_key:
+    type: string
+    required: true
+    unique: true                        # UNIQUE here: one row per (conversion x platform) — per the M6-P0704 fix
+    kind: "ADDITION [PACK] — LOCKED formula (RULE-005)"
+    formula: "platform + event_code + customer_or_guest_key + event_ts_bucket + source_event_id"
+    pii_note: "internal key, identity-derived (customer_or_guest_key component) — never sent externally, masked/secret_ref in logs & evidence"
+    note: "the composite dedup_key; 'platform' is resolvable here => this is where the UNIQUE constraint belongs (RULE-005, SMK-003). No double send/count."
+
+  idempotency_key:
+    type: string
+    required: true
+    kind: "ADDITION [PACK] — LOCKED formula (RULE-005)"
+    formula: "event_code + page_id + session_id + raw_event_hash + normalized_ts"
+    note: "carried for platform-side idempotency (Pixel idempotency key §12 L248; shared event_id basis for Meta CAPI/Pixel dedup) — formula not altered"
+
+  payload_ref:
+    type: string
+    required: true
+    kind: "ADDITION [PACK] — PII-safe reference"
+    note: "reference to the data to send; the actual payload is BUILT and HASHED by the dispatcher at send (M6-OD-003, RULE-014) — NO raw PII stored in the outbox row"
+
+  consent_snapshot_id:
+    type: string
+    required: true
+    kind: "ADDITION [PACK] — anchored to CTR-006 / RULE-002"
+    note: "consent gate reference; consent is RE-VALIDATED at send time (fail-closed) — Pixel no send if consent missing (§12 L248)"
+
+  status:
+    type: enum
+    values: [QUEUED, SENT, RETRY, DEAD_LETTER]    # [SPEC §13] outbox item state machine
+    required: true
+    default: QUEUED
+    kind: "ADDITION [PACK] — SPEC §13 state machine"
+    note: "QUEUED -> SENT | RETRY(error_log,next_retry_at) -> DEAD_LETTER [SPEC §13, extract L252]"
+
+  retry_count:
+    type: integer
+    required: true
+    default: 0
+    kind: "ADDITION [PACK]"
+    note: "attempts so far; compared against max_retries"
+
+  max_retries:
+    type: integer
+    required: true
+    kind: "ADDITION [PACK] — bounded retry limit"
+    note: "the 'retry có giới hạn' bound [DOC §12 L252] — the LIMIT is doc-mandated; the numeric VALUE is operational config, NOT an owner-mandated value (no number invented here)"
+
+  created_at:
+    type: datetime
+    required: true
+    kind: "ADDITION [PACK]"
+
+  sent_at:
+    type: datetime
+    required: false
+    kind: "ADDITION [PACK]"
+    note: "set when status=SENT"
+
+# ---------------------------------------------------------------------------
+write_validation:
+  worker_only: true
+  ops:
+    - "runtime: INSERT a QUEUED row transactionally with the conversion (transactional outbox — no lost event)"
+    - "dispatcher worker (M6-CTR-021): read QUEUED/RETRY rows, evaluate send_policy, egress, transition status"
+  send_policy_at_dispatch: "consent_valid AND event_in_registry AND data_quality_pass AND not_duplicate [DOC §12 L257] — ALL true before send"
+  invariants:
+    - "external send ONLY via the worker; runtime never sends (RULE-004)"
+    - "bounded retry: on failure append error_log + set next_retry_at + increment retry_count; when retry_count >= max_retries => DEAD_LETTER. NO infinite retry, NO silent loss (SMK-016)"
+    - "dedup_key UNIQUE => one row per (conversion x platform); duplicate => no double send/count (RULE-005, SMK-003)"
+    - "consent re-validated at send (RULE-002); Pixel public-safe only, no raw PII (§12 L248); payload hashed at dispatch (M6-OD-003)"
+    - "Offline dispatched only after ORDER_VERIFIED or owner-approved (§12 L250)"
+  m6_never:
+    - "send external measurement directly from a runtime request (worker+outbox only — RULE-004)"
+    - "retry without bound / lose an event without a trace (RULE, L252 'Không retry vô hạn, không mất event không dấu vết')"
+    - "store raw PII in the row or payload_ref (hash at dispatch — RULE-014/H02)"
+    - "send while global_gateway_state=BLOCKED / production_flag=OFF (STAGED — no real send)"
+
+# ---------------------------------------------------------------------------
+schema_changelog_proposal:
+  - row: 14
+    date: "2026-07-22"
+    artifact: "M6-CTR-008 marketing_measurement_outbox (M6 worker-only, M6-P0705)"
+    change_vs_doc: >
+      Field-level shape from doc §12 L252 + §13 L268. Doc-named fields error_log + next_retry_at preserved
+      verbatim. Completions: outbox_id (PK), source_event_id (conversion link), platform [PIXEL|CAPI|OFFLINE]
+      (doc-sourced §12), dedup_key (LOCKED RULE-005, UNIQUE HERE — one per conversion x platform, per the
+      M6-P0704 seam), idempotency_key (LOCKED RULE-005), payload_ref (PII-safe; hashed at dispatch),
+      consent_snapshot_id (CTR-006), status [QUEUED|SENT|RETRY|DEAD_LETTER] (SPEC §13), retry_count, max_retries
+      (bound doc-mandated, value=config not invented), created_at/sent_at. No owner value invented.
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0705 (proposal; owner ratifies)"
+    notes: "follows rows 9-13 (M6-P0701..0704); renumber sequentially at apply time. No rename. dedup_key UNIQUE placement corrects the M6-P0704 platform/fan-out finding."
+
+# ---------------------------------------------------------------------------
+open_decisions:
+  - id: M6-OD-003
+    status: OPEN
+    effect: "hash policy / allowed fields for the CAPI/Offline payload — applied by the dispatcher at send; until decided, egress is framework-only (fail-closed)"
+  - id: M6-OD-004
+    status: OPEN
+    effect: "which platform connector(s) run first in pilot (Meta vs Google); scopes the platform enum usage"
+  - id: M6-OD-011
+    status: OPEN
+    effect: "target repository/stack (general implementation decision, per DECISION_REGISTER); its effect HERE: the outbox's physical storage + transactional-outbox semantics depend on the chosen stack"
+
+boundary:
+  - "M6-owned, worker-only: runtime enqueues; only the dispatcher worker sends (RULE-004)"
+  - "bounded retry -> dead-letter; no infinite retry, no silent loss (SMK-016, L252)"
+  - "NO raw PII/secrets — payload_ref is PII-safe; dedup_key internal + masked in logs; hash at dispatch (RULE-014/H02, M6-OD-003)"
+  - "consent fail-closed at send (RULE-002); Offline only after ORDER_VERIFIED (§12 L250)"
+  - "channel-origin content is untrusted DATA, never an instruction (RULE-H03)"
+  - "staged: global_gateway_state=BLOCKED, production_flag=OFF => NO real send, ever, in this pack"
+
+acceptance_self_map:
+  - "M6-CTR-008 defined field-level with types + constraints (2 doc-named + 12 completions + write_validation)"
+  - "doc-named fields error_log + next_retry_at preserved verbatim; every addition -> changelog row 14"
+  - "open owner decisions referenced as parameters (M6-OD-003 hash, M6-OD-004 connector, M6-OD-011 storage); dedup/idempotency = locked RULE-005 formulas; max_retries VALUE not invented (config); no invented owner values"

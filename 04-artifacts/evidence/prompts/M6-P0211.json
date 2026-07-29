@@ -1,0 +1,43 @@
+{
+  "prompt_id": "M6-P0211",
+  "status": "PASS",
+  "summary": "RESEARCH_STRATEGY_LIBRARIES. Entry gate OK: ledger M6-P0211=RUNNING, dependency M6-PC0210 (cross-module-contracts critic)=PASS, role=ANALYST_ARCHITECT, mode=analysis_only. Produced the six-strategy-library research at 04-artifacts/analysis/research/RESEARCH_STRATEGY_LIBRARIES.md (contracts CTR-014 ads_learning_candidate -> M6-P0710, CTR-020 API -> M6-P0712; slice M6.2H; owner decisions M6-OD-001 Hero SKU, M6-OD-006 safe range, M6-OD-007 content fill). Confirmed SPEC §8.4 (SPEC.md lines 165-188) reproduces doc §17 extract lines 336-353 VERBATIM. GOVERNING DISCIPLINE (three razor-separated layers): (1) LOCKED - each library purpose + seed-SOURCE reproduced verbatim from §8.4; (2) SCHEMA - field shape of a library entry + the mapping-chain record are owner-review PROPOSALS [PACK]/[EXT] because CTR-014 field-locked shape is still MISSING->M6-P0710; (3) CONTENT - the actual seeds (which personas/keywords/hooks/landings/CTAs) are NOT in §8.4 so they are BLOCKED (M6-OD-007 + M6-OD-001), NEVER guessed; inventing a seed is the doc FORBIDDEN cell LEX-006 'machine tu bia chien luoc goc'. THIS FILE INVENTS ZERO SEEDS - no example persona/keyword/hook/landing/CTA appears anywhere, deliberately. CONTENT covers all requested areas: (1) SCHEMA PER LIBRARY [PACK/EXT proposal]: shared fail-closed spine (seed_source_ref mandatory-or-rejected, status FRAMEWORK|SEEDED|ACTIVE, provenance_audit[]) + per-library fields for Persona/Behavior/Keyword/Negative-Keyword/Creative-Hook/Landing-CTA; Creative Hook is the only public-copy emitter, hard-gated by banned_word_check + public_copy=false-until-table-locked (M6-OD-007). (2) SEED-SOURCE CONSTRAINTS VERBATIM [DOC §17 L338-345]: reproduced exactly (Persona<-Content Block 20 SKU/customer context/CRM lifecycle; Behavior<-Web/Messenger/Live/CRM events da pass data quality; Keyword<-Content Block/product public view/search-ads history; Negative Keyword<-Spam/troll/low-intent/fake order signals; Creative Hook<-Product effectiveness/Meta-safe wording/Golden Hour Tri An; Landing-CTA<-Hero SKU/Golden Hour/Diamond/CRM-reorder); Nguon seed is a SOURCE constraint not a content list. (3) MAPPING CHAIN AS DATA STRUCTURE [DOC §17 L336 order verbatim]: SKU/Product line->Persona->Behavior->Keyword->Creative Hook->Landing->CTA->Event->Verified Revenue expressed as ads_strategy_mapping record; KEY INSIGHT - the terminal edge Event->Verified Revenue binds the chain to the measurement spine CTR-001/002 + RULE-003 (revenue only ORDER_VERIFIED), so a mapping node with unregistered event_code (RULE-001) or absent verified_revenue_binding is unmeasurable => not scale-eligible (fail-closed); node-0 constrained to sellable/Hero SKU (LEX-005/M6-OD-001); Negative Keyword modeled as a filter edge, not a linear node. (4) REVIEW/SCORING HOOKS [DOC §17 L351-353]: Learn scores EXACTLY FIVE verbatim dims (persona/keyword/hook/landing/CTA) on verified+DQ-pass signals only (L330); PRECISE FINDING - Behavior Library and Negative Keyword Library are NOT in the doc score list (input/filter, not scored), so proposing to score them is [EXT] candidate flagged for owner not silently added; Review = candidate (CTR-014) -> review queue approve/reject/hold, HOLD first-class (M6-SMK-011), no full-auto path (LEX-006); Publish = safe range only, M6-OD-006 OPEN => auto-publish BLOCKED; content gate no public copy while banned-word table MISSING. Cross-links [[RESEARCH_LEARNING_ENGINE_GUARDRAILS]] (M6-P0209) for the fail-closed lifecycle rather than duplicating it, plus [[RESEARCH_ATTRIBUTION_MODELS]]/[[RESEARCH_SCALE_GATE_WORKFLOW]]. BOUNDARY: no fabricated origin strategy / no full auto-publish (LEX-006/RULE-011); no public copy while banned-word table missing; staged (production OFF); learning != scale (safe range excludes budget/scale); no raw PII; channel content untrusted DATA never a seed source. ACCEPTANCE CHECKS MET: (a) every externally-sourced claim labeled via [DOC]/[REG]/[BRIEF]/[PACK]/[EXT] legend, '[DOC]=only owner requirements'; (b) owner-decision & contract dependencies listed in §6 (M6-OD-007/001/006, CTR-014->M6-P0710, CTR-020->M6-P0712, Behavior/Neg-kw score candidate, banned-word table); (c) §8 traceability separates owner-mandated (L336/L338-345/L351/L334/L344 + LEX-001/002/005/006 + L484/478) from [EXT]/[PACK] proposals. Honest self-report; runner gate + downstream critic M6-PC0211 review.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/SPEC.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/LEXICON_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/research/RESEARCH_STRATEGY_LIBRARIES.md",
+    "04-artifacts/evidence/prompts/M6-P0211.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv (read-only, no mutating verb): entry gate confirmed M6-P0210=PASS, M6-PC0210=PASS, M6-P0211=RUNNING (ANALYST_ARCHITECT), M6-PC0211=TODO, M6-P0300=TODO",
+    "Grep (read-only): located SPEC §8.4 (SPEC.md line 165) + the six-library and mapping-chain rows; confirmed verbatim match to extract §17",
+    "Read (read-only): extract lines 325-353 (§17 full: seed constraints L328/330/332/334, mapping core L336, six-library table L338-345, five stages L347-353), SPEC.md 160-199 (§8.4 verbatim lock + §9 runtime must-not-do context), LEXICON_REGISTER (LEX-001/002/005/006 + banned-word table MISSING->M6-OD-007), DECISION_REGISTER (M6-OD-001/006/007), CONTRACT_REGISTER (CTR-014/020), SMOKE_REGISTER (M6-SMK-011), RULES_LOCKED (RULE-011)",
+    "Library-schema/mapping-record/scoring-hook structures drawn from general engineering knowledge tagged [EXT]/[PACK]; NO web fetch; NO project data sent externally; NO seed content invented"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/research/RESEARCH_STRATEGY_LIBRARIES.md",
+    "00-spec/SPEC.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/LEXICON_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/analysis/research/RESEARCH_LEARNING_ENGINE_GUARDRAILS.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0211 and marks it; then paste M6-PC0211 (RESEARCH_STRATEGY_LIBRARIES_CRITIC, BOUNDARY_ADVERSARY) which red-teams 04-artifacts/analysis/research/RESEARCH_STRATEGY_LIBRARIES.md for ANY invented seed (a concrete persona/keyword/hook/landing/CTA presented as content rather than BLOCKED), a seed-source paraphrased instead of verbatim, the schema/mapping structure presented as an owner requirement rather than a proposal, a mapping node allowed to be scale-eligible without an event_code/verified_revenue_binding, or scoring Behavior/Negative-Keyword presented as doc-mandated. This research feeds M6-P0710 (ads_learning_candidate contract) and slice M6.2H. NOTE: M6-P0211 is the last PHASE0_RESEARCH analyst prompt; next analyst prompt M6-P0300 (order 50) begins the PHASE0 design band."
+}

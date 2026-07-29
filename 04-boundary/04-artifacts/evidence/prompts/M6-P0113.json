@@ -1,0 +1,57 @@
+{
+  "prompt_id": "M6-P0113",
+  "status": "PASS",
+  "summary": "DOC_LOCK_GATE_JUDGE (JUDGE, gate_review, fresh session). Judged the DOC_LOCK band strictly from evidence + ledger + changelog + state; did NOT re-audit registers against the extract (outside the judge's evidence-only scope and context budget). ENTRY GATE OK (PROMPT_EXECUTION_LEDGER_LOCKED.csv): M6-P0113 Status=RUNNING; all 13 required-previous M6-P0100..M6-P0112 Status=PASS; band root dep M6-P0011 Status=SIGNED. SAFETY (CURRENT_STATE_LOCKED.json): global_gateway_state=BLOCKED, production_flag=OFF - unchanged, no enabling tokens anywhere. ACCEPTANCE CHECK 1 (13 lock evidences exist/parse/clean-or-resolved) = PASS: all 13 are valid JSON, prompt_id matches filename, status=PASS, fail_gate_tripped=false, open_blockers=[]; band-wide hard deviations = 0 (0 verbatim failures where verbatim required, 0 invented rule content, 0 mis-citations, 0 softened forbidden cells, 0 orphan smokes, DAG strictly sequential A->K per M6-OD-010). ACCEPTANCE CHECK 2 (no register modified without a SCHEMA_CHANGELOG row) = PASS: every lock prompt's files_changed = only its own evidence JSON (analysis_only lock prompts touched no register); the DOC_LOCK register edits that did occur are each logged - SCHEMA_CHANGELOG row 6 (P0100/P0101: doc-control 'Khong phai' row -> SPEC 4; gate-script #section strip) and row 7 (P0108/P0110: LEX-004/006 verbatim restores; ENTRY header line-317 verbatim). No unlogged change found. RESIDUAL OPEN ITEMS (3, non-blocking, advisory only, none alters owner content / flips a gate/flag / blocks a slice): (1) no dedicated changelog row for hardening rules M6-RULE-H01/H02/H03 (implicitly under row 2's 'M6-RULE-*', transparently marked HARDENING in RULES_LOCKED.md - a completeness asymmetry vs rows 3/4, not a hidden change); (2) M6-P0102 R015 add extract line 454 to Source for the no-self-certify sub-clause (core norm already supported by lines 450/506); (3) M6-P0102 R018 cite SPEC 5 line 99 / CONFLICT_MATRIX alongside doc 2 for the 'Conflict Matrix' routing clause. PII/secret scan over the 13 files: 0 VN phone/email hits, no raw tokens; quoted VN text is spec content only. BOUNDARY: DOC_LOCK band is pure documentation/register verification - no pricing/QuoteSnapshot, CRM, order-state, commission, or scale/publish; no module ownership crossed. Both acceptance checks pass, entry gate satisfied, flags intact => JUDGE VERDICT PASS (recorded in the FINAL_SIGN_OFF). Registers now count as LOCKED for downstream work; the canonical layer is trustworthy. Honest self-report only; the runner machine gate + operator marking advance the ledger. NOTE: an attempted Bash directory listing referencing 04-artifacts/state was blocked by role_pre_tool_guard (mutating-verb-near-denied-root false positive); all reads were completed with the read-only Read/Glob tools instead.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/evidence/prompts/M6-P0100.json",
+    "04-artifacts/evidence/prompts/M6-P0101.json",
+    "04-artifacts/evidence/prompts/M6-P0102.json",
+    "04-artifacts/evidence/prompts/M6-P0103.json",
+    "04-artifacts/evidence/prompts/M6-P0104.json",
+    "04-artifacts/evidence/prompts/M6-P0105.json",
+    "04-artifacts/evidence/prompts/M6-P0106.json",
+    "04-artifacts/evidence/prompts/M6-P0107.json",
+    "04-artifacts/evidence/prompts/M6-P0108.json",
+    "04-artifacts/evidence/prompts/M6-P0109.json",
+    "04-artifacts/evidence/prompts/M6-P0110.json",
+    "04-artifacts/evidence/prompts/M6-P0111.json",
+    "04-artifacts/evidence/prompts/M6-P0112.json",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "04-artifacts/state/CURRENT_STATE_LOCKED.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/judge/M6-P0011_JUDGE_FINAL_SIGN_OFF.json"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/judge/M6-P0113_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/prompts/M6-P0113.json"
+  ],
+  "commands_run": [
+    "Read (read-only): CLAUDE_CONTEXT_BRIEF.md; all 13 lock evidences M6-P0100..M6-P0112; SCHEMA_CHANGELOG.md (8 rows); CURRENT_STATE_LOCKED.json (BLOCKED/OFF); PROMPT_EXECUTION_LEDGER_LOCKED.csv (rows 1-60, covering the full DOC_LOCK band 14-26 + M6-P0113 row 27=RUNNING); M6-P0011 judge sign-off (for convention)",
+    "Glob (read-only): 04-artifacts/evidence/prompts/*.json, 04-artifacts/evidence/judge/*.json, 04-artifacts/state/*.json, 00-spec/registers/* => confirmed all 13 lock evidences present and register set complete",
+    "Bash directory listing of evidence + state dirs: BLOCKED by role_pre_tool_guard (mutating-verb-near-denied-root false positive on '04-artifacts/state'); superseded by Read/Glob"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/prompts/M6-P0100.json",
+    "04-artifacts/evidence/prompts/M6-P0101.json",
+    "04-artifacts/evidence/prompts/M6-P0102.json",
+    "04-artifacts/evidence/prompts/M6-P0103.json",
+    "04-artifacts/evidence/prompts/M6-P0104.json",
+    "04-artifacts/evidence/prompts/M6-P0105.json",
+    "04-artifacts/evidence/prompts/M6-P0106.json",
+    "04-artifacts/evidence/prompts/M6-P0107.json",
+    "04-artifacts/evidence/prompts/M6-P0108.json",
+    "04-artifacts/evidence/prompts/M6-P0109.json",
+    "04-artifacts/evidence/prompts/M6-P0110.json",
+    "04-artifacts/evidence/prompts/M6-P0111.json",
+    "04-artifacts/evidence/prompts/M6-P0112.json",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "04-artifacts/state/CURRENT_STATE_LOCKED.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/judge/M6-P0113_JUDGE_FINAL_SIGN_OFF.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine JUDGE_GATE for M6-P0113 and, on green, marks it SIGNED; the DOC_LOCK band is then closed and registers are LOCKED for downstream work. Next paste M6-P0200 (RESEARCH_REPO_AUDIT_PLAN, PHASE0_RESEARCH). The 3 non-blocking documentation items in the sign-off (H01-H03 changelog row; R015 line-454 citation; R018 SPEC-5/CONFLICT_MATRIX citation) are optional operator-authorized 00-spec edits and do not block M6-P0200."
+}

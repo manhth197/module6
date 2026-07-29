@@ -1,0 +1,36 @@
+{
+  "prompt_id": "M6-P0700",
+  "status": "PASS",
+  "summary": "HARMONIZATION_PLAN (CONTRACT_HARMONIZATION band opener, plan_only). Entry gate OK: ledger M6-P0700=RUNNING, dependency M6-P0309 (JUDGE)=SIGNED (PHASE0 design band accepted by the judge), role=ANALYST_ARCHITECT. Produced the MISSING-contract->producer bijection at 04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md. CORE RESULT (the task's central check): mechanically parsed CONTRACT_REGISTER - total_CTR_rows=26, missing_count=22, orphan_count=0. Every one of the 22 MISSING/OWNER_DECISION_REQUIRED rows maps to EXACTLY ONE producing prompt, and every producer is a real in-band ledger prompt (M6-P0701..0714 all present). NO MISSING contract lacks a producer => NO generation bug => PASS, not BLOCKED. BIJECTION (§1): CTR-003->P0701, 004->P0703, 005/006->P0702, 007->P0704, 008->P0705, 009/010/011->P0706, 012->P0708, 013/026->P0709, 014->P0710, 016/017->P0711, 018/019/020->P0712, 021/022/023/024->P0713. DRAFT_LOCKED BINDERS (§2): the 4 non-MISSING contracts (CTR-001 20 fields, CTR-002 19 fields, CTR-015 formulas, CTR-025 content) are bound/parameterized not produced - P0707 binds CTR-001 storage, P0714 binds CTR-015 thresholds + CTR-025 format; that is why P0707/P0714 do not appear as schema producers in §1. PRODUCER COVERAGE (§3): all 14 band prompts have a job - 12 schema producers cover the 22 MISSING (counts sum to 22), 2 binders parameterize DRAFT_LOCKED; no idle producer, no orphaned contract. HARMONIZATION DISCIPLINE (§4): each producer must preserve doc-named fields verbatim (web_event_logs L117 partials, measurement_outbox L252 partials), append a SCHEMA_CHANGELOG row for every addition (rows 9+ reserved; empty diff recorded as 'no change beyond doc'; no silent renames), reference OPEN owner decisions as parameters never invent values, and consumed shapes (003/005/006/009/010) define only the consumed shape. SCHEMA_CHANGELOG STATE (§5): rows 1-8 exist; carried non-blocking observation - hardening rules M6-RULE-H01/H02/H03 were logged as label additions under row 2 but lack the dedicated per-item rows that M6-FAIL-008/009/010 (row 3) and M6-SMK-016/017/018 (row 4) got (asymmetric; recorded for owner/registry, NOT fixed here - 00-spec read-only). OWNER-DECISION PARAMETERS PER PRODUCER (§6): mapped which OPEN OD each producer references (P0704->OD-008, P0708->OD-002, P0709->OD-002/005+approver-role, P0710->OD-006/007/001, P0711/0713->OD-003, P0712->approver-role/OD-002, P0707/0714->OD-011/002/012) - referenced, none resolved. VERIFICATION (this plan gates the whole band; no downstream critic M6-PC0700): bijection established by DETERMINISTIC mechanical parse (22 MISSING, 0 orphans) + ledger cross-check (14 producers present); 1 independent re-derivation agent confirmed CLEAN on all checks (orphan-check 0, exactly-one-producer, producer-exists, plan-vs-register accuracy, PASS-not-BLOCKED conclusion) - even corroborated binder classification via ledger titles (P0707=CONTRACT_MEASUREMENT_EVENTS_STORAGE, P0714=CONTRACT_KPI_EVIDENCE_BINDING). ACCEPTANCE CHECKS MET: (a) every MISSING row mapped to a producer - 22/22, 0 orphans; (b) doc-named fields preserved verbatim + every addition has a changelog-row proposal - the §4 discipline binds every producer to this; (c) open owner decisions referenced as parameters never invented - §6, all 12 OD stay OPEN. BOUNDARY: plan_only - authors NO schema (producers do that next), invents no owner value, no raw PII/secrets (CTR ids + field names only); staged BLOCKED/OFF. Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/analysis/design/PHASE0_CONSOLIDATION.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "04-artifacts/evidence/prompts/M6-P0700.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv (read-only): entry gate M6-P0309(JUDGE)=SIGNED, M6-P0700=RUNNING; enumerated harmonization band M6-P0701..0714 (all present, TODO)",
+    "PowerShell parse (read-only): parsed CONTRACT_REGISTER markdown table -> total_CTR_rows=26, missing_count=22, orphan_count=0; built MISSING->producer map and producer->contracts reverse map",
+    "Read (read-only): SCHEMA_CHANGELOG (rows 1-8; rows 9+ reserved for this band), DECISION_REGISTER (M6-OD parameters), PHASE0_CONSOLIDATION (carried H01/H02/H03 changelog observation)",
+    "1 independent verification agent (analysis_only, read-only, no writes): re-derived the bijection from the register + ledger -> VERDICT CLEAN (0 orphans, exactly-one-producer, all producers real, plan accurate, PASS sound); NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/analysis/design/PHASE0_CONSOLIDATION.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0700 and marks it; then paste M6-P0701 (CONTRACT_EVENT_REGISTRY, order 61, ANALYST_ARCHITECT) which produces the CTR-003 event_registry consumed shape - the first schema in the band. Each subsequent producer M6-P0701..0714 defines its mapped contract(s) per §1, preserving doc-named fields verbatim and appending a SCHEMA_CHANGELOG row (row 9+) per §4. The bijection is complete (0 orphans) so the band may proceed with no generation-bug BLOCK."
+}

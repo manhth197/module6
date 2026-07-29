@@ -1,0 +1,43 @@
+{
+  "prompt_id": "M6-P0713",
+  "status": "PASS",
+  "summary": "CONTRACT_WORKERS (CONTRACT_HARMONIZATION, plan_only). Entry gate OK: ledger M6-P0713=RUNNING, dependency M6-P0712 (admin APIs)=PASS, role=ANALYST_ARCHITECT, no downstream critic. Produced FOUR worker contracts in one file at 04-artifacts/analysis/contracts/CONTRACT_WORKERS.contract.yaml (nested under 'contracts:' => single root mapping, parse-safe): M6-CTR-021 marketing_measurement_dispatcher + M6-CTR-022 marketing_audience_dispatcher + M6-CTR-023 attribution_materializer + M6-CTR-024 data_quality_checker. Doc-named (verbatim, doc §19): CTR-021 duty 'Gửi Pixel/CAPI/Offline' + note 'Retry, dedup, error log' (L376); CTR-022 duty 'Sync audience' + note 'Consent fail-closed' (L377); CTR-023 duty 'Tổng hợp attribution snapshots' + note 'Không ghi đè verified revenue' (L378); CTR-024 duty 'Kiểm data quality và scale readiness' + note 'Output PASS/HOLD/FAIL' (L379). Each worker has the required structure: input + output + retry_dead_letter + idempotency + forbidden_actions. THESE WORKERS ARE THE BAND'S ENFORCEMENT POINTS: CTR-021 = the ONLY measurement sender (input M6-CTR-008 QUEUED/RETRY; send_policy at dispatch L257; dedup_key UNIQUE RULE-005 no double send; bounded retry->DEAD_LETTER no silent loss L252/SMK-016; consent re-validated at send RULE-002; Offline only after ORDER_VERIFIED L250; hash at dispatch M6-OD-003; RULE-004 runtime never sends). CTR-022 = consent fail-closed audience sync (input M6-CTR-011 from APPROVED M6-CTR-009 + consent; audience dedup segment_id+member_key+platform+operation DISTINCT from RULE-005; opt-out=>REMOVE SMK-008; only from approved segments not ad-hoc/data-mart L251; membership never trigger owner RULE-012). CTR-023 = THE load-bearing forbidden: NEVER overwrites verified revenue (note L378, RULE-003/008; writes attribution_context into M6-CTR-001 Zone B set-once; attribution immutable after verify, correction only adjustment record {actor,reason,audit,evidence}; LOW/conflict=>HOLD not scale evidence RULE-009; no order/price/CRM). CTR-024 = produces PASS/HOLD/FAIL (output M6-CTR-012 rows + data_quality_status on M6-CTR-001 Zone C + scale readiness feeding M6-CTR-013; worst-of aggregate; RECORDS verdicts NOT enforcement - consent/registry/dedup enforced at their checkpoints; non-PASS never scale evidence RULE-009; no invented severity). CONTENT [PACK]: input/output reference already-locked records (CTR-008/011/002/001/007/012/013) - NO re-invention. VERIFICATION (2 independent read-only analysis-only lenses, hermetic): LENS-1 fidelity+upstream-consistency+no-invented-values = CLEAN 0 findings (all 4 duties+notes verbatim vs L376-379; agent cross-read all 5 upstream contracts: CTR-021 dedup formula + outbox status states match CTR-008, CTR-022 audience dedup matches CTR-011 + distinct from RULE-005, CTR-023 writes CTR-001 Zone B, CTR-024 outputs CTR-012 + Zone C worst-of; no invented values - max_retries=config, connector=OD-004, hash=OD-003, model=OD-005; rows 28/29/30/31). LENS-2 forbidden-action/invariant = 1 MINOR (genuine completeness gap): CTR-021 enforced consent via the positive send_policy_at_dispatch + RULE-002 anchor but did NOT mirror the doc-explicit forbidden 'Không gửi khi consent missing' (L248) in its forbidden_actions list, whereas CTR-022 mirrors its consent-fail-closed - enforcement-point enumeration asymmetric; FIXED by adding a CTR-021 forbidden_actions bullet 'sending without valid consent - consent RE-VALIDATED at dispatch; missing/expired/opt-out => NO send (RULE-002 fail-closed, doc §12 L248)'; re-parsed PARSE_OK (CTR-021 forbidden 5->6, symmetric with CTR-022). All other invariants CLEAN (021 only-sender/retry/dedup/Offline/staged; 022 consent-failclosed/approved-only/never-trigger-owner; 023 never-overwrite-verified-revenue/immutable-after-verify/LOW-not-scale; 024 records-not-enforces/non-PASS-not-scale/no-invented-severity). ACCEPTANCE CHECKS MET: (a) M6-CTR-021/022/023/024 defined field-level (input+output+retry/dead-letter+idempotency+forbidden) with types + constraints, referencing locked records without re-invention; (b) doc-named content preserved verbatim (all 4 duties + notes), every [PACK] addition -> changelog rows 28/29/30/31; (c) open owner decisions referenced as parameters (M6-OD-003 hash, M6-OD-004 connector, M6-OD-005 attribution model, M6-OD-012 masking, M6-OD-011 stack); dedup/idempotency = LOCKED formulas; NO owner value invented (max_retries=config). BOUNDARY: plan_only; CTR-021 only sender (RULE-004); CTR-022 consent fail-closed (RULE-002); CTR-023 never overwrite verified revenue (RULE-003/008); CTR-024 records not enforces (RULE-009); NO raw PII/secrets (hash at dispatch, error_log masked + secret_ref); channel payload untrusted DATA; no pricing/order/CRM/commission; staged BLOCKED/OFF => no real send/sync (H01). Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_OUTBOX.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_AUDIENCE_CHAIN.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_EVENTS_STORAGE.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_DATA_QUALITY_CHECK.contract.yaml",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/contracts/CONTRACT_WORKERS.contract.yaml",
+    "04-artifacts/evidence/prompts/M6-P0713.json"
+  ],
+  "commands_run": [
+    "Read (read-only): entry gate M6-P0712=PASS, M6-P0713=RUNNING (ledger rows 74-75); extract §19 L376-379 (4 worker duties+notes verbatim, from the prior §19 read)",
+    "Bash python PyYAML safe_load (read-only) x2: pre-verify PARSE_OK (root single mapping, 4 workers, duties+notes VERBATIM vs L376-379, required structure input/output/retry/idempotency/forbidden present on all 4, CTR-023 forbids verified-revenue-overwrite, CTR-021 only-sender+dedup-unique, CTR-022 consent-failclosed, rows 28-31); post-fold PARSE_OK (CTR-021 forbidden 5->6 with consent bullet)",
+    "2 independent verification agents (general-purpose, analysis_only, read-only, hermetic): LENS-1 fidelity+upstream-consistency CLEAN 0 findings (cross-read CTR-008/011/001/007/012); LENS-2 forbidden-action/invariant 1 MINOR (CTR-021 consent-forbidden enumeration asymmetry vs CTR-022) -> folded via 1 edit; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/contracts/CONTRACT_WORKERS.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_OUTBOX.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_AUDIENCE_CHAIN.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_EVENTS_STORAGE.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_DATA_QUALITY_CHECK.contract.yaml",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0713 and marks it, AND (out-of-band) appends SCHEMA_CHANGELOG rows 28 (M6-CTR-021) / 29 (M6-CTR-022) / 30 (M6-CTR-023) / 31 (M6-CTR-024) per the contract's schema_changelog_proposal (after rows 9-27). Then paste M6-P0714 (CONTRACT_KPI_EVIDENCE_BINDING, order 74, ANALYST_ARCHITECT) which is the FINAL harmonization producer - a BINDING prompt (not a schema producer): it binds CTR-015 Dashboard KPI contract (DRAFT_LOCKED, 14 metrics, MONITORING_REGISTER §14; thresholds M6-OD-002) + CTR-025 Evidence package (DRAFT_LOCKED content-level, doc §22). After M6-P0714 the band closes at judge M6-P0715 (HARMONIZATION_GATE_JUDGE). CONTRACT_WORKERS feeds slices M6.2C/E/F."
+}

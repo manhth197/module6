@@ -1,0 +1,30 @@
+{
+  "prompt_id": "M6-P0104",
+  "status": "PASS",
+  "summary": "LOCK_SMOKE_REGISTER. Entry gate OK: ledger M6-P0104=RUNNING, dependency M6-P0103=PASS, role=ANALYST_ARCHITECT. Verified registers/SMOKE_REGISTER.md against extract §21 'P0 Smoke Test Matrix' (00-spec/M6_FULL_DETAIL_EXTRACT.md; §21 header L397, table header 'Test ID | Kịch bản | Kết quả phải đạt' at L399-400, 15 data rows L401-415; §22 'Evidence Plan' at L417) and against the authoritative binding source 00-spec/slices/slice_definitions.json. RESULT: no deviations => PASS. CHECK A - owner smokes M6-SMK-001..015 are 1:1 VERBATIM with extract lines 401-415 in BOTH the Kịch bản (scenario) and Kết quả phải đạt (expected) columns; every scenario+expected pair is byte-identical to the extract; the owner Doc IDs ADS-P0-001..015 are preserved as aliases; row order preserved; per-row Source citations (001->401, 002->402, ... 015->415) all correct. Examples: SMK-001=L401 'Event không có trong event_registry' / 'Reject/HOLD, audit rõ'; SMK-007=L407 'ORDER_VERIFIED thiếu source' / 'Revenue vẫn lưu, attribution confidence LOW/HOLD'; SMK-013=L413 'Live/Comment/Messenger chain' / 'Trace được live_session_id, comment_id, messenger_thread_id'; SMK-015=L415 'Dashboard hiển thị quote/order draft như revenue' / 'Fail'. CHECK B - proposals labeled: M6-SMK-016/017/018 sit in a SEPARATE section '## Proposed additions (proposed - HARDENING - OWNER REVIEW)' with a Status column set to 'proposed' and a Derivation column (not Source); each derivation cites real source lines and is a doc-named concern that is ABSENT from the P0 matrix: 016 (outbox retry/dead-letter) <- doc §12 line 252 + M6.2C done-gate line 387; 017 (external payload built from raw PII / hash policy) <- doc §12 line 248 + §22 line 429 + M6.2D done-gate line 388; 018 (attribution correction after ORDER_VERIFIED) <- doc §11 line 242 immutability rule. Clearly separated from the 15 locked owner smokes; not counted among the verbatim-locked set. CHECK C - NO ORPHANS: built the smoke->slice reverse index from slice_definitions.json (each of the 11 slices' smoke_ids and proposed_smoke_ids arrays). EVERY smoke is bound to >=1 slice. All 15 locked smokes are listed in M6.2K.smoke_ids (the cross-phase full re-run slice) in addition to their phase-specific slices; all 3 proposed smokes are in M6.2K.proposed_smoke_ids plus phase slices. Reverse map: 001{2A,2B,2K} 002{2A,2C,2K} 003{2B,2D,2K} 004{2F,2I,2K} 005{2F,2K} 006{2E,2F,2K} 007{2E,2K} 008{2J,2K} 009{2G,2K} 010{2F,2J,2K} 011{2H,2K} 012{2G,2K} 013{2E,2I,2K} 014{2J,2K} 015{2F,2K}; proposed 016{2C,2K} 017{2D,2K} 018{2E,2K}. ZERO orphans across all 18 smokes. CONSISTENCY: the register's human-readable 'Bound slices' column matches slice_definitions.json exactly for all 18 smokes (no drift between the two representations the validator cross-checks). Section attribution 'doc §21' confirmed (§21 header L397, §22 L417). No missing/contradictory input and no OPEN owner decision gates this prompt => not BLOCKED. global_gateway_state=BLOCKED and production_flag=OFF unchanged; no enabling tokens written. No raw secrets/PII. Honest self-report only; the runner machine gate and the DOC_LOCK judge decide PASS.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/slices/slice_definitions.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/prompts/M6-P0104.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): registers/SMOKE_REGISTER.md; extract 396-417 (§21 P0 Smoke Test Matrix); slices/slice_definitions.json (all 11 slices); ledger rows 17-19",
+    "Manual reverse-map cross-check: built the smoke->slice reverse index from each slice's smoke_ids/proposed_smoke_ids arrays in slice_definitions.json; confirmed all 18 smokes bound to >=1 slice (zero orphans) and that the SMOKE_REGISTER 'Bound slices' column matches slice_definitions.json exactly"
+  ],
+  "evidence_refs": [
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/slices/slice_definitions.json",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0104 and marks it; then paste M6-P0105 (LOCK_CONTRACTS). Smoke register is verified lockable: owner smokes M6-SMK-001..015 are 1:1 verbatim with extract lines 401-415, proposals M6-SMK-016..018 are clearly labeled proposed/HARDENING with correct derivations, and all 18 smokes are bound to >=1 slice in slice_definitions.json (zero orphans) with register bindings fully consistent with the JSON. No deviations for the judge to reconcile."
+}

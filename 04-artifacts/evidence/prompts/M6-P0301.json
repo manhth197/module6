@@ -1,0 +1,39 @@
+{
+  "prompt_id": "M6-P0301",
+  "status": "PASS",
+  "summary": "DATA_MODEL_BASELINE (PHASE0 design, plan_only). Entry gate OK: ledger M6-P0301=RUNNING, dependency M6-P0300=PASS, role=ANALYST_ARCHITECT. Produced the M6 data-model baseline at 04-artifacts/analysis/design/DATA_MODEL_BASELINE.md mapped to doc §13. STRUCTURE: (1) §1 ENTITY LIST - the 14 doc-§13 objects split 9 M6-owned (web_event_logs 004, conversion_events 007, marketing_measurement_outbox 008, marketing_audience_outbox 011, ads_attribution_context 002, ads_measurement_events 001, ads_data_quality_check 012, ads_scale_request 013, ads_learning_candidate 014) vs 5 CONSUMED (event_registry 003, guest_contacts 005, consent_snapshot 006, customer_segments 009, segment_members 010), each with CTR-id/status/verbatim-purpose/home-layer. (2) §2 the ONLY two field-locked schemas reproduced faithfully: ads_measurement_event 20 fields [DOC §10 L191-211] (currency:VND + data_quality_status enum locked) and ads_attribution_context 19 fields [DOC §11 L215-234] (entry_channel/source_confidence/conflict_status enums), PII-class fields flagged (customer_id/guest_id/psid -> mask/secret_ref). (3) §3 RELATIONSHIPS reference graph: web_event_logs->conversion_events->ads_measurement_events(embeds attribution_context); measurement refs event_registry/guest_contacts/consent/quote/order and enqueues to outbox->Pixel/CAPI/Offline; attribution traces campaign..->quote/order/ORDER_VERIFIED [L236]; revenue_value sole source = Commerce Verified Revenue [L256]. (4) §4 APPEND-ONLY ZONES: web_event_logs (RULE-007, L264 'khong sua lich su'), adjustment/audit records, measurement history; append-only distinguished from audited status-transitions. (5) §5 IMMUTABILITY BOUNDARY (the crux): ads_attribution_context MUTABLE until ORDER_VERIFIED then IMMUTABLE, every correction = adjustment record {actor,reason,audit,evidence} never in-place [DOC §11 L242 / SPEC §13 / RULE-008]; verified revenue never overwritten (CTR-023 duty); revenue_value consume-only (RULE-003). (6) §6 FIELDS AWAITING HARMONIZATION: 2 field-locked (001/002), 2 partial (web_event_logs L117->P0703, measurement_outbox L252->P0705), rest no-schema (conversion_events P0704, dq_check P0708, scale_request P0709, learning_candidate P0710, audience_outbox P0706) + consumed shapes P0701/P0702/P0706 - INVENTS NO FIELD for any MISSING object. (7) §7 invariants: dedup_key/idempotency_key/send_policy verbatim [L254-257], state-machine enums [SPEC §13], PII discipline. VERIFICATION (this prompt has NO downstream critic: M6-P0301->M6-P0302, no M6-PC0301): ran 3 parallel independent verification agents. RESULTS: Lens-A (field fidelity & ownership) CLEAN - 20+19 fields exact, 9/5 split + statuses + producing-prompts all match CONTRACT_REGISTER; Lens-C (no invented fields / no OD preempt) CLEAN - no field schema written for any MISSING object (only doc-named partials L117/L252), no OPEN owner decision resolved; Lens-B (immutability & invariants) 1 MINOR - §4 'adjustment records' row used {actor,from->to,reason,evidence_ref,ts} under a RULE-008 citation but RULE-008/L242 lock the adjustment-record shape as {actor,reason,audit,evidence} (which §5 states correctly) -> FIXED §4 to the doc-locked shape, general status-transition audit fields relabeled [PACK]. All confirmed corrections applied and re-grounded. ACCEPTANCE CHECKS MET: (a) design cites rules/contracts by ID (CTR-001..014/023, RULE-003/005/007/008/009/014/019/H02/H03, OD-002/003/005/008/011, SMK-018); (b) no owner decision pre-empted - OD-002/003/005/008/011 remain OPEN gates in §9 (Lens-C verified PAYMENT_COMPLETED kept non-revenue, no thresholds/model/hash-list/repo stated); (c) BLOCKER critic findings - none: the prior 12 research critics all PASS/0-blocker and this prompt's own 3-lens pass found 0 BLOCKER/0 MAJOR (1 MINOR fixed). BOUNDARY: plan_only - no DDL/migration/table/data write; consume-only at edges (revenue<-Commerce, identity<-Customer, consent<-Consent, segments<-CRM, event_registry<-Core); staged (BLOCKED/OFF); no raw PII/secrets; channel content untrusted DATA. Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/SPEC.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/design/DATA_MODEL_BASELINE.md",
+    "04-artifacts/evidence/prompts/M6-P0301.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv (read-only): entry gate M6-P0300=PASS, M6-P0301=RUNNING, M6-P0302=TODO (no M6-PC0301 critic between 0301 and 0302)",
+    "Read (read-only): extract §10 ads_measurement_event L191-211 (20 fields), §11 ads_attribution_context L215-242 (19 fields + immutability L242 + traceability L236 + Diamond L238 + LOW/HOLD L240), §12 dedup/outbox/send_policy L246-257, §13 object catalog L261-276; SPEC §10.1/10.2 (locked schemas), SPEC §12 data-model tables + §13 state machines L285-307; CONTRACT_REGISTER, RULES_LOCKED, DECISION_REGISTER",
+    "3 parallel independent verification agents (analysis_only, read-only, no writes): field-fidelity/ownership (CLEAN), immutability/append-only/invariants (1 MINOR -> fixed), no-invented-fields/no-OD-preemption (CLEAN). Confirmed finding folded via Edit; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/design/DATA_MODEL_BASELINE.md",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/SPEC.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0301 and marks it; then paste M6-P0302 (next PHASE0 design prompt, order 52, ANALYST_ARCHITECT). NOTE: M6-P0301 has no dedicated critic; the independent 3-lens verification pass (§8) substitutes and its one confirmed MINOR finding was folded in. DATA_MODEL_BASELINE.md pairs with ARCH_BASELINE.md as the design foundation the CONTRACT_HARMONIZATION prompts (M6-P0701..0710) fill in field-by-field."
+}

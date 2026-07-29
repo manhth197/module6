@@ -1,0 +1,244 @@
+# CONTRACT_WORKERS — M6-CTR-021 measurement dispatcher + M6-CTR-022 audience dispatcher
+#                   + M6-CTR-023 attribution materializer + M6-CTR-024 data quality checker
+# Prompt: M6-P0713 · Phase: CONTRACT_HARMONIZATION · Mode: plan_only (schema definition; no code/migration)
+# FOUR contracts => nested under a top-level 'contracts:' key so the root is a SINGLE mapping (parse-safe).
+#
+# The four Module-6 workers [DOC §19 L376-379]. Each duty (Mục đích) + note (Ghi chú) is preserved verbatim;
+# input/output/retry/idempotency/forbidden are [PACK], anchored to already-defined records (CTR-008/011/002/
+# 001/007/012/013) — no field re-invention. These workers are the ENFORCEMENT points for the band's
+# invariants: CTR-021 is the ONLY measurement sender (RULE-004); CTR-022 is consent-fail-closed audience sync;
+# CTR-023 NEVER overwrites verified revenue (RULE-008); CTR-024 produces the PASS/HOLD/FAIL verdicts (CTR-012).
+
+contracts:
+
+  # =========================================================================
+  # M6-CTR-021 marketing_measurement_dispatcher — the ONLY measurement sender
+  # =========================================================================
+  - contract_id: M6-CTR-021
+    name: "worker: marketing_measurement_dispatcher"
+    kind: OWNED_SHAPE_DEFINED
+    schema_version: GFD-M6-CTR-021-OWNED-001
+    ownership: M6
+    doc_duty: "Gửi Pixel/CAPI/Offline"                                   # [DOC §19 L376] verbatim
+    doc_note: "Retry, dedup, error log"                                  # [DOC §19 L376] verbatim
+    doc_verbatim: true
+
+    source:
+      doc_anchor: "[DOC §19 L376] 'worker: marketing_measurement_dispatcher | Gửi Pixel/CAPI/Offline | Retry, dedup, error log'"
+      rule_anchors:
+        - "[REG RULE-004] the ONLY path for external measurement — runtime never sends"
+        - "[REG RULE-005] dedup_key unique => no double send/count (SMK-003)"
+        - "[REG RULE-002] consent re-validated at send (fail-closed)"
+        - "[REG RULE-014 / H02] payload hashed at dispatch (M6-OD-003); no raw PII"
+
+    input:
+      source_contract: "M6-CTR-008 marketing_measurement_outbox"
+      selection: "rows with status in {QUEUED, RETRY} and next_retry_at due"
+    output:
+      effect: "evaluate send_policy, egress to Pixel/CAPI/Offline, transition outbox status QUEUED->SENT | RETRY -> DEAD_LETTER; append error_log / set next_retry_at on failure (M6-CTR-008)"
+      send_policy_at_dispatch: "consent_valid AND event_in_registry AND data_quality_pass AND not_duplicate [DOC §12 L257]"
+    retry_dead_letter:
+      policy: "bounded retry — on failure append error_log + set next_retry_at + increment retry_count; when retry_count >= max_retries => DEAD_LETTER (M6-CTR-008)"
+      guarantee: "NO infinite retry, NO silent loss (doc L252, SMK-016); max_retries VALUE = config, not invented"
+    idempotency:
+      key: "dedup_key (LOCKED RULE-005: platform + event_code + customer_or_guest_key + event_ts_bucket + source_event_id), UNIQUE on the outbox => one send per (conversion x platform); idempotency_key carried for platform-side dedup"
+      behavior: "at-most-once external send; a duplicate is not re-sent (no double count)"
+    forbidden_actions:
+      - "external send from anywhere but this worker (RULE-004)"
+      - "sending without valid consent — consent RE-VALIDATED at dispatch; missing/expired/opt-out => NO send (RULE-002 fail-closed, doc §12 L248 'Không gửi khi consent missing')"
+      - "infinite retry / losing an event without a trace (doc L252)"
+      - "sending raw PII — payload is hashed at dispatch (M6-OD-003, RULE-014/H02)"
+      - "sending Offline before ORDER_VERIFIED or owner approval (doc §12 L250)"
+      - "sending while global_gateway_state=BLOCKED / production_flag=OFF (staged; H01) => NO real send ever"
+
+  # =========================================================================
+  # M6-CTR-022 marketing_audience_dispatcher — consent-fail-closed audience sync
+  # =========================================================================
+  - contract_id: M6-CTR-022
+    name: "worker: marketing_audience_dispatcher"
+    kind: OWNED_SHAPE_DEFINED
+    schema_version: GFD-M6-CTR-022-OWNED-001
+    ownership: M6
+    doc_duty: "Sync audience"                                            # [DOC §19 L377] verbatim
+    doc_note: "Consent fail-closed"                                      # [DOC §19 L377] verbatim
+    doc_verbatim: true
+
+    source:
+      doc_anchor: "[DOC §19 L377] 'worker: marketing_audience_dispatcher | Sync audience | Consent fail-closed'"
+      rule_anchors:
+        - "[REG RULE-002] consent fail-closed — opt-out => not synced / REMOVE (SMK-008)"
+        - "[REG RULE-004] audience only from APPROVED customer_segments + outbox; never direct"
+        - "[REG RULE-012] segment membership is never a trigger owner"
+
+    input:
+      source_contract: "M6-CTR-011 marketing_audience_outbox"
+      selection: "rows with status in {QUEUED, RETRY}; only from APPROVED customer_segments (M6-CTR-009) with consent pass [DOC §12 L251]"
+    output:
+      effect: "sync audience ADD/REMOVE to the platform (META_AUDIENCE / GOOGLE_AUDIENCE, M6-OD-004); transition audience_outbox status; error_log / next_retry_at on failure (M6-CTR-011)"
+    retry_dead_letter:
+      policy: "bounded retry -> DEAD_LETTER (mirrors M6-CTR-011); error_log + next_retry_at"
+      guarantee: "no infinite retry, no silent loss; max_retries = config, not invented"
+    idempotency:
+      key: "audience dedup_key (M6-CTR-011: segment_id + member_key + platform + operation) — DISTINCT from the RULE-005 measurement formula"
+      behavior: "at-most-once ADD/REMOVE per (segment, member, platform, operation); duplicate not re-synced"
+    forbidden_actions:
+      - "syncing without valid consent — consent RE-VALIDATED at send; opt-out => REMOVE / not synced (RULE-002 fail-closed, SMK-008)"
+      - "syncing from an ad-hoc query or data mart (only from APPROVED customer_segments + outbox + consent, doc §12 L251)"
+      - "using segment membership as a trigger for any CRM/pricing/Diamond/scale action (RULE-012)"
+      - "sending raw PII — payload hashed/PII-safe at dispatch (M6-OD-003, RULE-014/H02)"
+      - "syncing while global_gateway_state=BLOCKED / production_flag=OFF (staged; H01) => NO real sync ever"
+
+  # =========================================================================
+  # M6-CTR-023 attribution_materializer — NEVER overwrites verified revenue
+  # =========================================================================
+  - contract_id: M6-CTR-023
+    name: "worker: attribution_materializer"
+    kind: OWNED_SHAPE_DEFINED
+    schema_version: GFD-M6-CTR-023-OWNED-001
+    ownership: M6
+    doc_duty: "Tổng hợp attribution snapshots"                           # [DOC §19 L378] verbatim
+    doc_note: "Không ghi đè verified revenue"                            # [DOC §19 L378] verbatim — the load-bearing forbidden action
+    doc_verbatim: true
+
+    source:
+      doc_anchor: "[DOC §19 L378] 'worker: attribution_materializer | Tổng hợp attribution snapshots | Không ghi đè verified revenue'"
+      rule_anchors:
+        - "[REG RULE-008] attribution snapshot IMMUTABLE after order verified; correction => adjustment record {actor, reason, audit, evidence}"
+        - "[REG RULE-003] verified revenue = ORDER_VERIFIED only — NEVER recomputed/overwritten by attribution"
+        - "[REG RULE-009] LOW-confidence / conflict => HOLD, not scale evidence"
+
+    input:
+      source_contract: "M6-CTR-001 ads_measurement_event + M6-CTR-007 conversion_events + M6-CTR-002 ads_attribution_context"
+      selection: "events/conversions needing attribution materialization"
+    output:
+      effect: "materialize the attribution snapshot (M6-CTR-002) and write attribution_context into ads_measurement_event Zone B (M6-CTR-001); mark source_confidence / conflict_status (M6-CTR-002)"
+    retry_dead_letter:
+      policy: "idempotent recompute; bounded retry on transient failure -> DEAD_LETTER; error_log"
+      guarantee: "no infinite retry; recompute is deterministic (no duplicate snapshot)"
+    idempotency:
+      key: "deterministic materialization keyed by event/conversion identity; re-running yields the same snapshot (no duplicate)"
+      behavior: "idempotent — safe to re-materialize; NEVER mutates an already-verified value"
+    forbidden_actions:
+      - "OVERWRITING verified revenue (doc L378 'Không ghi đè verified revenue'; RULE-003) — verified revenue is ORDER_VERIFIED-sourced and set-once (M6-CTR-001 Zone B, M6-CTR-023 duty)"
+      - "mutating an attribution snapshot after order verified WITHOUT an adjustment record {actor, reason, audit, evidence} (RULE-008)"
+      - "using LOW-confidence / conflict attribution as scale evidence (mark HOLD/LOW, RULE-009)"
+      - "any order-state / pricing / CRM / commission action (module boundary)"
+
+  # =========================================================================
+  # M6-CTR-024 data_quality_checker — produces PASS/HOLD/FAIL
+  # =========================================================================
+  - contract_id: M6-CTR-024
+    name: "worker: data_quality_checker"
+    kind: OWNED_SHAPE_DEFINED
+    schema_version: GFD-M6-CTR-024-OWNED-001
+    ownership: M6
+    doc_duty: "Kiểm data quality và scale readiness"                     # [DOC §19 L379] verbatim
+    doc_note: "Output PASS/HOLD/FAIL"                                    # [DOC §19 L379] verbatim
+    doc_verbatim: true
+
+    source:
+      doc_anchor: "[DOC §19 L379] 'worker: data_quality_checker | Kiểm data quality và scale readiness | Output PASS/HOLD/FAIL'"
+      rule_anchors:
+        - "[CTR-012] ads_data_quality_check — the 8 §15 gate items; this worker is its producer"
+        - "[REG RULE-009] non-PASS subjects never used as scale evidence"
+
+    input:
+      source_contract: "M6-CTR-001 ads_measurement_event / M6-CTR-007 conversion_events / dashboard metrics (M6-CTR-018) / scale requests (M6-CTR-013)"
+      selection: "subjects needing a Data Quality Gate verdict (the applicable §15 gate items per subject)"
+    output:
+      effect: "write ads_data_quality_check rows (M6-CTR-012) with status PASS/HOLD/FAIL per gate item; set data_quality_status on ads_measurement_event Zone C (M6-CTR-001); compute scale readiness (feeds M6-CTR-013 gate_evidence)"
+      aggregate: "per-subject data_quality_status = worst-of applicable gate items (FAIL > HOLD > PASS)"
+    retry_dead_letter:
+      policy: "idempotent re-check; bounded retry on transient failure -> DEAD_LETTER; error_log"
+      guarantee: "no infinite retry; re-check is deterministic"
+    idempotency:
+      key: "deterministic check keyed by (subject, gate_item); re-running yields the same verdict"
+      behavior: "idempotent — safe to re-check"
+    forbidden_actions:
+      - "acting as an enforcement gate itself — it RECORDS verdicts; consent/registry/dedup are enforced at their own checkpoints (M6-CTR-012 boundary)"
+      - "marking a non-PASS subject as usable scale evidence (RULE-009)"
+      - "inventing a per-item HOLD-vs-FAIL owner value (severity derived from locked rules; M6-CTR-012)"
+      - "triggering any owner/CRM/scale action (support/measure only)"
+
+# ===========================================================================
+schema_changelog_proposal:
+  - row: 28
+    date: "2026-07-22"
+    artifact: "M6-CTR-021 marketing_measurement_dispatcher (M6 worker, M6-P0713)"
+    change_vs_doc: >
+      New worker contract from doc §19 L376. Doc-named duty ('Gửi Pixel/CAPI/Offline') + note ('Retry, dedup,
+      error log') preserved verbatim. [PACK]: input (M6-CTR-008 QUEUED/RETRY), output (send + status
+      transition), retry/dead-letter (bounded, L252/SMK-016), idempotency (dedup_key unique RULE-005),
+      forbidden (only sender RULE-004; no raw PII hash-at-dispatch; Offline after ORDER_VERIFIED; staged
+      no-send). No owner value invented (max_retries=config).
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0713 (proposal; owner ratifies)"
+    notes: "follows rows 9-27 (M6-P0701..0712); renumber sequentially at apply time. No rename."
+  - row: 29
+    date: "2026-07-22"
+    artifact: "M6-CTR-022 marketing_audience_dispatcher (M6 worker, M6-P0713)"
+    change_vs_doc: >
+      New worker contract from doc §19 L377. Doc-named duty ('Sync audience') + note ('Consent fail-closed')
+      preserved verbatim. [PACK]: input (M6-CTR-011 from APPROVED M6-CTR-009 + consent), output (ADD/REMOVE
+      sync), retry/dead-letter, idempotency (audience dedup distinct from RULE-005), forbidden (consent
+      fail-closed RULE-002/SMK-008; only from approved segments not ad-hoc/data-mart L251; membership never a
+      trigger owner RULE-012; staged no-sync). No owner value invented (platform=M6-OD-004).
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0713 (proposal; owner ratifies)"
+    notes: "follows row 28; renumber sequentially at apply time. No rename."
+  - row: 30
+    date: "2026-07-22"
+    artifact: "M6-CTR-023 attribution_materializer (M6 worker, M6-P0713)"
+    change_vs_doc: >
+      New worker contract from doc §19 L378. Doc-named duty ('Tổng hợp attribution snapshots') + note ('Không
+      ghi đè verified revenue') preserved verbatim. [PACK]: input (M6-CTR-001/007/002), output (materialize
+      snapshot into Zone B), retry/dead-letter (idempotent recompute), idempotency (deterministic), forbidden
+      (NEVER overwrite verified revenue RULE-003/008; no post-verify mutation without adjustment record; LOW/
+      conflict not scale evidence RULE-009; no order/price/CRM). No owner value invented.
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0713 (proposal; owner ratifies)"
+    notes: "follows row 29; renumber sequentially at apply time. No rename."
+  - row: 31
+    date: "2026-07-22"
+    artifact: "M6-CTR-024 data_quality_checker (M6 worker, M6-P0713)"
+    change_vs_doc: >
+      New worker contract from doc §19 L379. Doc-named duty ('Kiểm data quality và scale readiness') + note
+      ('Output PASS/HOLD/FAIL') preserved verbatim. [PACK]: input (subjects), output (M6-CTR-012 rows +
+      data_quality_status on Zone C + scale readiness; worst-status aggregate), retry/dead-letter (idempotent
+      re-check), idempotency (deterministic), forbidden (records verdicts not enforcement; non-PASS never scale
+      evidence RULE-009; no invented severity; no owner trigger). No owner value invented.
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0713 (proposal; owner ratifies)"
+    notes: "follows row 30; renumber sequentially at apply time. No rename."
+
+open_decisions:
+  - id: M6-OD-003
+    status: OPEN
+    effect: "hash policy / allowed fields for the payload the dispatchers (M6-CTR-021/022) send; until decided, egress is framework-only (fail-closed)"
+  - id: M6-OD-004
+    status: OPEN
+    effect: "which platform connector runs first in pilot (Meta vs Google) — scopes M6-CTR-021/022 egress targets"
+  - id: M6-OD-005
+    status: OPEN
+    effect: "official attribution model for M6-CTR-023 materialization; the snapshot shape (M6-CTR-002) is unchanged"
+  - id: M6-OD-012
+    status: OPEN
+    effect: "masking format for identity-derived fields in worker logs / error_log (abc***xy recommended)"
+  - id: M6-OD-011
+    status: OPEN
+    effect: "target repository/stack; worker runtime, queue engine and retry implementation depend on the chosen stack"
+
+boundary:
+  - "M6-owned workers; plan_only (contract schema, not application code)"
+  - "M6-CTR-021 is the ONLY measurement sender (RULE-004); bounded retry -> dead-letter, no silent loss (L252)"
+  - "M6-CTR-022 consent fail-closed audience sync from APPROVED segments only (RULE-002/004/012); audience dedup distinct from RULE-005"
+  - "M6-CTR-023 NEVER overwrites verified revenue (RULE-003/008); attribution immutable after verify (adjustment record only)"
+  - "M6-CTR-024 produces PASS/HOLD/FAIL (M6-CTR-012); records verdicts, does not itself enforce; non-PASS never scale evidence (RULE-009)"
+  - "NO raw PII/secrets — payloads hashed at dispatch, error_log masked + secret_ref (RULE-014/H02, M6-OD-003, M6-OD-012)"
+  - "channel-origin payload content is untrusted DATA (RULE-H03); no pricing/order-state/CRM/commission action (module boundary)"
+  - "staged: global_gateway_state=BLOCKED, production_flag=OFF => NO real send/sync ever (H01)"
+
+acceptance_self_map:
+  - "M6-CTR-021/022/023/024 defined field-level: input + output + retry/dead-letter + idempotency + forbidden_actions, with types + constraints, referencing already-locked records without re-invention"
+  - "doc-named content preserved verbatim (all 4 worker duties + notes); every [PACK] addition -> changelog rows 28/29/30/31"
+  - "open owner decisions referenced as parameters (M6-OD-003 hash, M6-OD-004 connector, M6-OD-005 attribution model, M6-OD-012 masking, M6-OD-011 stack); dedup/idempotency = LOCKED formulas; NO owner value invented (max_retries=config)"

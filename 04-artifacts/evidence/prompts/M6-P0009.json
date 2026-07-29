@@ -1,0 +1,38 @@
+{
+  "prompt_id": "M6-P0009",
+  "status": "PASS",
+  "summary": "REGISTER_INIT_REVIEW. Ledger confirmed M6-P0009=RUNNING and dependency M6-P0008=PASS. Read all 11 files in 00-spec/registers/ and recorded a snapshot to work-root/REGISTER_INIT_REVIEW.md. ROW COUNTS PER REGISTER (grep-verified where an M6-XXX- row ID exists): SOURCE_MANIFEST=12 field rows; RULES_LOCKED=24 (21 owner M6-RULE-001..021 + 3 hardening H01..H03); FAIL_GATE=10 (7 owner + 3 hardening); SMOKE=18 (15 owner M6-SMK-001..015 + 3 proposed); CONTRACT=26 (M6-CTR-001..026); DECISION=12 (M6-OD-001..012); CONFLICT=7 (M6-CONF-001..007); ENTRY_EVIDENCE=4 (M6-ENTRY-001..004, + 7 consumed-boundary reference rows); LEXICON=6 (M6-LEX-001..006, + 1 MISSING banned-word row); MONITORING=27 (14 KPI + 5 growth KPI + 8 data-quality-gate items); SCHEMA_CHANGELOG=8 entries. ENUMERATED: OPEN decisions = all 12 (M6-OD-001..012; OD-010/011/012 annotated 'pack proceeds' but Status still OPEN). OPEN conflicts = 5 (M6-CONF-001,002->OD-008,003,004->OD-009,007; CONF-005 and 006 are RESOLVED-BY-READING). MISSING contracts = 22 (M6-CTR-003,004,005,006,007,008,009,010,011,012,013,014,016,017,018,019,020,021,022,023,024,026; DRAFT_LOCKED = 001,002,015,025). OPEN entry evidence = all 4 (M6-ENTRY-001..004). Cross-references outside the 4 target registers: MONITORING numeric thresholds MISSING -> M6-OD-002; LEXICON banned-word table MISSING -> M6-OD-007 (both delegate to decisions already listed). Grep cross-check matched every hand count (OD=12, CONF=7, CTR=26, CTR-MISSING=22, ENTRY=4, RULE=24, FAIL=10, SMK=18, LEX=6). These OPEN/MISSING items are the snapshot content that seeds later gates; they are recorded, not blockers to this review prompt, so open_blockers is empty. Read-only; no state touched. Final PASS/FAIL is the runner gate + Judge's call.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/registers/SOURCE_MANIFEST.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/CONFLICT_MATRIX.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/LEXICON_REGISTER.md",
+    "00-spec/registers/MONITORING_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "work-root/REGISTER_INIT_REVIEW.md",
+    "04-artifacts/evidence/prompts/M6-P0009.json"
+  ],
+  "commands_run": [
+    "Grep count ^| M6-XXX- per register (deterministic row-count cross-check): OD=12, CONF=7, CTR=26, CTR-MISSING=22, ENTRY=4, RULE=24, FAIL=10, SMK=18, LEX=6 (all match hand counts)"
+  ],
+  "evidence_refs": [
+    "work-root/REGISTER_INIT_REVIEW.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/CONFLICT_MATRIX.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine gate for M6-P0009 (EVIDENCE_GATE) and marks it, then pastes the next prompt M6-P0010 (BOOTSTRAP_READINESS). Snapshot for later gates: 12 OPEN decisions, 5 OPEN conflicts, 22 MISSING contracts, 4 OPEN entry-evidence items recorded in work-root/REGISTER_INIT_REVIEW.md."
+}

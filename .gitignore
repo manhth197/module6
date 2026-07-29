@@ -1,0 +1,8 @@
+.venv/
+**/.venv/
+**/__pycache__/
+*.pyc
+_NEXT_PROMPT_LOCKED.md
+03-runner/handoff/*
+!03-runner/handoff/.gitkeep
+work-root/target-repo/

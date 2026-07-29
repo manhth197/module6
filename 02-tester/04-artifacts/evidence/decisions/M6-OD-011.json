@@ -1,0 +1,19 @@
+{
+  "decision_id": "M6-OD-011",
+  "decided_at": "2026-07-23",
+  "decided_by": "Nguyen Duc Manh (owner)",
+  "mode": "GREENFIELD",
+  "decision": "M6.2A implementation builds staged in work-root/target-repo (scaffold), stdlib-first Python tooling. Integrating into the real platform repo (candidate: ginsengfood-business-platform) is a later owner-controlled step per the slice design; the implementation target is a read-only convention reference and all impl stays staged under 04-artifacts/impl/.",
+  "stack": {
+    "language": "python",
+    "language_version": "3.12",
+    "test_command": "pytest -q",
+    "run_command": "python -m app"
+  },
+  "conditions": [
+    "global_gateway_state stays BLOCKED and production_flag stays OFF",
+    "impl stays staged under 04-artifacts/impl/<slice>/ until an owner-controlled integration step",
+    "stack is revisable at the real-repo integration decision"
+  ],
+  "note": "Ratifies the DECISION_REGISTER M6-OD-011 pack recommendation (staged, stdlib-first) as GREENFIELD. Recorded per owner instruction 2026-07-23."
+}

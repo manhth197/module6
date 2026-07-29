@@ -1,0 +1,9 @@
+# ==========================================================================
+# 04-boundary - ROLE REQUIREMENTS (venv: 04-boundary/.venv)
+# ==========================================================================
+# Layer 1 - pack baseline (STDLIB-ONLY policy lives there):
+-r ../requirements.txt
+#
+# Layer 2 - role-specific packages (GATED):
+# BOUNDARY_ADVERSARY stays STDLIB-ONLY unless a gated prompt approves specific analysis tooling (owner decision + changelog).
+# -- intentionally no packages below this line --

@@ -1,0 +1,41 @@
+{
+  "prompt_id": "M6-PC0200",
+  "status": "PASS",
+  "summary": "RESEARCH_REPO_AUDIT_PLAN_CRITIC (BOUNDARY_ADVERSARY, analysis_only). Entry gate verified: ledger M6-PC0200=RUNNING, dependency M6-P0200=PASS; IMPLEMENTATION_TARGET_LOCKED.json confirms repository.mode=UNRESOLVED, M6-OD-011=OPEN, status=DRAFT, workspace_mode=STAGED_ONLY, safety.*=false (the plan's fail-closed premises are real). Adversarially red-teamed 04-artifacts/analysis/research/RESEARCH_REPO_AUDIT_PLAN.md via direct source grounding (plan + CONTRACT_REGISTER + DECISION_REGISTER + RULES_LOCKED + M6_FULL_DETAIL_EXTRACT sec7/24/25 + ledger) plus a find->refute-verify pass (5 finder lenses -> 20 candidates, each handed to a separate verifier told to refute it and grade severity). OUTCOME: NO BLOCKER. The playbook is structurally sound as a boundary artifact (fail-closed preconditions, read-only on target repo, operator-owned stack facts not written by coder, never resolves an owner decision, routes CONSUMED gaps to owning module, cross-references every MISSING contract to a real producing harmonization prompt M6-P0700..0714 which all exist in the ledger; gateway BLOCKED/production OFF respected). CONFIRMED findings (each cites exact plan claim + exact source line/row, verdict per finding) = 2 MAJOR + 4 MINOR: F1 MAJOR (executability/boundary) the four-value MappingStatus vocabulary has NO valid value for a CONSUMED contract that is absent from the repo, a case sec3 lines 91-92 anticipate and sec9 line 192 forces a status for -- MISSING_CREATE would file a Core/Identity/Consent/CRM object into the M6 build set; MAJOR not BLOCKER because build-vs-route is Owner-keyed (sec4 116-118, sec9 195) not status-keyed. F2 MAJOR (missing-owner-decision) sec6/sec10 'explicit list - acceptance requirement' omits M6-OD-006 (auto-publish safe-range), which the audit's mapping of CTR-013/014/026 (M6.2H) intersects with the same value-plugs-into-mapped-contract structure as the LISTED M6-OD-002 (CTR-015/026); verifier split disclosed (1 MAJOR via OD-002<->OD-006 symmetry vs 3 REJECT on curated-list grounds) -- adjudicated MAJOR because OD-002/OD-005 are also later-leg yet listed, so 'later leg' does not distinguish OD-006; OD-008 (PAYMENT_COMPLETED revenue-adjacency) and OD-009 (GOLDEN_HOUR codes) retained only as MINOR sub-notes since independently backstopped for a read-only audit. F3 MINOR sec3 lines 78-79 'the 22 MISSING rows' wrongly equated with 'M6-owned' (5 of the 22 are CONSUMED; M6-owned MISSING=17; also conflates register status axis vs plan MappingStatus axis) -- realized harm negligible because operative Expected-buckets block 8 lines later names the 5 CONSUMED contracts as EXISTS_REUSE/never-build. F4 MINOR three citation-precision defects (sec3 line100 '[DOC sec10]' tag on base event codes that live under extract sec7; legend lines22-24 range '463-466' excludes the line-468 sentence it quotes; sec2 line60 quoted 'reuse existing test patterns' elides 'conventions and' from extract L466). F5 MINOR sec3 line77 routes foreign-schema EXISTS_EXTEND to '(sec5)' Conflict report but owner-capture is sec6. F6 MINOR binary Owner(M6/CONSUMED) column flattens CTR-007 conversion_events which the register marks joint 'M6/Core'. Six further candidates were attacked and DISMISSED (documented in the report sec5): CONSUMED-EXISTS_REUSE-drops-harmonization (killed by register Invariant 1 + M6.2A entry gate), CTR-008/M6.2D slice (sec6 col tracks decision-intersection not needed-before), OD-008/OD-009 standalone MAJOR, discovered-decision column-shape mismatch, CTR-007-resolves-OD-008-by-code, sec9-checklist-not-exhaustive. Deliverable is analysis-only; no application code/migration/external call/state write; no raw secrets/PII; global_gateway_state=BLOCKED and production_flag=OFF unchanged. This is an honest self-report; the runner EVIDENCE_GATE decides PASS. Findings feed Phase-0 design; the research author does not respond here.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/analysis/research/RESEARCH_REPO_AUDIT_PLAN.md",
+    "04-artifacts/evidence/prompts/M6-P0200.json",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json"
+  ],
+  "files_changed": [
+    "04-artifacts/boundary-reports/RESEARCH_REPO_AUDIT_PLAN_critique.md",
+    "04-artifacts/evidence/prompts/M6-PC0200.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): brief; RESEARCH_REPO_AUDIT_PLAN.md; M6-P0200.json; CONTRACT_REGISTER.md (26 contracts, Owner + Status columns); DECISION_REGISTER.md (M6-OD-001..012); RULES_LOCKED.md (RULE-001/003/018 etc.); M6_FULL_DETAIL_EXTRACT.md sec7 lines 108-152 (base event codes 123-134), sec24 lines 452-472 (audit playbook 459/460/463-468), sec25 lines 474-484 (owner decisions); PROMPT_EXECUTION_LEDGER_LOCKED.csv rows 1-80 (entry gate: M6-PC0200=RUNNING, M6-P0200=PASS; harmonization prompts M6-P0700..0715 present rows 62-77); IMPLEMENTATION_TARGET_LOCKED.json (UNRESOLVED/OPEN/DRAFT/STAGED_ONLY)",
+    "Glob + Grep (read-only): confirmed producing harmonization prompts M6-P0701..0714 exist in the ledger",
+    "Workflow (analysis only, 25 subagents, 0 errors): 5 adversarial finder lenses (citation-fidelity, contract-consistency, owner-decisions, boundary-overreach, executability) -> deduped to 20 candidates -> 20 adversarial verifiers each attempting refutation and grading BLOCKER/MAJOR/MINOR; results read from journal.jsonl and synthesized"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/research/RESEARCH_REPO_AUDIT_PLAN.md",
+    "04-artifacts/boundary-reports/RESEARCH_REPO_AUDIT_PLAN_critique.md",
+    "04-artifacts/evidence/prompts/M6-P0200.json",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-PC0200 and marks it. The critique (2 MAJOR + 4 MINOR, 0 BLOCKER) is advisory feedback for Phase-0 design and CONTRACT_HARMONIZATION, not a gate on M6-P0200; MAJOR F1 (add a MappingStatus value/rule for CONSUMED-absent so no CONSUMED object can get MISSING_CREATE) and F2 (add M6-OD-006 to the sec6/sec10 owner-decision list) should be folded into the audit playbook before the coder executes it verbatim post-M6-OD-011. Then paste the next prompt M6-P0201 (RESEARCH_EVENT_REGISTRY_INTEGRATION). No real repo audit runs until the owner resolves M6-OD-011 and IMPLEMENTATION_TARGET_LOCKED.json becomes LOCKED/RESOLVED."
+}

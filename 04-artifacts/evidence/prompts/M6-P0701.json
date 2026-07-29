@@ -1,0 +1,39 @@
+{
+  "prompt_id": "M6-P0701",
+  "status": "PASS",
+  "summary": "CONTRACT_EVENT_REGISTRY (CONTRACT_HARMONIZATION, plan_only). Entry gate OK: ledger M6-P0701=RUNNING, dependency M6-P0700 (harmonization plan)=PASS, role=ANALYST_ARCHITECT. Produced the consumed field-level shape of M6-CTR-003 event_registry at 04-artifacts/analysis/contracts/CONTRACT_EVENT_REGISTRY.contract.yaml. NATURE: CTR-003 is a CONSUMED shape (ownership=CONSUMED, owner_module=Core Event Governance) - M6 defines only the MINIMUM row shape it READS + the RULE-001 read-side validation; the authoritative schema belongs to Core Event Governance (runtime existence = entry evidence M6-ENTRY-003, OPEN). CONTENT: (1) ROW SHAPE (5 fields): 4 doc-named fields from [DOC §13 L263] reproduced (owner, channel, data_sensitivity, external_send_policy - identifiers snake_cased, exact doc spelling kept in each field's doc_source) + event_code formalized as the primary key (doc-implied by 'Danh sach event hop le' = the list of valid event codes). (2) ADDITIONS (2, each with changelog row): schema_ref (validation-driven - DQ item 1 'schema dung' [DOC §15 L301]) and registration_state [ACTIVE|DEREGISTERED] ([PACK] fail-closed de-registration - asymmetric cache invariant per RESEARCH_EVENT_REGISTRY_INTEGRATION: a DEREGISTERED code must NEVER be false-ALLOWed by a stale M6 cache). (3) READ VALIDATION (RULE-001 fail-closed): not-found OR registration_state!=ACTIVE => REJECT/HOLD + audit (SMK-001, §7 L116); missing owner => DQ item 1 FAIL (§15 L301); M6 never inserts/updates/deletes a row or invents an event_code (RULE-001/018). (4) SCHEMA_CHANGELOG PROPOSAL: row 9 (next free; rows 1-8 exist) documenting the consumed shape + both additions by name, kind ADDITION (HARDENING - OWNER/CORE REVIEW), explicitly 'no owner value invented'. (5) OPEN DECISIONS as parameters: M6-OD-003 (external_send_policy enum values - which fields sent/hashed, OPEN => egress framework-only), M6-OD-009 (GOLDEN_HOUR registration - population not shape), M6-ENTRY-003 (Core registry existence evidence). NO INVENTED VALUES: data_sensitivity enum values referenced to Core policy (proposed_values_PACK [PUBLIC,INTERNAL,PII] clearly tagged [PACK] candidate for owner/Core review, not decided); external_send_policy values parameterized to M6-OD-003 OPEN. VERIFICATION (first contract of the band, sets pattern; no downstream critic M6-PC0701): 1 independent verification agent checked doc-field-verbatim / no-invented-values / consumed-shape-ownership / additions-changelog-row-9 / validation-fidelity / YAML-well-formed - all six CLEAN (agent confirmed L263 names the 4 fields, M6-OD-003/009 OPEN in register, row 9 is next free, YAML parses via yaml.safe_load, no relaxation of RULE-001). 1 MINOR: fields marked doc_verbatim have snake_cased keys vs doc's space-spelling ('data sensitivity') - transparent (doc spelling in doc_source) but 'verbatim' next to snake_case invites a pedantic challenge -> FIXED by clarifying the doc_verbatim definition to mean semantic-verbatim (identifier snake_cased, exact doc spelling retained in doc_source, no semantic rename). ACCEPTANCE CHECKS MET: (a) M6-CTR-003 defined field-level with types + constraints (row_shape 5 + additions 2 + read_validation); (b) doc-named fields preserved (meaning unchanged, doc spelling in doc_source) + every addition has changelog row 9 proposal; (c) open owner decisions referenced as parameters (M6-OD-003/009, ENTRY-003), no invented values. BOUNDARY: plan_only - schema definition not a table/migration; CONSUMED (M6 reads, Core writes); no raw PII/secrets (field names only); staged BLOCKED/OFF; channel content untrusted DATA. Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "04-artifacts/analysis/research/RESEARCH_EVENT_REGISTRY_INTEGRATION.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/contracts/CONTRACT_EVENT_REGISTRY.contract.yaml",
+    "04-artifacts/evidence/prompts/M6-P0701.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv (read-only): entry gate M6-P0700=PASS, M6-P0701=RUNNING, M6-P0702=TODO (no M6-PC0701 critic between 0701 and 0702)",
+    "Read (read-only): extract §13 L261-264 (event_registry row L263 verbatim), §7 L116 (registry acceptance), §15 L301 (DQ item 1); CONTRACT_REGISTER (CTR-003 CONSUMED/MISSING/P0701), SCHEMA_CHANGELOG (rows 1-8; row 9 next free), DECISION_REGISTER (M6-OD-003/009 OPEN); prior RESEARCH_EVENT_REGISTRY_INTEGRATION (asymmetric cache)",
+    "1 independent verification agent (analysis_only, read-only, no writes): doc-field-verbatim / no-invented-values / consumed-shape / additions-changelog / validation-fidelity / YAML-well-formed -> all 6 CLEAN, 1 MINOR (snake_case-vs-verbatim naming) fixed via Edit; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/contracts/CONTRACT_EVENT_REGISTRY.contract.yaml",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "04-artifacts/analysis/research/RESEARCH_EVENT_REGISTRY_INTEGRATION.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0701 and marks it, AND (out-of-band) appends SCHEMA_CHANGELOG row 9 per the contract's schema_changelog_proposal (this role cannot write 00-spec). Then paste M6-P0702 (CONTRACT_IDENTITY_CONSENT, order 62, ANALYST_ARCHITECT) which produces the consumed shapes CTR-005 guest_contacts + CTR-006 guest_marketing_consent_snapshot. CONTRACT_EVENT_REGISTRY.contract.yaml feeds slice M6.2A (event validation, before any tracking hook) and the event-registry read-validation in the dispatcher/track-API contracts (M6-P0711/0713)."
+}

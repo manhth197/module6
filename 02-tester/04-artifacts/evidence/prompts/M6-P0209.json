@@ -1,0 +1,35 @@
+{
+  "prompt_id": "M6-P0209",
+  "status": "PASS",
+  "summary": "RESEARCH_LEARNING_ENGINE_GUARDRAILS. Entry gate OK: ledger M6-P0209=RUNNING, dependency M6-PC0208 (scale-gate critic)=PASS, role=ANALYST_ARCHITECT, mode=analysis_only. Produced guarded-learning research at 04-artifacts/analysis/research/RESEARCH_LEARNING_ENGINE_GUARDRAILS.md (contracts CTR-014 ads_learning_candidate -> M6-P0710, CTR-020 API -> M6-P0712; slice M6.2H; owner decisions M6-OD-006 safe range, M6-OD-007 content fill). GOVERNING FRAME: the learning engine is the highest runaway-risk component, so every stage of Seed->Run->Learn->Review->Publish is FAIL-CLOSED. CONTENT covers all requested areas: (1) SEED-ONLY-FROM-CANON [DOC §17 L328/L330/L349, RULE-011]: the six libraries seed only from Content Block/SKU Master/Phase ADS rule/business truth; provenance enforcement - every entry carries seed_source_ref, an entry lacking canonical provenance is REJECTED (fail-closed); machine never fabricates origin strategy (LEX-006); Learn precondition (L330) - Learn/scoring runs only AFTER canonical seed exists AND consumes only verified business signals that passed the DQ Gate; every optimization tied to sellable SKU/program/policy/claim/brand (L334). (2) REVIEW QUEUE STATES [DOC §17 L352]: candidate lifecycle CANDIDATE->APPROVED|REJECTED|HOLD->PUBLISHED(only within safe range)|queued; default = review-queue-only, no full-auto-publish path (L332); HOLD is first-class (smoke M6-SMK-011). (3) SAFE-RANGE PUBLISH + ROLLBACK [DOC §17 L353, M6-OD-006, RULE-011]: guarded auto-publish ONLY within the owner-defined safe range with rollback+audit; because M6-OD-006 is OPEN the safe range is undefined => auto-publish BLOCKED ENTIRELY (everything to review); rollback auto-reverts a breaching/drifting candidate with audit; CONTENT GATE - no candidate generates public ad copy while the banned-word/claim table is MISSING (LEXICON_REGISTER/M6-OD-007), learning halts at framework level regardless of safe range. (4) DRIFT DETECTION [DOC §9 L177]: candidate approval rate + uplift + drift violations as guardrail signals computed ONLY from verified+DQ-pass signals; a drift violation => HOLD/rollback and, on repetition, pause auto-publish. (5) DECIDABILITY - what M6-OD-006 needs: which knobs auto-publish may touch (explicitly EXCLUDING budget/scale which is the Scale Gate/M6-OD-002), bounds per knob, eligibility (canonical-seeded approved SKUs/personas), rollback triggers, who may widen, and whether auto-publish is enabled for pilot at all (default off/review-only). BOUNDARY: outputs are candidate/delta/safe-range only, never full auto-publish (RULE-011/LEX-006); no public copy while banned-word table missing; staged (production OFF - no real publish); no scale/pricing/order/CRM/commission side effects; no raw PII; channel content is untrusted DATA, never a seed source. ACCEPTANCE CHECKS MET: (a) every claim labeled via [DOC]/[REG]/[BRIEF]/[PACK]/[EXT] legend, '[DOC]=only owner requirements'; (b) owner-decision dependencies listed in §8 (M6-OD-006 safe range - this file briefs it, M6-OD-007 content fill, CTR-014->M6-P0710, CTR-020->M6-P0712, drift thresholds candidate); (c) §9 traceability separates owner-mandated (L328/330/332/334/349-353/L177 + RULE-011) from [EXT]/[PACK] proposals. Honest self-report; runner gate + downstream critic M6-PC0209 review.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/research/RESEARCH_LEARNING_ENGINE_GUARDRAILS.md",
+    "04-artifacts/evidence/prompts/M6-P0209.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): ledger rows 45-47 (entry gate: M6-PC0208=PASS, M6-P0209=RUNNING, critic M6-PC0209=TODO next)",
+    "Sourced from prior DOC_LOCK reads (this session): extract lines 328/330/332/334/336/349-353 (§17 Learning Engine lifecycle + seed constraints), 177 (§9 drift KPIs), 80 (§4 LEX-006 forbidden cell); RULES_LOCKED RULE-011; CONTRACT_REGISTER CTR-014/020; slice_definitions M6.2H; SMOKE_REGISTER M6-SMK-011; LEXICON_REGISTER banned-word MISSING->M6-OD-007; DECISION_REGISTER M6-OD-006/007",
+    "Candidate-lifecycle/drift-detection/MLOps patterns drawn from general engineering knowledge tagged [EXT]; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/research/RESEARCH_LEARNING_ENGINE_GUARDRAILS.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/LEXICON_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0209 and marks it; then paste M6-PC0209 (RESEARCH_LEARNING_ENGINE_GUARDRAILS_CRITIC, BOUNDARY_ADVERSARY) which red-teams 04-artifacts/analysis/research/RESEARCH_LEARNING_ENGINE_GUARDRAILS.md for any full-auto-publish path (RULE-011/LEX-006), learning on unclean/unseeded data (L330), auto-publish while M6-OD-006 undefined, public-copy generation while the banned-word table is missing (M6-OD-007), or safe-range creep into budget/scale. This research feeds M6-P0710 (ads_learning_candidate contract) and slice M6.2H."
+}

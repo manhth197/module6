@@ -1,0 +1,43 @@
+{
+  "prompt_id": "M6-P0307",
+  "status": "PASS",
+  "summary": "SECURITY_PRIVACY_DESIGN (PHASE0 design, plan_only). Entry gate OK: ledger M6-P0307=RUNNING, dependency M6-P0306=PASS, role=ANALYST_ARCHITECT. Produced the security/privacy enforcement design at 04-artifacts/analysis/design/SECURITY_PRIVACY_DESIGN.md. GOVERNING FRAME: the doc mandates access control EXIST as evidence ([DOC §22 L429] 'No PII tho, consent, hash policy, access control') but NOT its shape; so this file mandates the doc/rule-required PROPERTIES and BRIEFS an authorization model as [PACK] for owner review, picking no hash-field set (M6-OD-003) and no approver role. CONTENT covers all six requested areas: (1) CONSENT FAIL-CLOSED (§1): two checkpoints event-time + external-send-time ([DOC §15 L302] verbatim, RULE-002); 5 enforcement points (event gate / measurement egress / audience sync / send-time re-validation / CRM outbound) each backed by RULE-002/004/017; load-bearing = checkpoint 4 (consent valid at capture is not a standing licence to send). (2) HASH-POLICY OPTIONS for M6-OD-003 (§2): owner mandate Pixel public-safe/CAPI hash ([DOC §12 L248-249]); M6-OD-003 (allowed fields) OPEN needs privacy/legal; SHA-256/E.164 normalization briefed as [PLATFORM] 'verify against current docs', NOT picked - this file selects NO allowed-field set, CAPI payload builder framework-only until decided. (3) secret_ref HANDLING (§3): no raw secret anywhere (access/verify tokens, app secrets, page tokens, worker creds) - only secret_ref, never in code/logs/evidence (RULE-H02); rotation-safe; store = M6-OD-011. (4) PII MASKING (§4): PII-class field list; abc***xy (first 3 + last 2) + secret_ref per M6-OD-012 (pack-recommended, enforced by hooks + gate scans, VN phone/email auto-scanned); masked at write time in every log/evidence/smoke-report/audit; no raw PII in web_event_logs/outbox/platform-result-log/Evidence package (SMK-017). (5) UNTRUSTED CHANNEL INPUT (§5): channel text = untrusted DATA never instructions (RULE-H03), never executed/followed, quoted only in fenced blocks, prompt-injection defense, PII masked before entering any log. (6) ACCESS CONTROL ([DOC §22 L429], model=[PACK]) (§6): admin-API authz /api/admin/ads/* least-privilege - dashboard admin-read read-only, scale-requests approve = OWNER role only (RULE-010 scale is owner's, never any admin, never M6 self-approval RULE-015 - deliberately tighter than the other endpoints), learning-candidates review = marketing/owner no-auto-publish; worker credentials scoped secret_ref least-privilege with NO admin-API access and NO approve/publish ability (separation of duties, preserves propose-only RULE-010/011); evidence-store access append/scoped per role, judges read-only, ledger operator-script-only hook-blocked, no self-PASS (RULE-015). §7 invariant map, §9 owner-decision deps. VERIFICATION (this prompt has NO downstream critic: M6-P0307->M6-P0308, no M6-PC0307; scoped 2-lens pass): Lens-A (consent/hash/secret_ref/PII-masking/untrusted-input fidelity) CLEAN - two-checkpoint correct, 5 points rule-backed, M6-OD-003 not picked, [PLATFORM] not dressed as [DOC], secret_ref/masking/M6-OD-012 faithful, RULE-H03 faithful. Lens-B (access-control correctness + no-preemption + boundary) CLEAN - authz model correctly [PACK] not mandated, scale-approval=OWNER (RULE-010/015), worker separation-of-duties (no admin/approve/flag), no concrete approver identity/hash-field/secret/PII, no flag flipped. BOTH LENSES CLEAN, 0 findings - the independent re-derivation cleared the doc with no edits (2 non-blocking notes judged non-discrepancies: dashboard read-only also backed by §19 L373; 'owner duyet' verbatim §16 L324). ACCEPTANCE CHECKS MET: (a) design cites rules/contracts by ID (CTR-018/019/020, RULE-002/004/010/011/012/014/015/017/H02/H03, OD-003/011/012, SMK-002/008/017); (b) no owner decision pre-empted - M6-OD-003 hash-fields OPEN, M6-OD-012 masking pack-recommended, approver role catalog owner-decision, no value picked; (c) BLOCKER critic findings - none: 12 prior research critics PASS/0-blocker and this prompt's 2-lens pass found 0 BLOCKER/0 MAJOR/0 MINOR. BOUNDARY: plan_only - no auth code, no secret resolved, no raw PII/secret in file (field names only, masked/secret_ref); staged BLOCKED/OFF; authz enforces no admin/worker self-approves a scale or performs another module's action; measure-only. Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/SPEC.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "04-artifacts/analysis/research/RESEARCH_IDENTITY_CONSENT.md",
+    "04-artifacts/analysis/research/RESEARCH_META_PIXEL_CAPI_DEDUP.md",
+    "04-artifacts/analysis/design/EVENT_FLOW_DESIGN.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/design/SECURITY_PRIVACY_DESIGN.md",
+    "04-artifacts/evidence/prompts/M6-P0307.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv (read-only): entry gate M6-P0306=PASS, M6-P0307=RUNNING, M6-P0308=TODO (no M6-PC0307 critic between 0307 and 0308)",
+    "Grep (read-only): confirmed the doc mentions 'access control' ONLY at §22 L429 (no doc-level RBAC/credential/evidence-store model) + the admin API rows §19 L373-375 -> authz model is [PACK]/[EXT], not owner-mandated",
+    "Read (read-only): extract §12 L248-257 (Pixel/CAPI/send_policy), §15 L302 (consent event/external send), §19 L373-375 (admin APIs), §22 L429 (Security/Privacy Evidence); RULES_LOCKED, DECISION_REGISTER (M6-OD-003/011/012); prior RESEARCH_IDENTITY_CONSENT / RESEARCH_META_PIXEL_CAPI_DEDUP conclusions",
+    "2 parallel independent verification agents (analysis_only, read-only, no writes): consent/hash/secret_ref/PII/untrusted fidelity (CLEAN), access-control/no-preemption/boundary (CLEAN). Both CLEAN, 0 findings; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/design/SECURITY_PRIVACY_DESIGN.md",
+    "04-artifacts/analysis/research/RESEARCH_IDENTITY_CONSENT.md",
+    "04-artifacts/analysis/research/RESEARCH_META_PIXEL_CAPI_DEDUP.md",
+    "04-artifacts/analysis/design/EVENT_FLOW_DESIGN.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0307 and marks it; then paste M6-P0308 (next PHASE0 design prompt, order 58, ANALYST_ARCHITECT). NOTE: M6-P0307 has no dedicated critic; the scoped 2-lens verification pass (§8) substitutes and returned both lenses CLEAN (0 findings). SECURITY_PRIVACY_DESIGN.md feeds the admin-API authz binding (M6-P0712), the M6-OD-003 hash-policy owner decision, and slice M6.2D (PII/hash) + M6.2K security evidence."
+}

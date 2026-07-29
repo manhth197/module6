@@ -1,0 +1,51 @@
+{
+  "prompt_id": "M6-P0112",
+  "status": "PASS",
+  "summary": "DOC_LOCK_CONSOLIDATION. Entry gate OK: ledger M6-P0112=RUNNING, dependency M6-P0111=PASS, role=ANALYST_ARCHITECT. Aggregated evidence M6-P0100..M6-P0111 (12 prompts) and verified SCHEMA_CHANGELOG coverage. BAND STATUS: 12/12 PASS - every evidence file self-reports status=PASS, fail_gate_tripped=false, open_blockers=0, AND the ledger marks each PASS (M6-P0100..M6-P0111 rows). NO HARD DEVIATIONS across the band: 0 verbatim failures where verbatim was required (SOT banner, fail gates 001-007, smokes 001-015, schemas §10.1/§10.2/§10.4, metrics/quality-gate, OD-001..007, lexicon rows, entry-evidence header, slice scope/done-gate all byte-exact), 0 invented rule content, 0 mis-citations, 0 softened forbidden cells, 0 orphan smokes, DAG strictly sequential. DEVIATION/OBSERVATION AGGREGATE (all NON-BLOCKING, with resolution status): [P0100 LOCK_SOT_PRECEDENCE] 5 SPEC §5 ranked-table curation notes (rank4 drops 'product', rank6 adds 'consumption', rank7 merges Phase7+8, rank8 merges 4 ADS docs+summarized Owns, 'Facebook'->'FB') - in NON-verbatim-tagged cells; SOURCE-OF-TRUTH PRIORITY banner is character-exact; RESOLUTION: acceptable summarization, and SPEC §5 rank-7 'ads-safe live signal boundary' restore already logged (SCHEMA_CHANGELOG row 5). [P0101 LOCK_BOUNDARY] CẢNH BÁO TRIỂN KHAI deployment-warning banner (extract 83-84) not reproduced as a discrete SPEC element; 'được làm' column carried in SPEC §3; §18 delegated to ENTRY_EVIDENCE_REGISTER - all non-ownership/structural; RESOLUTION: doc-control 'Không phải' row already reproduced verbatim in SPEC §4 (SCHEMA_CHANGELOG row 6); banner substance distributed across SPEC §3/§7/registers. [P0102 LOCK_RULE_REGISTER] 2 PARTIAL, 0 invented/mis-cited: R015 second sentence 'executors never self-certify' not in cited lines 450/506 (derivable from extract line 454) - suggest add line 454; R018 'Conflicts go to the Conflict Matrix' clause not in cited doc §2 lines 27-51 (sourced in SPEC §5 line 99 / registers/CONFLICT_MATRIX.md) - suggest cite SPEC §5. Both OPEN citation-completeness suggestions for the judge. [P0103 LOCK_FAIL_GATES] register header says '1:1 ... lines 442-450' (inclusive of header rows 442-443) while the 7 data rows are 444-450 - precise per-row citations correct; no deviation. [P0104 LOCK_SMOKE_REGISTER] none. [P0105 LOCK_CONTRACTS] six §17 ADS Strategy libraries scoped under CTR-014/M6.2H rather than individual rows (consistent with doc §13); no deviation. [P0106 LOCK_SCHEMAS] SPEC wraps §10.1/§10.2/§10.4 in yaml/code fences (presentation wrapper only); content character-exact. [P0107 LOCK_DECISIONS] none. [P0108 LOCK_LEXICON] M6-LEX-002 quotes a verbatim SUBSTRING of line 344's seed-source cell (omits non-wording token 'Product effectiveness'); RESOLUTION: LEX-004/LEX-006 verbatim restores already logged (SCHEMA_CHANGELOG row 7). [P0109 LOCK_MONITORING] none. [P0110 LOCK_ENTRY_EVIDENCE] none (CONF-003 line-104 citation directly verified: 'Retargeting Engine cơ bản' present in Phase-1 Core output). [P0111 LOCK_SLICES] M6.2H done_gate_legs adds a 3rd hardening leg (Learning-input precondition, §17 line 330) beyond the 2 doc legs; M6.2J itemizes 'CRM/Diamond revenue verified' into 2 sub-legs - both ADDITIVE, no doc leg dropped. SCHEMA_CHANGELOG COVERAGE VERIFICATION: 8 rows present. They cover: CONF-001 naming observation (row1), pack ID schemes M6-RULE/FAIL/SMK/CTR/ENTRY/LEX/CONF-* (row2), hardening fail-gates M6-FAIL-008/009/010 (row3), proposed smokes M6-SMK-016/017/018 (row4), audit-round-2 corrections incl. M6-RULE-021 added + RULE-011/017 extended + CTR field-count fixes (CTR-001=20,CTR-002=19) + MONITORING §9/§15 tables + SPEC §19 §22-evidence table + SPEC §5 rank-7 restore (row5), DOC_LOCK exec fixes from P0100/P0101 (doc-control 'Không phải' row->SPEC §4; gate-script #section strip) (row6), DOC_LOCK exec fixes from P0108/P0110 (LEX-004/006 verbatim; ENTRY header line-317 verbatim) (row7), Claude Code readiness additions incl. implementation-target schema + M6-OD-011 checks (row8). COVERAGE GAP (1, MINOR/non-blocking): there is NO dedicated changelog row for the three hardening RULES M6-RULE-H01/H02/H03 (net-new pack rules beyond the owner doc). This is ASYMMETRIC with rows 3 and 4, which give the sibling hardening additions (fail-gates, smokes) their own 'ADDITION (HARDENING)' rows. H01-H03 are only implicitly covered by row 2's 'M6-RULE-*', but row 2 characterizes those IDs as 'labels only, no owner content altered', which understates H01-H03 as genuinely net-new content. The rules themselves are transparently marked 'HARDENING - OWNER REVIEW, not in the owner document' in RULES_LOCKED.md, so this is a documentation-completeness gap in the changelog, not a hidden change. RECOMMENDATION to operator/judge: add a SCHEMA_CHANGELOG row 'M6-RULE-H01/H02/H03 added (pack-level hard rules beyond doc) - ADDITION (HARDENING - OWNER REVIEW)', plus (optional) rows for the R015/R018 citation-completeness suggestions. DOC_LOCK READINESS (advisory only, NOT a self-certification): GO for M6-P0113 (DOC_LOCK_GATE_JUDGE) - all 12 DOC_LOCK prompts PASS with no hard deviations; the residual items are 3 non-blocking documentation/citation-completeness suggestions (RULE-H01-H03 changelog row; R015 add line 454; R018 cite SPEC §5), none of which alters owner content or blocks a slice. global_gateway_state=BLOCKED and production_flag=OFF verified unchanged across the entire band; no enabling tokens written anywhere. No raw secrets/PII. Honest self-report only; the DOC_LOCK judge (M6-P0113, fresh session, verdict strictly from evidence files) decides the gate.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P0100.json",
+    "04-artifacts/evidence/prompts/M6-P0101.json",
+    "04-artifacts/evidence/prompts/M6-P0102.json",
+    "04-artifacts/evidence/prompts/M6-P0103.json",
+    "04-artifacts/evidence/prompts/M6-P0104.json",
+    "04-artifacts/evidence/prompts/M6-P0105.json",
+    "04-artifacts/evidence/prompts/M6-P0106.json",
+    "04-artifacts/evidence/prompts/M6-P0107.json",
+    "04-artifacts/evidence/prompts/M6-P0108.json",
+    "04-artifacts/evidence/prompts/M6-P0109.json",
+    "04-artifacts/evidence/prompts/M6-P0110.json",
+    "04-artifacts/evidence/prompts/M6-P0111.json"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/prompts/M6-P0112.json"
+  ],
+  "commands_run": [
+    "PowerShell aggregate: ConvertFrom-Json status of M6-P0100..M6-P0111 evidence => 12/12 status=PASS, fail_gate_tripped=false, open_blockers=0 (read-only)",
+    "Read tool (read-only): registers/SCHEMA_CHANGELOG.md (8 rows); ledger rows 14-25 (M6-P0100..M6-P0111 all marked PASS)",
+    "Deviation aggregate compiled in-session from the 12 evidence summaries (all authored earlier this DOC_LOCK band)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/prompts/M6-P0100.json",
+    "04-artifacts/evidence/prompts/M6-P0101.json",
+    "04-artifacts/evidence/prompts/M6-P0102.json",
+    "04-artifacts/evidence/prompts/M6-P0103.json",
+    "04-artifacts/evidence/prompts/M6-P0104.json",
+    "04-artifacts/evidence/prompts/M6-P0105.json",
+    "04-artifacts/evidence/prompts/M6-P0106.json",
+    "04-artifacts/evidence/prompts/M6-P0107.json",
+    "04-artifacts/evidence/prompts/M6-P0108.json",
+    "04-artifacts/evidence/prompts/M6-P0109.json",
+    "04-artifacts/evidence/prompts/M6-P0110.json",
+    "04-artifacts/evidence/prompts/M6-P0111.json",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0112 and marks it; then paste M6-P0113 (DOC_LOCK_GATE_JUDGE) in a FRESH JUDGE session. DOC_LOCK band consolidated: 12/12 prompts PASS, no hard deviations, gateway BLOCKED / production OFF intact. Three non-blocking documentation/citation-completeness items for the judge to accept or request as small edits before/at sign-off: (1) add a SCHEMA_CHANGELOG row for hardening rules M6-RULE-H01/H02/H03 (mirroring rows 3/4 for hardening fail-gates and proposed smokes); (2) M6-P0102 R015 - add extract line 454 to the Source for the no-self-certify sentence; (3) M6-P0102 R018 - cite SPEC §5 / CONFLICT_MATRIX alongside doc §2 for the 'Conflict Matrix' routing clause. None blocks the gate; all are analysis_only-out-of-scope edits to 00-spec that the operator/judge must authorize."
+}

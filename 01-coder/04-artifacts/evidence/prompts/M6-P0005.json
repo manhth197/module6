@@ -1,0 +1,24 @@
+{
+  "prompt_id": "M6-P0005",
+  "status": "PASS",
+  "summary": "RUNNER_STATE_INIT_VERIFY (READ-ONLY, no state written). Ledger confirmed M6-P0005=RUNNING and dependency M6-P0004=PASS before proceeding. Compared 04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv against the pristine index 00-spec/PROMPT_INDEX_LOCKED.csv. RESULTS: (1) Row count equal: INDEX_ROWS=198, LEDGER_ROWS=198, ROWCOUNT_MATCH=True. (2) Columns exact match: both have the identical 20 columns in identical order (PromptId,Order,Role,Agent,Phase,Slice,Title,File,RequiresEvidence,RequiresJudge,GateLevel,DependsOn,ExpectedEvidence,ExpectedJudge,RequiredInputs,RequiredOutputs,Status,Note,UpdatedAt,Attempt) => COLS_EXACT_MATCH=True. (3) PromptId sets identical (0 only-in-index, 0 only-in-ledger) and row order aligned (same PromptId at same position) ROW_ORDER_ALIGNED=True. (4) Definitional integrity: for all 16 non-state columns (PromptId..RequiredOutputs), every row matches the index byte-for-byte => DEFINITIONAL_FIELD_MISMATCHES=0; only the 4 runtime-state columns (Status/Note/UpdatedAt/Attempt) differ, as expected. (5) Status legality: ILLEGAL_STATUS_ROWS=0 against legal set {TODO,RUNNING,PASS,FAIL,BLOCKED,SKIPPED}; distribution PASS=5, RUNNING=1, TODO=192 (=198). Index is pristine (INDEX_NON_TODO_ROWS=0). (6) Progression is exactly legitimate: the 6 non-TODO ledger rows are M6-P0000..M6-P0004=PASS (Attempt 1) and M6-P0005=RUNNING (Attempt 1) — precisely the bootstrap sequence executed so far, no unexpected advancement. Side observation (out of scope for this prompt, belongs to M6-P0008): a truncated mtime-sorted glob suggested prompt file 0048 might be absent; verified via Test-Path FILE_0048_EXISTS=True => false alarm, file present. No write to 04-artifacts/state was attempted. Final PASS/FAIL is the runner gate + Judge's call.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/PROMPT_INDEX_LOCKED.csv",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/prompts/M6-P0005.json"
+  ],
+  "commands_run": [
+    "Import-Csv index + ledger; compare row count, column headers, PromptId sets, row-order alignment; compare 16 definitional columns row-by-row (keyed by PromptId); status legality + distribution; Test-Path 0048 prompt file (read-only)"
+  ],
+  "evidence_refs": [
+    "00-spec/PROMPT_INDEX_LOCKED.csv",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine gate for M6-P0005 (EVIDENCE_GATE) and marks it, then pastes the next prompt M6-P0006 (EVIDENCE_DIRS_CHECK)."
+}

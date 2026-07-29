@@ -1,0 +1,9 @@
+# ==========================================================================
+# 06-security - ROLE REQUIREMENTS (venv: 06-security/.venv)
+# ==========================================================================
+# Layer 1 - pack baseline (STDLIB-ONLY policy lives there):
+-r ../requirements.txt
+#
+# Layer 2 - role-specific packages (GATED):
+# SECURITY_PII stays STDLIB-ONLY unless a gated prompt approves specific scanning tooling (owner decision + changelog).
+# -- intentionally no packages below this line --

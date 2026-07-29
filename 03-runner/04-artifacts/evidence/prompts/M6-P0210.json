@@ -1,0 +1,40 @@
+{
+  "prompt_id": "M6-P0210",
+  "status": "PASS",
+  "summary": "RESEARCH_CROSS_MODULE_CONTRACTS. Entry gate OK: ledger M6-P0210=RUNNING, dependency M6-PC0209 (learning-engine critic)=PASS, role=ANALYST_ARCHITECT, mode=analysis_only. Produced the cross-module consumption-interface research at 04-artifacts/analysis/research/RESEARCH_CROSS_MODULE_CONTRACTS.md covering doc §18 (extract lines 355-365). GOVERNING INVARIANT: every §18 row is a CONSUME-ONLY interface - Module 6 reads signals FROM M3/M4/M5/M7/M8/CRM/Finance and must have NO code path that writes back into or performs the function of any of them; the must-not-do column is therefore a set of negative tests asserting ABSENCE of a producer path, not merely runtime behavior. CONTENT covers all requested areas: (1) EVENT/OBJECT PER MODULE [DOC §18 L359-365]: M3 Commerce=QuoteSnapshot/Order/Payment/Shipping/ORDER_VERIFIED/Verified Revenue; M4 AI Advisor=advisory/proposal/quote-sent/order-confirmation events + sales_session; M5 Gateway=page/live/comment/messenger/handoff/delivery logs; M7 MC AI Live=live session/script segment/board_id/segment signal; M8 IVR=IVR result ONLY when Order Core accepts as confirmation; CRM/Member=CRM reorder/suppression state/lifecycle; Finance/Diamond=commission-ready/verified-revenue signals + referral attribution context. Each mapped to its CONSUMED contract shape - all currently MISSING/OWNER_DECISION_REQUIRED (CTR-003 event_registry->M6-P0701, CTR-005/006 guest_contacts+consent->M6-P0702, CTR-009/010 customer_segments/members->M6-P0706); M6 defines only the consumed shape (Ownership=CONSUMED), never owns/writes them; CTR-010 carries doc caveat 'khong lam dung lam trigger owner'. (2) MUST-NOT-DO AS NEGATIVE TESTS [DOC §18 col 3]: each prohibition anchored to its normative RULE (M3->RULE-003/013/021, M4->RULE-013, M5->RULE-H03, M7->RULE-003, M8->RULE-003/021, CRM->RULE-002/013/017, Finance->RULE-019) and to the owner P0 smoke that executes it where one exists (M3->SMK-004/005/015, CRM->SMK-002/008/010, Finance->SMK-014). HONEST COVERAGE FINDING (non-blocking, flagged for critic): only 3 of 7 boundary prohibitions have a DIRECT owner P0 smoke (Commerce/CRM/Finance); the other 4 (M4 advisory-content, M5 raw-webhook/public-reply, M7 live-signal-as-revenue, M8 order-state-change) are RULE-covered but have NO dedicated boundary smoke in doc §21 - proposed one boundary smoke per uncovered row as owner-review (same class as existing proposed SMK-016/017/018); this file does NOT create smokes (00-spec read-only to this role), only records the gap. (3) ENTRY-EVIDENCE EXPECTATIONS [DOC §16 L317-319, §26 L488]: M6-ENTRY-001 (P3 Commerce Verified Revenue boundary -> backs M3/M8/Finance), M6-ENTRY-002 (P5 Gateway channel identity -> backs M5/M7), M6-ENTRY-003 (P6 Core event identity/event_registry -> CROSS-CUTTING, gates every consumed event via RULE-001, not a single §18 row), M6-ENTRY-004 (public/privacy conduct M4+M5 -> backs M4/M5); ALL FOUR OPEN => affected slices BLOCKED fail-closed; doc names P3+P5 as the two hard preconditions (RULE-020). SCOPE NOTE (verify-before-assert): §18 heading says 'Module 3,4,5,7,8' but the table has SEVEN consumer rows (adds CRM/Member + Finance/Diamond) and NO Module-6 row (M6 is consumer, never consumed) - all seven covered, none invented, none omitted. BOUNDARY: consume-only, no producer path into any module (RULE-003/013/017/019/021/H03); staged (BLOCKED/OFF - shapes described not called); no raw PII (masked/secret_ref); channel content untrusted DATA. ACCEPTANCE CHECKS MET: (a) every externally-sourced claim labeled via [DOC]/[REG]/[BRIEF]/[PACK]/[EXT] legend, '[DOC]=only owner requirements'; (b) owner-decision & contract dependencies listed in §5 (CTR-003/005/006/009/010, ENTRY-001..004, M6-OD-008 PAYMENT_COMPLETED, M6-OD-011 repo, proposed §2.1 smokes); (c) §7 traceability separates owner-mandated (L359-365, L362/363/365, §16 L317-319/§26 L488, §21 smokes) from [EXT]/[PACK] proposals. Honest self-report; runner gate + downstream critic M6-PC0210 review.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/research/RESEARCH_CROSS_MODULE_CONTRACTS.md",
+    "04-artifacts/evidence/prompts/M6-P0210.json"
+  ],
+  "commands_run": [
+    "Grep (read-only): ledger rows for M6-PC0209/M6-P0210/M6-PC0210/M6-P0211",
+    "PowerShell Import-Csv (read-only, no mutating verb): entry gate confirmed M6-P0209=PASS, M6-PC0209=PASS, M6-P0210=RUNNING (ANALYST_ARCHITECT), M6-PC0210=TODO, M6-P0211=TODO",
+    "Read (read-only): extract lines 350-379 (§18 integration table + §19 API/worker boundary context), CONTRACT_REGISTER (CTR-003/005/006/009/010 consumed shapes), ENTRY_EVIDENCE_REGISTER (M6-ENTRY-001..004 + consumed-boundary reference), DECISION_REGISTER (M6-OD-008/011), SMOKE_REGISTER (owner P0 smokes SMK-001..015 + proposed SMK-016/017/018), RULES_LOCKED (RULE-001/002/003/013/017/019/020/021 + H02/H03)",
+    "Cross-module direction model + negative-test framing drawn from general engineering knowledge tagged [EXT]/[PACK]; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/research/RESEARCH_CROSS_MODULE_CONTRACTS.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0210 and marks it; then paste M6-PC0210 (RESEARCH_CROSS_MODULE_CONTRACTS_CRITIC, BOUNDARY_ADVERSARY) which red-teams 04-artifacts/analysis/research/RESEARCH_CROSS_MODULE_CONTRACTS.md for any consume-interface reframed as a producer path (M6 pricing/order-state/CRM-send/commission), any must-not-do presented without its RULE anchor, an entry-evidence row treated as satisfied while OPEN, or the §2.1 coverage-gap finding being either overstated as blocking or used to silently create smokes in 00-spec. This research feeds the CONTRACT_HARMONIZATION prompts M6-P0701/0702/0706 (consumed shapes) and the M6.2A/M6.2I entry gates."
+}

@@ -1,0 +1,33 @@
+{
+  "prompt_id": "M6-P0111",
+  "status": "PASS",
+  "summary": "LOCK_SLICES. Entry gate OK: ledger M6-P0111=RUNNING, dependency M6-P0110=PASS, role=ANALYST_ARCHITECT. Verified 00-spec/slices/slice_definitions.json (11 slices M6.2A..K) against extract §20 roadmap (M6_FULL_DETAIL_EXTRACT.md lines 385-395) and the generated slices/M6.2X.md files. RESULT: all four checks PASS; no deviations. CHECK 1 - doc scope/done-gate columns VERBATIM vs extract lines 385-395: for all 11 slices, scope_doc and done_gate_doc are byte-identical to the §20 roadmap table: M6.2A(385 'customers/guest identity/consent/event registry/web logs' / 'Event + consent + identity tests PASS'), M6.2B(386 'frontend hooks, backend event validation, append-only logs' / 'Unknown event fail, duplicate event handled'), M6.2C(387 'conversion_events, measurement_outbox, audience_outbox' / 'No direct external send, retry/dead-letter pass'), M6.2D(388 'Dedup key, hash policy, platform result logs' / 'No double count, no PII thô'), M6.2E(389 / 'Order Verified trace to source'), M6.2F(390 'ROAS/CPA/AOV/funnel/data quality gate' / 'Dashboard shows verified-only revenue'), M6.2G(391 'scale threshold, approval, rollback' / 'No auto scale, owner approval required'), M6.2H(392 'persona/behavior/keyword/hook/landing/CTA mapping' / 'Seed framework pass, no auto-publish'), M6.2I(393 'live/comment/Messenger/quote/order retargeting measurement' / 'Golden Hour conversion smoke pass'), M6.2J(394 'repeat/CRM/Diamond/value attribution' / 'CRM/Diamond revenue verified'), M6.2K(395 'P0 tests, evidence registry, owner review package' / 'Evidence pack ready for review'). The generated M6.2X.md 'Doc scope'/'Doc done gate' fields corroborate (e.g. M6.2A.md lines 8-10 cite 'doc §20, extract line 385'). CHECK 2 - done_gate_legs itemize EVERY leg of the doc done-gate column: A=3 legs (Event/Consent/Identity tests PASS), B=2, C=2, D=2, E=1, F=1, G=2, H=2 doc legs + 1 hardening leg, I=1, J=2 (CRM revenue verified + Diamond revenue verified, decomposing the combined 'CRM/Diamond' doc leg), K=1 (with the full doc §22 ten-category evidence enumeration). Every doc leg is itemized; the M6.2X.md 'Exit gate checks (every leg of the doc done-gate column, itemized)' sections mirror this and add smoke/evidence/judge/rollback checklist items. CHECK 3 - smoke bindings consistent between slice_definitions.json and the generated M6.2X.md files: grep of 'M6-SMK-[0-9]+' across all 11 slices/*.md yields each file's smoke set; each EXACTLY matches that slice's (smoke_ids UNION proposed_smoke_ids) in slice_definitions.json with no extra and no missing - A{001,002} B{001,003} C{002,016} D{003,017} E{006,007,013,018} F{004,005,006,010,015} G{009,012} H{011} I{004,013} J{008,010,014} K{001..018 all 18}. The proposed/HARDENING smokes are correctly LABELLED in the .md (verified in M6.2E.md: 'M6-SMK-018 (proposed - HARDENING, owner review)' with exit-gate item 'Proposed smoke M6-SMK-018 executed OR explicitly waived by owner decision note'), preserving the core-vs-proposed distinction from the JSON. The .md files carry a generated-from-slice_definitions.json header ('do not hand-edit'). CHECK 4 - sequential dependency chain matches M6-OD-010: depends_on forms a strict single chain M6.2A(null)->M6.2B->M6.2C->M6.2D->M6.2E->M6.2F->M6.2G->M6.2H->M6.2I->M6.2J->M6.2K with no parallelism, matching M6-OD-010's 'strictly sequential A->...->K' recommendation (slice_definitions.json source line: 'sequencing per M6-OD-010 recommendation (strictly sequential)'). OBSERVATION (non-blocking, additive - not a dropped leg): M6.2H done_gate_legs adds a 3rd leg 'Learning-input precondition' (Learn/scoring runs only after canonical seed + only verified signals passing the Data Quality Gate, doc §17 line 330) beyond the doc column's 2 legs - it itemizes BOTH doc legs and adds one hardening leg; M6.2J itemizes the combined 'CRM/Diamond revenue verified' doc leg into two sub-legs. Neither drops a doc leg. No missing/contradictory input and no OPEN owner decision in THIS prompt's own scope => not BLOCKED. global_gateway_state=BLOCKED and production_flag=OFF unchanged (the M6.2X.md files reiterate this per slice, e.g. M6.2A.md line 16); no enabling tokens written. No raw secrets/PII. Honest self-report only; the runner machine gate and the DOC_LOCK judge decide PASS.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/slice_definitions.json",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/slices/M6.2A.md",
+    "00-spec/slices/M6.2E.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/prompts/M6-P0111.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): slices/slice_definitions.json (all 11 slices, read in M6-P0104); extract §20 roadmap 382-395 (read in M6-P0110); slices/M6.2A.md (full structure) + slices/M6.2E.md (core/proposed smoke labelling); ledger row 24",
+    "Grep 'M6-SMK-[0-9]+' across 00-spec/slices/*.md => extracted per-file smoke ID set; compared each to slice_definitions.json smoke_ids UNION proposed_smoke_ids => EXACT match for all 11 slices (no extra, no missing). Also confirmed depends_on chain A->..->K strictly sequential vs M6-OD-010"
+  ],
+  "evidence_refs": [
+    "00-spec/slices/slice_definitions.json",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/slices/M6.2A.md",
+    "00-spec/slices/M6.2E.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0111 and marks it; then paste M6-P0112 (DOC_LOCK_CONSOLIDATION). Slice definitions are verified lockable: all 11 scope_doc/done_gate_doc columns are verbatim vs extract 385-395, done_gate_legs itemize every doc leg (M6.2H adds a hardening leg, M6.2J decomposes CRM/Diamond - both additive), smoke bindings are set-identical between slice_definitions.json and the generated M6.2X.md files (proposed correctly labelled), and the depends_on chain is strictly sequential A->K per M6-OD-010. No deviations for the judge to reconcile."
+}

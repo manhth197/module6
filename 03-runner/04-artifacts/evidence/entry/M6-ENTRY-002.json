@@ -1,0 +1,42 @@
+{
+  "schema_version": "GFD-M6-ENTRY-EVIDENCE-001",
+  "entry_id": "M6-ENTRY-002",
+  "source_module": "Module 5",
+  "supplied_by": "Facebook Gateway Owner (Module 5) — Nguyễn Đức Mạnh, Tech Lead",
+  "captured_at": "2026-07-22T08:10:34Z",
+  "status": "READY_FOR_JUDGE",
+  "scope": "P5 channel identity: page/live/comment/messenger identity + handoff và delivery logs. Bằng chứng trích từ codebase M5 thật (contract + runtime tạo/ghi log), PII-safe by design.",
+  "provenance": {
+    "repo": "Module5-workspace/01-coder/module5-app",
+    "commit": "87fad536a4a18f2a6c2493c784ed719e493c182e",
+    "commit_short": "87fad53"
+  },
+  "evidence_refs": [
+    "04-artifacts/evidence/entry/M6-ENTRY-002/page-identity.md",
+    "04-artifacts/evidence/entry/M6-ENTRY-002/live-identity.md",
+    "04-artifacts/evidence/entry/M6-ENTRY-002/comment-messenger-identity.md",
+    "04-artifacts/evidence/entry/M6-ENTRY-002/handoff-delivery-logs.md"
+  ],
+  "assertions": [
+    { "id": "ASSERT-001", "claim": "Page identity: mỗi page có page_id ổn định (PageContext.sourcePageId/commerceHubPageId, PageRegistryPort.resolve, ConfigPageRegistry)", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-002/page-identity.md" },
+    { "id": "ASSERT-002", "claim": "Live identity: live session có liveSessionId coded map về pageId (LiveSessionContext, LiveSessionRegistryPort.resolve, ConfigLiveSessionRegistry)", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-002/live-identity.md" },
+    { "id": "ASSERT-003", "claim": "Comment identity: NCE.commentId map về page/live/user; author ref fail-closed chỉ hashed (psidHash/userRef), PSID không bao giờ thô", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-002/comment-messenger-identity.md" },
+    { "id": "ASSERT-004", "claim": "Messenger identity: messengerThreadId/targetThreadId + psidHash/customerRef (hashed/masked); IdentityMapPort không trả PSID thô", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-002/comment-messenger-identity.md" },
+    { "id": "ASSERT-005", "claim": "Handoff logs tồn tại: ledger comment_handoff (UNIQUE comment_id) + PrismaCommentHandoffWriter upsert idempotent + endpoint /api/channel/handoff/messenger ghi row masked", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-002/handoff-delivery-logs.md" },
+    { "id": "ASSERT-006", "claim": "Delivery logs tồn tại: dispatcher buildLog + emit('delivery_log') mọi terminal → EvidenceService.emit persist (fail-closed mask) + audit('DELIVER'); inbound receive log riêng (ingest_forward/ingest_deadletter). Trạng thái là gửi/terminal (không read-receipt)", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-002/handoff-delivery-logs.md" }
+  ],
+  "sha256_manifest": [
+    { "path": "04-artifacts/evidence/entry/M6-ENTRY-002/page-identity.md", "sha256": "6458762431d50c854acfe87810986d2d3bfd4ee34cb4c5d22aecd94b93cecc96" },
+    { "path": "04-artifacts/evidence/entry/M6-ENTRY-002/live-identity.md", "sha256": "9de8727f5630b287f25ee5c4733076e1bf4849dcb8de0263a3840a1998e3891a" },
+    { "path": "04-artifacts/evidence/entry/M6-ENTRY-002/comment-messenger-identity.md", "sha256": "d43858709d808220a13476ab11e4dce87ee1ebd2242c7e9bb11349a9e298adf5" },
+    { "path": "04-artifacts/evidence/entry/M6-ENTRY-002/handoff-delivery-logs.md", "sha256": "eba245b5389893e0705f66f215b87497cd916771d3873ac0eaae3f805d47dde3" }
+  ],
+  "open_blockers": [],
+  "pii_handling": "MASKED_OR_NONE",
+  "signoff": {
+    "authorized_by": "Nguyễn Đức Mạnh, Tech Lead — Facebook Gateway / Module 5 owner",
+    "authorized_at": "2026-07-22",
+    "note": "Owner ký xác nhận supplied_by. Bằng chứng là source-proof trích verbatim từ M5 (commit 87fad53), đã red-team 4 judge hoài nghi (fidelity + overclaim + PII) trước khi ký. Vẫn READY_FOR_JUDGE — chữ ký này KHÔNG phải PASS tự phong; phiên Judge tươi M6-P1000 mới ra verdict."
+  },
+  "review_note": "Input cho phiên Judge tươi M6-P1000; KHÔNG phải PASS tự phong. Bằng chứng do Gateway/Module 5 cung cấp, trích verbatim từ code M5 (commit 87fad53), PII-safe by design (psidHash/userRef/customerRef hashed, tokenRef secret_ref, delivery/handoff log recipient masked + no body). Đã tự red-team bằng 4 judge hoài nghi đối chiếu source thật (fidelity + overclaim + PII scan) trước khi nộp. supplied_by đã được Gateway/Module 5 owner ký xác nhận (xem signoff)."
+}

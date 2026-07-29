@@ -1,0 +1,44 @@
+{
+  "prompt_id": "M6-P0300",
+  "status": "PASS",
+  "summary": "ARCH_BASELINE (PHASE0 design, plan_only). Entry gate OK: ledger M6-P0300=RUNNING, dependency M6-PC0211 (last research critic)=PASS, role=ANALYST_ARCHITECT. Produced the Module 6 architecture baseline mapped 1:1 to doc §5 at 04-artifacts/analysis/design/ARCH_BASELINE.md. STRUCTURE: (1) §0 provenance - baseline folds in the ACCEPTED Phase-0 research; VERIFIED all 12 research critics M6-PC0200..0211 = PASS/fail_gate=False/open_blockers=0, so NO outstanding BLOCKER critic finding to address or escalate (acceptance-check satisfied by verification not assumption). (2) §1 the nine §5 layers 1:1 (Source/Tracking/Outbox/Integration/Attribution/Dashboard/Gate/Learning/Evidence), each with components reproduced VERBATIM from extract L90-98, responsibility, must-not-do traced to a [DOC §4 L72-81] / [DOC §19 L371-379] cell + normative RULE, the M6-CTR contracts that live there, and the accepted non-blocking research finding. (3) §2 contract-to-layer index placing all 26 M6-CTR exactly once (Source 3, Tracking 2, Outbox 4 +2 consumed, Integration 2, Attribution 3, Dashboard 2, Gate 5, Learning 2, Evidence 1 = 26; 4 DRAFT_LOCKED 001/002/015/025, rest MISSING with named producing prompt P07xx). (4) §3 cross-cutting invariants (RULE-001 registry, RULE-002 consent 2-checkpoint, RULE-003 verified-revenue-only, RULE-004 outbox-not-direct, RULE-005 dedup, RULE-010 no-executable-scale, RULE-011 guarded-learning, H01 staged immutables, RULE-014/H02 no-PII, RULE-018 Core-wins, RULE-015 no-self-certify). (5) §4 verification pass, (6) §5 owner-decision->layer map, (7) §6 boundary, (8) §7 traceability. VERIFICATION (this prompt has NO downstream critic in the ledger: M6-P0300 -> M6-P0301 with no M6-PC0300; per pack discipline an independent adversary was run): spawned 3 parallel independent verification agents (contract-placement/completeness; must-not-do & rule-citation faithfulness; owner-decision-preemption & §5 verbatim). RESULTS: Lens-C CLEAN (no OD resolved, all 9 layers' components+roles verbatim); Lens-A 1 MINOR (DRAFT_LOCKED roll-up said '3' but lists 4 -> FIXED to 4); Lens-B 1 MAJOR (runtime-boundary lines L371/L372/L373 mislabeled [DOC §9] but they live in doc §19 'API/Worker/Queue Boundary' per extract header L367; line numbers + all RULE citations correct) -> FIXED §9->§19 in §1.2/§1.3/§1.6/§7 and replaced the Dashboard English gloss with the verbatim extract text 'Chi doc data mart/support view' [DOC §19 L373]; Lens-B LEX-006 'unverifiable' was a false alarm (LEX-006 is real in LEXICON_REGISTER, not supplied to that agent) -> no change. All 5 confirmed corrections applied and re-grounded against real source. ACCEPTANCE CHECKS MET: (a) design cites rules/contracts by ID throughout (CTR-001..026, RULE-001..021+H01-03, LEX-006, OD-001..011, SMK/FAIL/ENTRY); (b) no owner decision pre-empted - OD-002/003/004/005/006/007/001/011 + ENTRY-001..004 all remain OPEN gates in §5 (Lens-C verified no threshold/model/safe-range/connector/SKU/repo/seed-content stated); (c) BLOCKER critic findings addressed or escalated - verified ZERO across all 12 research critics. BOUNDARY: plan_only - writes no code, sends nothing, scales/publishes nothing, resolves no owner decision, flips no flag; global_gateway_state=BLOCKED, production_flag=OFF unchanged; no raw PII/secrets; channel content untrusted DATA. Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/SPEC.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/LEXICON_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-PC0200.json .. M6-PC0211.json (12 critic verdicts)"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/evidence/prompts/M6-P0300.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv (read-only): entry gate M6-P0211=PASS, M6-PC0211=PASS, M6-P0300=RUNNING, M6-P0301=TODO (no M6-PC0300 critic between 0300 and 0301)",
+    "Grep + Read (read-only): extract §5 layer table L86-98, §4 boundary lock L72-81, §19 API/Worker/Queue Boundary L367-379 (header L367='## 19.'), SPEC §8.4 context; CONTRACT_REGISTER (26 CTR), RULES_LOCKED, DECISION_REGISTER, LEXICON_REGISTER, SMOKE_REGISTER, ENTRY_EVIDENCE_REGISTER",
+    "PowerShell (read-only, no mutating verb): Get-ChildItem enumerated evidence/analysis tree (04-artifacts is a junction Glob cannot traverse); extracted all 12 critic verdicts -> all PASS/0-blocker",
+    "3 parallel independent verification agents (analysis_only, read-only, no writes): contract-placement/completeness (1 MINOR), must-not-do & rule-citation faithfulness (1 MAJOR + minors), owner-decision-preemption & §5 verbatim (CLEAN). Confirmed findings folded via Edit; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/LEXICON_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0300 and marks it; then paste M6-P0301 (next PHASE0 design prompt, order 51, ANALYST_ARCHITECT). NOTE: M6-P0300 has no dedicated critic in the ledger; the independent 3-lens verification pass (§4) substitutes for that adversarial review and its confirmed findings were folded in. ARCH_BASELINE.md is the reference map every downstream design prompt (contracts M6-P0701..0714, slices M6.2A..K) builds on."
+}

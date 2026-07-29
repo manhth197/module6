@@ -1,0 +1,42 @@
+{
+  "prompt_id": "M6-P0709",
+  "status": "PASS",
+  "summary": "CONTRACT_SCALE_REQUEST (CONTRACT_HARMONIZATION, plan_only). Entry gate OK: ledger M6-P0709=RUNNING, dependency M6-P0708 (data quality check)=PASS, role=ANALYST_ARCHITECT, no downstream critic. Produced TWO contracts in one file at 04-artifacts/analysis/contracts/CONTRACT_SCALE_REQUEST.contract.yaml (nested under top-level 'contracts:' => single root mapping, parse-safe, per M6-P0702 lesson): M6-CTR-013 ads_scale_request (M6-owned) + M6-CTR-026 scale_gate_approval_flow (M6 + Owner). GOVERNING INVARIANT [DOC §16 L312 verbatim]: 'SCALE GATE LÀ QUYẾT ĐỊNH CỦA OWNER. Module 6 chỉ tính toán và đề xuất.' => Module 6 COMPUTES + PROPOSES; NEVER executes scale (RULE-010) and NEVER self-approves (RULE-015). CONTENT CTR-013: the 8 doc §16 gate conditions (P3/P5/P6 evidence, Quote/Order, Public/Privacy, Funnel, Dashboard, Quality, Risk, Approval) with 'Yêu cầu tối thiểu' preserved VERBATIM; scale_scope [CAMPAIGN_BUDGET_INCREASE|CAMPAIGN_SCALE|AUDIENCE_SCALE|OPTIMIZATION_PUBLISH] (the 4 doc-named actions L312); request shape (request_id PK, target_ref masked, proposed_change=RECOMMENDATION only, gate_evidence, budget_cap, rollback_condition, risk_bound, approval_ref, status). CTR-026: approval flow (request -> owner approve/reject -> budget cap -> rollback, CONTRACT_REGISTER L42) with approval_state [PENDING|APPROVED|REJECTED], owner_decision {actor,decision,reason,decided_at,evidence_ref}, budget_cap/rollback_condition bound on APPROVED, risk_veto boolean. THRESHOLD DISCIPLINE (top-0.1% lens): no owner value invented — 'AOV tối thiểu 2 hộp/đơn' preserved as DOC-STATED floor (not invented, not dropped); CPA/ROAS/verified-rate numeric thresholds deferred to M6-OD-002 ('đạt ngưỡng owner đặt' is the doc's own deferral); budget_cap value owner-provided. Cross-refs: P3/P5/P6 + Quote/Order + Public/Privacy conditions map to entry evidence M6-ENTRY-001/002/003/004 (all OPEN => Scale Gate fail-closed until filed); Quote/Order + P3/P5/P6 are CONSUMED (M6 never creates orders/prices/confirms payment); Quality->CTR-012 PASS (RULE-009); Dashboard->ROAS ORDER_VERIFIED (RULE-003); Risk->RULE-017 hard veto. VERIFICATION (2 independent read-only analysis-only lenses, hermetic): LENS-1 fidelity+no-invented-values = CLEAN, 0 findings (8 conditions verbatim vs L317-324; scale_scope doc-derived L312; 'AOV 2 hộp/đơn' doc-stated; CPA/ROAS/budget deferred to OD-002/owner, no number in file; rows 20/21; ENTRY-001..004 cross-refs accurate). LENS-2 boundary+authority = 1 MINOR (genuine self-approval/seam hole): CTR-013 is M6-owned and its status enum carried APPROVED/REJECTED guarded only by soft 'mirror', while APPROVAL is one of the 8 gate_conditions and eligibility_rule required 'every condition MET' before owner approval => a coder could set CTR-013.status=APPROVED without a CTR-026 owner decision (documentary self-approval, RULE-015 risk) OR auto-mark APPROVAL MET OR deadlock; FIXED via 3 edits: (a) status note => APPROVED/REJECTED are a READ-ONLY one-directional MIRROR of a recorded CTR-026 owner decision, M6 never sets independently (RULE-015); (b) APPROVAL gate_condition flagged owner_only:true + excluded_from_pre_eligibility:true; (c) eligibility_rule => conditions 1-7 (ALL EXCEPT APPROVAL) MET + RISK clear, APPROVAL satisfied ONLY by the CTR-026 owner decision AFTER eligibility (kills the circular dependency). Re-parsed PARSE_OK (APPROVAL owner_only+excluded, status mirror/read-only/RULE-015, eligibility excludes APPROVAL, verbatim intact, rows 20/21). ACCEPTANCE CHECKS MET: (a) M6-CTR-013 + M6-CTR-026 defined field-level with types + constraints; (b) doc-named content preserved verbatim (8 conditions, owner-decision header, Approval row), every [PACK] addition -> changelog rows 20/21; (c) open owner decisions referenced as parameters (M6-OD-002 thresholds, M6-OD-006 safe-range publish, M6-OD-012 masking, M6-OD-011 stack, M6-ENTRY-001..004 entry evidence); NO threshold/budget value invented. BOUNDARY: plan_only; Module 6 proposes, owner decides + executes (RULE-010/015); Risk hard veto (RULE-017); consumed Quote/Order+P3/P5/P6 (M6 never creates order/price/payment); NO raw PII/secrets (target_ref masked + secret_ref); staged BLOCKED/OFF => no real scale (H01). Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/contracts/CONTRACT_SCALE_REQUEST.contract.yaml",
+    "04-artifacts/evidence/prompts/M6-P0709.json"
+  ],
+  "commands_run": [
+    "Read (read-only): entry gate M6-P0708=PASS, M6-P0709=RUNNING (ledger rows 70-71); extract §16 L310-324 (owner-decision header L312 + 8 condition rows verbatim); ENTRY_EVIDENCE_REGISTER (M6-ENTRY-001..004 map to P3/P5/P6 + Public/Privacy, all OPEN)",
+    "Bash python PyYAML safe_load (read-only) x2: pre-verify PARSE_OK (root single mapping, 2 contracts CTR-013/026, 8 gate conditions requirement VERBATIM zero-mismatch, scale_scope 4 doc actions, approval_state [PENDING,APPROVED,REJECTED], RISK veto=true, rows 20/21, OD-002+ENTRY-001..004 referenced); post-fold PARSE_OK (APPROVAL owner_only+excluded_from_pre_eligibility, status mirror read-only RULE-015, eligibility excludes APPROVAL)",
+    "2 independent verification agents (general-purpose, analysis_only, read-only, hermetic): LENS-1 fidelity+no-invented-values CLEAN 0 findings; LENS-2 boundary+authority 1 MINOR (CTR-013.status/APPROVAL self-approval seam) -> folded via 3 edits; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/contracts/CONTRACT_SCALE_REQUEST.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_DATA_QUALITY_CHECK.contract.yaml",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0709 and marks it, AND (out-of-band) appends SCHEMA_CHANGELOG rows 20 (M6-CTR-013) and 21 (M6-CTR-026) per the contract's schema_changelog_proposal (after rows 9-19). Then paste M6-P0710 (CONTRACT_LEARNING_CANDIDATE, order 70, ANALYST_ARCHITECT) which produces CTR-014 ads_learning_candidate (M6-owned; doc §17 lifecycle Seed/Run/Learn/Review/Publish, extract L347-353; RULE-011 guarded learning, no full auto-publish; safe range = M6-OD-006, content fill = M6-OD-007, both referenced as parameters). CONTRACT_SCALE_REQUEST feeds slice M6.2G (Scale Gate)."
+}

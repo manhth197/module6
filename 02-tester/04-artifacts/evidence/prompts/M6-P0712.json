@@ -1,0 +1,43 @@
+{
+  "prompt_id": "M6-P0712",
+  "status": "PASS",
+  "summary": "CONTRACT_ADMIN_APIS (CONTRACT_HARMONIZATION, plan_only). Entry gate OK: ledger M6-P0712=RUNNING, dependency M6-P0711 (track APIs)=PASS, role=ANALYST_ARCHITECT, no downstream critic. Produced THREE contracts in one file at 04-artifacts/analysis/contracts/CONTRACT_ADMIN_APIS.contract.yaml (nested under 'contracts:' => single root mapping, parse-safe): M6-CTR-018 GET /api/admin/ads/dashboard + M6-CTR-019 POST /api/admin/ads/scale-requests + M6-CTR-020 POST /api/admin/ads/learning-candidates. Doc-named (verbatim, doc §19): CTR-018 purpose 'Dashboard ROAS/CPA/AOV/funnel' + note 'Chỉ đọc data mart/support view' (L373); CTR-019 purpose 'Tạo đề nghị scale' + note 'Owner approval required' (L374); CTR-020 purpose 'Review candidate/hook/keyword/audience' + note 'Không auto-publish nếu chưa safe range' (L375). Each endpoint's load-bearing note honored: CTR-018 = READ-ONLY support view (writes_to NONE; RULE-012 never triggers an owner/CRM/scale/pricing action; ROAS from ORDER_VERIFIED RULE-003; metrics carry data_quality_status + evidence_trace, L308/RULE-009); CTR-019 = CREATE a proposal only (writes ads_scale_request CTR-013 with status SUBMITTED/PENDING_OWNER; response approval_state ALWAYS PENDING; endpoint NEVER self-approves - owner decides via CTR-026, RULE-010/015; RISK_VETO error RULE-017 - the P0709 self-approval seam lesson applied proactively); CTR-020 = review is owner/marketing (writes ads_learning_candidate CTR-014 review_state; review_decision [APPROVE|REJECT|HOLD]; publish_state=GUARDED_PUBLISHED ONLY if APPROVED + inside owner-approved safe range M6-OD-006, PUBLISH_WITHOUT_SAFE_RANGE error; no auto-publish without safe range - LEX-006/RULE-011). CONTENT [PACK]: request/response reference the already-locked records (CTR-015 14 KPIs, CTR-013 scale_request, CTR-014 learning_candidate) - NO field/KPI-formula re-invention. BOUNDARY CARE: CTR-020 doc purpose lists 'audience', but audience-segment approval is CRM-owned (CTR-009 approval_state) - the contract explicitly scopes to reviewing CTR-014 learning candidates and defers customer_segments approval to CRM (M6 only syncs APPROVED segments, RULE-004), no overreach. VERIFICATION (2 independent read-only analysis-only lenses, hermetic): LENS-1 fidelity+upstream-consistency+no-invented-values = CLEAN 0 findings (all 3 endpoints verbatim vs L373-375; agent confirmed dashboard does NOT re-define KPI formulas - references CTR-015/MONITORING_REGISTER §14 - and CTR-013/014-tagged fields all exist upstream; thresholds->M6-OD-002, safe_range->M6-OD-006, no invented values; HTTP codes engineering convention; rows 25/26/27). LENS-2 boundary = CLEAN 0 findings (dashboard read-only no write/trigger; scale create-only approval_state=[PENDING] no APPROVED/execution path, P0709 seam closed vs CTR-013 read-only mirror; learning no-auto-publish gated on APPROVED+safe-range with PUBLISH_WITHOUT_SAFE_RANGE, fail-closed while OD-006 OPEN; audience ownership deferred to CRM CTR-009 confirmed CONSUMED; untrusted input + PII masked; access-controlled 401 on all three; agent adversarially probed attacker-supplied safe_range + status[CREATED,REJECTED] and rejected as non-findings). NO fold required (both lenses CLEAN - the accumulated P0709 seam + audience-ownership lessons were applied proactively at authoring). ACCEPTANCE CHECKS MET: (a) M6-CTR-018/019/020 defined field-level (request + response + validation_errors) with types + constraints, referencing locked records without re-invention; (b) doc-named content preserved verbatim (all 3 paths + purpose + note), every [PACK] addition -> changelog rows 25/26/27; (c) open owner decisions referenced as parameters (M6-OD-002 thresholds, M6-OD-005 attribution model, M6-OD-006 safe range, M6-OD-012 masking, M6-OD-011 stack); NO owner value invented. BOUNDARY: plan_only; dashboard read-only support view (RULE-012); scale create-only owner-approval (RULE-010/015); learning no-auto-publish-without-safe-range (LEX-006/RULE-011); audience approval CRM-owned; UNTRUSTED input server-revalidated; NO raw PII/secrets (masked + secret_ref); access-controlled; no pricing/order/CRM action; staged BLOCKED/OFF => no real scale/publish (H01). Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/MONITORING_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/LEXICON_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/analysis/contracts/CONTRACT_SCALE_REQUEST.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_LEARNING_CANDIDATE.contract.yaml",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/contracts/CONTRACT_ADMIN_APIS.contract.yaml",
+    "04-artifacts/evidence/prompts/M6-P0712.json"
+  ],
+  "commands_run": [
+    "Read (read-only): entry gate M6-P0711=PASS, M6-P0712=RUNNING (ledger rows 73-74); extract §19 L373-375 (3 admin endpoints purpose+note verbatim, from the prior §19 read)",
+    "Bash python PyYAML safe_load (read-only): PARSE_OK (root single mapping, 3 contracts, all 3 endpoints method+path+purpose+note VERBATIM vs L373-375, dashboard writes_to=NONE, scale approval_state=[PENDING] only, learning PUBLISH_WITHOUT_SAFE_RANGE error, rows 25/26/27, OD-002/005/006/012/011 referenced)",
+    "2 independent verification agents (general-purpose, analysis_only, read-only, hermetic): LENS-1 fidelity+upstream-consistency CLEAN 0 findings (cross-read MONITORING_REGISTER CTR-015 + CTR-013 + CTR-014, no re-invention); LENS-2 boundary CLEAN 0 findings (read-only/create-only/no-publish/audience-ownership, adversarial probes rejected); NO fold required; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/contracts/CONTRACT_ADMIN_APIS.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_SCALE_REQUEST.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_LEARNING_CANDIDATE.contract.yaml",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/MONITORING_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/LEXICON_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0712 and marks it, AND (out-of-band) appends SCHEMA_CHANGELOG rows 25 (M6-CTR-018) / 26 (M6-CTR-019) / 27 (M6-CTR-020) per the contract's schema_changelog_proposal (after rows 9-24). Then paste M6-P0713 (CONTRACT_WORKERS, order 73, ANALYST_ARCHITECT) which produces the 4 worker contracts CTR-021 marketing_measurement_dispatcher + CTR-022 marketing_audience_dispatcher + CTR-023 attribution_materializer + CTR-024 data_quality_checker (extract L376-379; duties: retry/dedup/error-log, consent fail-closed, no verified-revenue overwrite, PASS/HOLD/FAIL output). CONTRACT_ADMIN_APIS feeds slices M6.2F (dashboard) / M6.2G (scale-requests) / M6.2H (learning-candidates)."
+}

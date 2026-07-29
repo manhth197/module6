@@ -1,0 +1,42 @@
+{
+  "prompt_id": "M6-P0707",
+  "status": "PASS",
+  "summary": "CONTRACT_MEASUREMENT_EVENTS_STORAGE (CONTRACT_HARMONIZATION, plan_only). Entry gate OK: ledger M6-P0707=RUNNING, dependency M6-P0706 (audience chain)=PASS, role=ANALYST_ARCHITECT, no downstream critic (band judges once at M6-P0715). NATURE: a BINDING, NOT a schema producer. M6-CTR-001 ads_measurement_event is DRAFT_LOCKED (SPEC §10.1, 20 fields, extract L191-211); this artifact at 04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_EVENTS_STORAGE.contract.yaml binds those 20 LOCKED fields to the physical table ads_measurement_events [DOC §13 L273 'Event da chuan hoa phuc vu dashboard/ROAS | Module 6'] WITHOUT renaming/removing/retyping any field. CONTENT: all 20 doc fields reproduced VERBATIM (name/type/optionality, doc_locked:true, per-field doc_source L192..L211); currency=VND literal and data_quality_status enum [PASS|HOLD|FAIL] preserved verbatim; attribution_context object; revenue_value number. STORAGE BINDING: PRIMARY KEY=event_id; UNIQUE=idempotency_key (RULE-005 locked formula, at-most-once, SMK-003 no double count); 9 indexes over doc fields for dashboard/ROAS+audit (event_ts,event_code,campaign_id,adset_id,ad_id,page_id,order_code,data_quality_status,correlation_id); partition_candidate deferred to stack M6-OD-011. THREE IMMUTABILITY ZONES (the load-bearing part): Zone A event-identity WRITE-ONCE (17 fields: identity/consent/trace + locked constant currency=VND + ingested_at; no history rewrite; identity stitching recorded in identity layer not by mutating the row, RULE-006); Zone B verified-enrichment SET-ONCE (attribution_context/revenue_value/order_code: revenue only from ORDER_VERIFIED RULE-003, attribution immutable after verify RULE-008, verified revenue NEVER overwritten M6-CTR-023 duty, corrections only via adjustment record {actor,reason,audit,evidence} RULE-008 L242); Zone C quality-status MUTABLE-AUDITED (data_quality_status transitioned only by data_quality_checker M6-CTR-024; HOLD/FAIL/LOW never scale evidence RULE-009). Explicitly framed as NOT wholesale append-only-immutable (would forbid enrichment) and NOT freely mutable (would break RULE-003/007/008). ONE physical ADDITION beyond the 20 doc fields: ingested_at (server persistence/append-audit timestamp, distinct from business event_ts) => changelog row 18. BOUNDARY: quote_snapshot_id REFERENCES M3 QuoteSnapshot (price truth, M6 never writes); order_code REFERENCES Commerce/M8 verified order (M6 never writes order state, RULE-021); no raw PII in logs/evidence (customer_id/guest_id/order_code masked abc***xy + secret_ref, RULE-014/H02). VERIFICATION (2 independent read-only analysis-only lenses, hermetic): LENS-1 fidelity = CLEAN, 0 findings (all 20 fields exact name/type/optionality vs L191-211; currency=VND literal; enum [PASS,HOLD,FAIL]; exactly 1 addition ingested_at with changelog row 18; no rename; doc_source line refs accurate). LENS-2 immutability/boundary = 1 MINOR (genuine internal-consistency catch): currency (required, doc_optional:false, locked constant) was placed in Zone B set-once (populated only on the ORDER_VERIFIED path by attribution_materializer), so non-order events would leave a REQUIRED field null; FIXED by moving currency to Zone A (write-once constant fixed at INSERT), leaving Zone B = {attribution_context,revenue_value,order_code}; 4 Edits (field binding + Zone A list/rule + Zone B list/rule + write_validation UPDATE op); re-ran PyYAML: PARSE_OK, currency_zone=A, bijection_ok=True (21 physical fields covered exactly once), Zone B=3, row 18. ACCEPTANCE CHECKS MET: (a) M6-CTR-001 bound field-level with types + constraints + PK/UNIQUE/indexes + 3 immutability zones; (b) all 20 doc-named fields preserved verbatim (no rename/remove/retype), currency=VND + enum verbatim, the only addition (ingested_at) has changelog row 18; (c) open owner decisions referenced as parameters (M6-OD-011 stack, M6-OD-008 revenue qualification, M6-OD-005 attribution model, M6-OD-003 hash, M6-OD-012 masking); idempotency_key=locked RULE-005 formula; no invented owner values (no thresholds; revenue stays ORDER_VERIFIED-only). Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_OUTBOX.contract.yaml",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_EVENTS_STORAGE.contract.yaml",
+    "04-artifacts/evidence/prompts/M6-P0707.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv + Get-ChildItem (read-only): entry gate M6-P0706=PASS, M6-P0707=RUNNING, M6-P0708=TODO; listed contracts dir (junction)",
+    "Read (read-only): extract L191-211 (ads_measurement_event 20 fields verbatim), L273 (ads_measurement_events table anchor), L254-257 (dedup/idempotency/revenue_source/send_policy formulas), L240-242 (LOW/HOLD not scale evidence + adjustment record shape); CONTRACT_REGISTER (CTR-001 DRAFT_LOCKED 20f, storage binding=P0707), SCHEMA_CHANGELOG (rows 1-8; 9-17 proposed by P0701..0706), DECISION_REGISTER (M6-OD-003/005/008/011/012)",
+    "Bash python PyYAML safe_load (read-only) x2: pre-verify PARSE_OK (root single mapping, 20 doc fields exact order vs L191-211, exactly 1 addition ingested_at, PK=event_id, UNIQUE=idempotency_key, zone bijection over 21 fields, row 18, enum+VND verbatim); post-fold PARSE_OK (currency->Zone A, Zone B=3, bijection_ok=True)",
+    "2 independent verification agents (general-purpose, analysis_only, read-only, hermetic): LENS-1 fidelity CLEAN 0 findings; LENS-2 immutability/boundary 1 MINOR (currency zone placement) -> folded via 4 Edits; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_EVENTS_STORAGE.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_OUTBOX.contract.yaml",
+    "04-artifacts/analysis/contracts/HARMONIZATION_PLAN.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0707 and marks it, AND (out-of-band) appends SCHEMA_CHANGELOG row 18 per the contract's schema_changelog_proposal (after rows 9-17). Then paste M6-P0708 (CONTRACT_DATA_QUALITY_CHECK, order 68, ANALYST_ARCHITECT) which produces CTR-012 ads_data_quality_check (M6-owned; doc §15 gate items exist, extract L299-308; PASS/HOLD/FAIL output feeds this table's data_quality_status and worker M6-CTR-024). CONTRACT_MEASUREMENT_EVENTS_STORAGE binds slice M6.2B; the physical table binding (storage engine/partition/index/embedded-vs-FK) resolves once M6-OD-011 target stack is decided."
+}

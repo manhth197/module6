@@ -1,0 +1,9 @@
+# ==========================================================================
+# 03-runner - ROLE REQUIREMENTS (venv: 03-runner/.venv)
+# ==========================================================================
+# Layer 1 - pack baseline (STDLIB-ONLY policy lives there):
+-r ../requirements.txt
+#
+# Layer 2 - role-specific packages (GATED):
+# RUNNER (operator folder) stays STDLIB-ONLY: operator tooling is PowerShell (scripts-win/) plus Python stdlib (scripts/).
+# -- intentionally no packages below this line --

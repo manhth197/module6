@@ -1,0 +1,246 @@
+{
+  "module": "M6",
+  "source": "doc §20, extract lines 383-395; sequencing per M6-OD-010 recommendation (strictly sequential)",
+  "slices": [
+    {
+      "id": "M6.2A",
+      "name": "ADS Phase 1 Data Foundation",
+      "ads_phase": "Phase 1",
+      "depends_on": null,
+      "scope_doc": "customers/guest identity/consent/event registry/web logs",
+      "done_gate_doc": "Event + consent + identity tests PASS",
+      "done_gate_legs": [
+        "Event registry tests PASS: every event validated against event_registry; unknown event rejected or held with clear audit",
+        "Consent tests PASS: consent fail-closed proven - no external measurement, no audience sync, no CRM send when consent missing/expired/opt-out",
+        "Identity tests PASS: guest -> customer mapping has audit and is never overwritten without evidence"
+      ],
+      "objective": "Build the clean measurement foundation before any ads money scales: valid events, correct identity, fail-closed consent, per doc §7 (extract lines 110-121).",
+      "in_scope": ["customers/customer_profiles/customer_addresses/customer_devices/guest_contacts consumption", "guest -> customer mapping with audit", "event_registry validation path", "web_event_logs append-only store", "guest_marketing_consent_snapshot enforcement"],
+      "out_of_scope": ["13/20 SKU parallel campaigns (Hero SKU only, M6-OD-001)", "external measurement send (M6.2C/D)", "attribution resolver (M6.2E)", "any scale action"],
+      "contracts": ["M6-CTR-003", "M6-CTR-004", "M6-CTR-005", "M6-CTR-006"],
+      "smoke_ids": ["M6-SMK-001", "M6-SMK-002"],
+      "proposed_smoke_ids": [],
+      "rules_in_scope": ["M6-RULE-001", "M6-RULE-002", "M6-RULE-006", "M6-RULE-007", "M6-RULE-018", "M6-RULE-020"],
+      "fail_gates_in_scope": ["M6-FAIL-002", "M6-FAIL-003"],
+      "entry_evidence": ["M6-ENTRY-001", "M6-ENTRY-002", "M6-ENTRY-003"],
+      "source_ref": "extract line 385"
+    },
+    {
+      "id": "M6.2B",
+      "name": "Tracking & Event Contract",
+      "ads_phase": "Phase 1",
+      "depends_on": "M6.2A",
+      "scope_doc": "frontend hooks, backend event validation, append-only logs",
+      "done_gate_doc": "Unknown event fail, duplicate event handled",
+      "done_gate_legs": [
+        "Unknown event fails: an event code absent from event_registry is rejected/held with audit at both frontend-hook and backend-validation layers",
+        "Duplicate event handled: idempotency_key formula applied; replayed events do not create duplicate rows"
+      ],
+      "objective": "Wire tracking hooks and the measurement event contract (ads_measurement_event) with validation and append-only logging, per doc §7/§10.",
+      "in_scope": ["frontend tracking hooks for locked base events (VIEW_LANDING..ORDER_VERIFIED list, extract lines 123-134)", "POST /api/ads/events/track validation", "ads_measurement_event contract enforcement", "idempotency handling"],
+      "out_of_scope": ["external platform sends", "audience sync", "dashboard"],
+      "contracts": ["M6-CTR-001", "M6-CTR-016"],
+      "smoke_ids": ["M6-SMK-001", "M6-SMK-003"],
+      "proposed_smoke_ids": [],
+      "rules_in_scope": ["M6-RULE-001", "M6-RULE-005", "M6-RULE-007"],
+      "fail_gates_in_scope": ["M6-FAIL-003"],
+      "entry_evidence": [],
+      "source_ref": "extract line 386"
+    },
+    {
+      "id": "M6.2C",
+      "name": "Outbox Workers",
+      "ads_phase": "Phase 1",
+      "depends_on": "M6.2B",
+      "scope_doc": "conversion_events, measurement_outbox, audience_outbox",
+      "done_gate_doc": "No direct external send, retry/dead-letter pass",
+      "done_gate_legs": [
+        "No direct external send: every external measurement/audience payload originates from an outbox row processed by a worker, never from a runtime request",
+        "Retry/dead-letter pass: bounded retry with error_log and next_retry_at; exhausted items dead-letter with full trace, no silent loss"
+      ],
+      "objective": "Separate runtime requests from external sync via conversion_events -> marketing_measurement_outbox and customer_segments -> marketing_audience_outbox, per doc §5/§7/§12.",
+      "in_scope": ["conversion_events source table", "marketing_measurement_outbox + dispatcher worker", "customer_segments/customer_segment_members consumption", "marketing_audience_outbox + dispatcher worker", "POST /api/ads/conversions"],
+      "out_of_scope": ["platform-specific dedup/hash (M6.2D)", "attribution (M6.2E)"],
+      "contracts": ["M6-CTR-007", "M6-CTR-008", "M6-CTR-009", "M6-CTR-010", "M6-CTR-011", "M6-CTR-017", "M6-CTR-021", "M6-CTR-022"],
+      "smoke_ids": ["M6-SMK-002"],
+      "proposed_smoke_ids": ["M6-SMK-016"],
+      "rules_in_scope": ["M6-RULE-002", "M6-RULE-004"],
+      "fail_gates_in_scope": ["M6-FAIL-002"],
+      "entry_evidence": [],
+      "source_ref": "extract line 387"
+    },
+    {
+      "id": "M6.2D",
+      "name": "Pixel/CAPI/Offline Dedup",
+      "ads_phase": "Phase 1",
+      "depends_on": "M6.2C",
+      "scope_doc": "Dedup key, hash policy, platform result logs",
+      "done_gate_doc": "No double count, no PII thô",
+      "done_gate_legs": [
+        "No double count: duplicate Pixel/CAPI/Offline events collapse via the locked dedup_key formula; platform result logs prove single delivery",
+        "No PII thô: no raw PII in any external payload or platform result log; hash policy per M6-OD-003 applied (BLOCKED on that decision where unresolved)"
+      ],
+      "objective": "Implement platform send discipline: locked dedup_key/idempotency_key formulas, hash policy, offline conversions only after ORDER_VERIFIED, per doc §12.",
+      "in_scope": ["dedup across Pixel browser / CAPI server / Offline", "send_policy = consent_valid AND event_in_registry AND data_quality_pass AND not_duplicate", "platform result logs", "offline conversion after ORDER_VERIFIED or owner-approved event"],
+      "out_of_scope": ["inventing hash fields (owner decision M6-OD-003)", "connector choice (M6-OD-004)"],
+      "contracts": ["M6-CTR-008"],
+      "smoke_ids": ["M6-SMK-003"],
+      "proposed_smoke_ids": ["M6-SMK-017"],
+      "rules_in_scope": ["M6-RULE-005", "M6-RULE-014", "M6-RULE-003"],
+      "fail_gates_in_scope": ["M6-FAIL-001", "M6-FAIL-002", "M6-FAIL-008"],
+      "entry_evidence": [],
+      "source_ref": "extract line 388"
+    },
+    {
+      "id": "M6.2E",
+      "name": "Attribution Resolver",
+      "ads_phase": "Phase 1",
+      "depends_on": "M6.2D",
+      "scope_doc": "campaign/adset/ad/page/live/comment/messenger/quote/order/verified",
+      "done_gate_doc": "Order Verified trace to source",
+      "done_gate_legs": [
+        "Order Verified trace to source: an ORDER_VERIFIED can be traced back through quote/order to campaign/adset/ad/page/live/comment/messenger per the ads_attribution_context contract"
+      ],
+      "objective": "Resolve the full attribution chain to verified revenue; missing/conflicting sources degrade to LOW/HOLD and never become scale evidence; snapshots immutable after verify, per doc §11.",
+      "in_scope": ["Attribution Resolver / Ads Context Resolver / Live Session Resolver", "ads_attribution_context population", "attribution_materializer worker", "adjustment-record path for corrections"],
+      "out_of_scope": ["commission computation (Finance owner, M6-RULE-019)", "attribution model final choice (M6-OD-005: implement multi-model display, single-model scale evidence pending owner)"],
+      "contracts": ["M6-CTR-002", "M6-CTR-023"],
+      "smoke_ids": ["M6-SMK-006", "M6-SMK-007", "M6-SMK-013"],
+      "proposed_smoke_ids": ["M6-SMK-018"],
+      "rules_in_scope": ["M6-RULE-008", "M6-RULE-009", "M6-RULE-019"],
+      "fail_gates_in_scope": ["M6-FAIL-001", "M6-FAIL-004"],
+      "entry_evidence": [],
+      "source_ref": "extract line 389"
+    },
+    {
+      "id": "M6.2F",
+      "name": "Dashboard & Data Quality",
+      "ads_phase": "Phase 1",
+      "depends_on": "M6.2E",
+      "scope_doc": "ROAS/CPA/AOV/funnel/data quality gate",
+      "done_gate_doc": "Dashboard shows verified-only revenue",
+      "done_gate_legs": [
+        "Dashboard shows verified-only revenue: every revenue figure sources from ORDER_VERIFIED / Verified Revenue; quote/order-draft displayed as revenue is an immediate FAIL"
+      ],
+      "objective": "Ship the KPI dashboard (locked formulas, doc §14) and the Data Quality Gate (doc §15) with metric-level source trace; data mart stays a support view.",
+      "in_scope": ["all 14 doc §14 metrics with formulas verbatim", "ads_data_quality_check output PASS/HOLD/FAIL", "data_quality_checker worker", "GET /api/admin/ads/dashboard (read-only on data mart/support view)", "sample evidence + trace per metric"],
+      "out_of_scope": ["alert thresholds (M6-OD-002)", "scale decisions (M6.2G)"],
+      "contracts": ["M6-CTR-012", "M6-CTR-015", "M6-CTR-018", "M6-CTR-024"],
+      "smoke_ids": ["M6-SMK-004", "M6-SMK-005", "M6-SMK-006", "M6-SMK-010", "M6-SMK-015"],
+      "proposed_smoke_ids": [],
+      "rules_in_scope": ["M6-RULE-003", "M6-RULE-012", "M6-RULE-015", "M6-RULE-017"],
+      "fail_gates_in_scope": ["M6-FAIL-001", "M6-FAIL-005"],
+      "entry_evidence": [],
+      "source_ref": "extract line 390"
+    },
+    {
+      "id": "M6.2G",
+      "name": "Scale Request",
+      "ads_phase": "Phase 1",
+      "depends_on": "M6.2F",
+      "scope_doc": "scale threshold, approval, rollback",
+      "done_gate_doc": "No auto scale, owner approval required",
+      "done_gate_legs": [
+        "No auto scale: the system can compute and propose but has no code path that raises budget, enables campaigns or opens audience scale",
+        "Owner approval required: ads_scale_request carries evidence refs, budget cap and rollback condition, and transitions only via explicit owner approval"
+      ],
+      "objective": "Turn the doc §16 Scale Gate into an owner-decision workflow: compute conditions, assemble evidence, propose; never act.",
+      "in_scope": ["scale condition evaluation across the 8 doc §16 condition rows", "ads_scale_request lifecycle", "POST /api/admin/ads/scale-requests", "Risk row FAIL/HOLD in full per doc §16 line 323: recall / sale lock / quality hold / complaint P0 / platform spam flag, plus CRM suppression (line 307)"],
+      "out_of_scope": ["threshold values (M6-OD-002)", "any budget/campaign mutation"],
+      "contracts": ["M6-CTR-013", "M6-CTR-019", "M6-CTR-026"],
+      "smoke_ids": ["M6-SMK-009", "M6-SMK-012"],
+      "proposed_smoke_ids": [],
+      "rules_in_scope": ["M6-RULE-010", "M6-RULE-017", "M6-RULE-020"],
+      "fail_gates_in_scope": ["M6-FAIL-006"],
+      "entry_evidence": ["M6-ENTRY-001", "M6-ENTRY-002", "M6-ENTRY-003", "M6-ENTRY-004"],
+      "source_ref": "extract line 391"
+    },
+    {
+      "id": "M6.2H",
+      "name": "ADS Strategy Libraries",
+      "ads_phase": "Phase 1",
+      "depends_on": "M6.2G",
+      "scope_doc": "persona/behavior/keyword/hook/landing/CTA mapping",
+      "done_gate_doc": "Seed framework pass, no auto-publish",
+      "done_gate_legs": [
+        "Seed framework pass: the six libraries (Persona/Behavior/Keyword/Negative Keyword/Creative Hook/Landing-CTA) exist with the doc §17 seed-source constraints enforced; machine never fabricates origin strategy",
+        "No auto-publish: candidates land in the review queue only; publish path requires owner/marketing approval or guarded safe range (safe range = M6-OD-006, BLOCKED until decided)",
+        "Learning-input precondition: the Learn/scoring stage runs only after the canonical seed exists and consumes only verified business signals that passed the Data Quality Gate (doc §17, extract line 330)"
+      ],
+      "objective": "Build the strategy-library framework and learning-engine skeleton with the Seed -> Run -> Learn -> Review -> Publish lifecycle, per doc §17. Content fill halts at framework if M6-OD-007 is unresolved.",
+      "in_scope": ["six library schemas + mapping chain SKU/Product line -> Persona -> Behavior -> Keyword -> Creative Hook -> Landing -> CTA -> Event -> Verified Revenue", "ads_learning_candidate lifecycle + review queue", "POST /api/admin/ads/learning-candidates"],
+      "out_of_scope": ["auto-publish outside safe range", "generating public ad copy while lexicon/claim table is missing (LEXICON_REGISTER)"],
+      "contracts": ["M6-CTR-014", "M6-CTR-020"],
+      "smoke_ids": ["M6-SMK-011"],
+      "proposed_smoke_ids": [],
+      "rules_in_scope": ["M6-RULE-011", "M6-RULE-013", "M6-RULE-018"],
+      "fail_gates_in_scope": ["M6-FAIL-006"],
+      "entry_evidence": [],
+      "source_ref": "extract line 392"
+    },
+    {
+      "id": "M6.2I",
+      "name": "Phase 2 Golden Hour Funnel",
+      "ads_phase": "Phase 2",
+      "depends_on": "M6.2H",
+      "scope_doc": "live/comment/Messenger/quote/order retargeting measurement",
+      "done_gate_doc": "Golden Hour conversion smoke pass",
+      "done_gate_legs": [
+        "Golden Hour conversion smoke pass: the Ads -> Live -> Comment -> Messenger -> Quote -> Order -> Verified chain is measured end-to-end across Golden Hour states PRE -> LIVE -> POST -> CLOSED, with the live/comment/messenger trace smoke passing"
+      ],
+      "objective": "Measure the Phase 2 conversion machine (doc §8): Golden Hour funnel, AI consult handoff, order capture signals and retargeting on valid events + valid consent only.",
+      "in_scope": ["Golden Hour state measurement PRE/LIVE/POST/CLOSED", "flow events per doc §8 table (extract lines 150-157)", "retargeting measurement on consent-valid events", "funnel rates (Comment/Inbox/Quote/Order/Verified)"],
+      "out_of_scope": ["operating live sessions (Gateway/Live owns)", "final price in public (M6-LEX-003/004)", "revenue from live signals (Module 7 boundary)", "treating order-capture signals as valid when Commerce has not passed stock/fulfillment/trust/policy + customer confirmation before send-to-Core (Commerce-owned gate, extract lines 105, 144; M6-RULE-021)"],
+      "contracts": ["M6-CTR-001", "M6-CTR-002"],
+      "smoke_ids": ["M6-SMK-004", "M6-SMK-013"],
+      "proposed_smoke_ids": [],
+      "rules_in_scope": ["M6-RULE-003", "M6-RULE-013", "M6-RULE-016", "M6-RULE-021"],
+      "fail_gates_in_scope": ["M6-FAIL-001", "M6-FAIL-010"],
+      "entry_evidence": ["M6-ENTRY-002"],
+      "source_ref": "extract line 393"
+    },
+    {
+      "id": "M6.2J",
+      "name": "Phase 3 CRM/Diamond/Lifecycle",
+      "ads_phase": "Phase 3",
+      "depends_on": "M6.2I",
+      "scope_doc": "repeat/CRM/Diamond/value attribution",
+      "done_gate_doc": "CRM/Diamond revenue verified",
+      "done_gate_legs": [
+        "CRM revenue verified: CRM revenue counts only from CRM eligibility + suppression pass + ORDER_VERIFIED; clicks/chats are never revenue",
+        "Diamond revenue verified: Diamond referral orders carry referral attribution (referral_link_id, buyer identity, ORDER_VERIFIED); commission is measured-not-computed (Finance owns)"
+      ],
+      "objective": "Measure the Phase 3 growth machine (doc §9): repeat/reorder, dormant reactivation, Diamond referral and value optimization signals; Data Mart remains a support view.",
+      "in_scope": ["CRM_REORDER_SENT / CRM_REORDER_ORDER_CREATED chain", "dormant/reactivation segments with consent + eligibility", "DIAMOND_LEAD_CREATED / DIAMOND_REFERRAL_ORDER_VERIFIED attribution", "value optimization signals (AOV, boxes/order, tier upgrade, affinity)", "Phase 3 growth KPIs per doc §9 (MONITORING_REGISTER growth table): Repeat rate, CRM Revenue, AOV; Reactivation rate, CPA reactivation; Diamond lead rate, Diamond Revenue, commission-ready revenue; CLV proxy, boxes/order, ads ratio reduction; Candidate approval rate, uplift, drift violations — each computed only from its listed valid signals"],
+      "out_of_scope": ["sending CRM (CRM Messaging owns)", "member rights decisions", "final commission/payout (Finance owns)", "Data Mart as trigger owner"],
+      "contracts": ["M6-CTR-002"],
+      "smoke_ids": ["M6-SMK-008", "M6-SMK-010", "M6-SMK-014"],
+      "proposed_smoke_ids": [],
+      "rules_in_scope": ["M6-RULE-002", "M6-RULE-012", "M6-RULE-019"],
+      "fail_gates_in_scope": ["M6-FAIL-002", "M6-FAIL-004", "M6-FAIL-005"],
+      "entry_evidence": [],
+      "source_ref": "extract line 394"
+    },
+    {
+      "id": "M6.2K",
+      "name": "Smoke & Evidence Pack",
+      "ads_phase": "cross-phase",
+      "depends_on": "M6.2J",
+      "scope_doc": "P0 tests, evidence registry, owner review package",
+      "done_gate_doc": "Evidence pack ready for review",
+      "done_gate_legs": [
+        "Evidence pack ready for review: all P0 smokes (ADS-P0-001..015 plus accepted proposed smokes) re-run with recorded results (correlation_id + evidence_id per doc §22), and ALL TEN doc §22 evidence categories assembled WITH their mandatory content (SPEC §19 verbatim table): Event Registry (screenshot/API/DB record proving event codes, owner, policy), Consent (pass/fail-closed cases, opt-out handling), Outbox (queued/sent/retry/error/dead-letter), Dedup (Pixel/CAPI/Offline duplicates handled), Attribution (Order Verified traced back campaign/adset/ad/page/live/comment/Messenger), Dashboard (Revenue Verified/ROAS/CPA/AOV from correct sources), Scale Gate (PASS/HOLD/FAIL with owner approval flow), Learning (candidate -> review -> approve/reject/hold -> rollback), Security/Privacy (no raw PII, consent, hash policy, access control), Smoke Report (results with correlation_id + evidence_id); owner review package complete"
+      ],
+      "objective": "Re-run the full P0 matrix, assemble the doc §22 evidence plan into an owner sign-off package. Production/scale stays BLOCKED regardless of results — this slice only proves readiness for owner review.",
+      "in_scope": ["full P0 smoke re-run", "evidence registry completion (all 10 §22 categories)", "owner review package assembly", "gap/blocker list for owner"],
+      "out_of_scope": ["flipping any gate/flag", "declaring ROAS Pass or Scale Ready (owner-only per doc §23)"],
+      "contracts": ["M6-CTR-025"],
+      "smoke_ids": ["M6-SMK-001", "M6-SMK-002", "M6-SMK-003", "M6-SMK-004", "M6-SMK-005", "M6-SMK-006", "M6-SMK-007", "M6-SMK-008", "M6-SMK-009", "M6-SMK-010", "M6-SMK-011", "M6-SMK-012", "M6-SMK-013", "M6-SMK-014", "M6-SMK-015"],
+      "proposed_smoke_ids": ["M6-SMK-016", "M6-SMK-017", "M6-SMK-018"],
+      "rules_in_scope": ["M6-RULE-015"],
+      "fail_gates_in_scope": ["M6-FAIL-007"],
+      "entry_evidence": [],
+      "source_ref": "extract line 395"
+    }
+  ]
+}

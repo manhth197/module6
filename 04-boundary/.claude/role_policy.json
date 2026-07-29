@@ -1,0 +1,18 @@
+{
+  "role_name": "BOUNDARY_ADVERSARY",
+  "allowed_write_roots": [
+    "work",
+    "04-artifacts/evidence/prompts",
+    "04-artifacts/boundary-reports"
+  ],
+  "deny_write_roots": [
+    "00-spec",
+    "04-artifacts/state",
+    "registry",
+    "scripts",
+    "scripts-win",
+    "_source_snapshot",
+    ".claude",
+    "CLAUDE.md"
+  ]
+}

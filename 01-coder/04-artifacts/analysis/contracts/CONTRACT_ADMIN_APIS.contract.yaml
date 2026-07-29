@@ -1,0 +1,269 @@
+# CONTRACT_ADMIN_APIS — M6-CTR-018 dashboard + M6-CTR-019 scale-requests + M6-CTR-020 learning-candidates
+# Prompt: M6-P0712 · Phase: CONTRACT_HARMONIZATION · Mode: plan_only (schema definition; no code/migration)
+# THREE contracts => nested under a top-level 'contracts:' key so the root is a SINGLE mapping (parse-safe).
+#
+# Admin endpoints [DOC §19 L373-375]. Each doc-named path + purpose + note is preserved verbatim; the
+# request/response/error fields are [PACK], anchored to already-defined records (CTR-015 dashboard KPIs,
+# CTR-013 scale_request, CTR-014 learning_candidate) — no field re-invention. Each endpoint's load-bearing
+# note: dashboard = read-only support view (RULE-012 never triggers owner); scale-requests = owner approval
+# required (creates PENDING only, never self-approves RULE-010/015); learning-candidates = no auto-publish
+# without an owner-approved safe range (RULE-011, LEX-006, M6-OD-006). All admin endpoints are access-controlled.
+
+contracts:
+
+  # =========================================================================
+  # M6-CTR-018 GET /api/admin/ads/dashboard — read-only support view
+  # =========================================================================
+  - contract_id: M6-CTR-018
+    name: "GET /api/admin/ads/dashboard"
+    kind: OWNED_SHAPE_DEFINED
+    schema_version: GFD-M6-CTR-018-OWNED-001
+    ownership: M6
+    method: GET
+    path: "/api/admin/ads/dashboard"
+    doc_purpose: "Dashboard ROAS/CPA/AOV/funnel"                          # [DOC §19 L373] verbatim
+    doc_note: "Chỉ đọc data mart/support view"                           # [DOC §19 L373] verbatim — READ-ONLY support view
+    doc_verbatim: true
+    reads_from: "the Dashboard KPI contract (M6-CTR-015, DRAFT_LOCKED 14 metrics) over the measurement store (M6-CTR-001) / data mart"
+    writes_to: "NONE — read-only (RULE-012 support view, never triggers an owner action)"
+
+    source:
+      doc_anchor: "[DOC §19 L373] 'GET /api/admin/ads/dashboard | Dashboard ROAS/CPA/AOV/funnel | Chỉ đọc data mart/support view'"
+      rule_anchors:
+        - "[REG RULE-012] data mart / dashboard is a SUPPORT VIEW ONLY — never triggers an owner action (no CRM/pricing/scale side effect)"
+        - "[REG RULE-003] ROAS computed ONLY from ORDER_VERIFIED"
+        - "[REG RULE-009] HOLD/FAIL/LOW rows carry their data_quality_status; not usable as scale evidence"
+        - "[CTR-015] Dashboard KPI contract — 14 metrics with locked formulas (MONITORING_REGISTER, doc §14)"
+
+    request:
+      note: "query filters [PACK]; read-only"
+      fields:
+        date_range: { type: object, required: false, note: "{from, to}" }
+        campaign_id: { type: string, required: false }
+        adset_id: { type: string, required: false }
+        ad_id: { type: string, required: false }
+        attribution_model: { type: string, required: false, note: "dashboard may display multiple models; official scale model = M6-OD-005" }
+
+    response:
+      note: "[PACK] shape; returns the CTR-015 KPI set — formulas are locked there, NOT re-defined here"
+      fields:
+        metrics: { type: object, note: "the M6-CTR-015 KPIs incl. ROAS/CPA/AOV/funnel (L373); ROAS from ORDER_VERIFIED only (RULE-003)" }
+        data_quality_status: { type: enum, values: [PASS, HOLD, FAIL], note: "worst-status over the slice (M6-CTR-012); HOLD/FAIL surfaced, never hidden (RULE-009)" }
+        evidence_trace: { type: object, required: true, note: "sample evidence + source trace — a metric without trace fails the Dashboard DQ item (L308, M6-CTR-012)" }
+        thresholds_ref: { type: string, required: false, note: "alert thresholds = M6-OD-002 (owner-set); none invented here" }
+        correlation_id: { type: string }
+
+    validation_errors:
+      note: "[PACK] error model {error_code, message (PII-safe), correlation_id}"
+      cases:
+        - code: UNAUTHORIZED
+          when: "caller lacks admin/read access (access control)"
+          http: 401
+        - code: INVALID_FILTER
+          when: "malformed query filter (untrusted input, RULE-H03)"
+          http: 400
+
+    boundary:
+      - "M6-owned admin endpoint; plan_only (schema, not code)"
+      - "READ-ONLY support view — NEVER triggers an owner action / CRM / scale / pricing (RULE-012)"
+      - "ROAS from ORDER_VERIFIED only (RULE-003); metrics carry data_quality_status + trace (RULE-009, L308)"
+      - "aggregated metrics; any drill-down masks PII (abc***xy) + secret_ref (RULE-014/H02, M6-OD-012)"
+      - "access-controlled (admin/read); thresholds = M6-OD-002 (not invented); staged BLOCKED/OFF"
+
+  # =========================================================================
+  # M6-CTR-019 POST /api/admin/ads/scale-requests — create a scale request (owner approval required)
+  # =========================================================================
+  - contract_id: M6-CTR-019
+    name: "POST /api/admin/ads/scale-requests"
+    kind: OWNED_SHAPE_DEFINED
+    schema_version: GFD-M6-CTR-019-OWNED-001
+    ownership: M6
+    method: POST
+    path: "/api/admin/ads/scale-requests"
+    doc_purpose: "Tạo đề nghị scale"                                     # [DOC §19 L374] verbatim
+    doc_note: "Owner approval required"                                  # [DOC §19 L374] verbatim
+    doc_verbatim: true
+    writes_to: "ads_scale_request (M6-CTR-013) with status=SUBMITTED/PENDING_OWNER — enters the Scale Gate approval flow (M6-CTR-026)"
+
+    source:
+      doc_anchor: "[DOC §19 L374] 'POST /api/admin/ads/scale-requests | Tạo đề nghị scale | Owner approval required'"
+      rule_anchors:
+        - "[REG RULE-010] no executable scale — Module 6 creates a PROPOSAL only"
+        - "[REG RULE-015] no self-certify — the endpoint NEVER sets APPROVED; the owner decides (M6-CTR-026)"
+        - "[REG RULE-017] risk hard veto"
+        - "[CTR-013 / CTR-026] request shape + approval flow already defined (M6-P0709)"
+
+    request:
+      note: "field shapes reference M6-CTR-013 ads_scale_request; server re-validates (RULE-H03)"
+      fields:
+        scale_scope: { type: enum, values: [CAMPAIGN_BUDGET_INCREASE, CAMPAIGN_SCALE, AUDIENCE_SCALE, OPTIMIZATION_PUBLISH], required: true, source_contract: "M6-CTR-013" }
+        target_ref: { type: string, required: true, source_contract: "M6-CTR-013", note: "masked if identity-derived" }
+        proposed_change: { type: object, required: true, source_contract: "M6-CTR-013", note: "a RECOMMENDATION; never executed (RULE-010)" }
+        gate_evidence: { type: list, required: true, source_contract: "M6-CTR-013", note: "the 8 §16 conditions as evidence" }
+        budget_cap: { type: object, required: true, source_contract: "M6-CTR-013", note: "value owner-provided at approval; not invented" }
+        rollback_condition: { type: string, required: true, source_contract: "M6-CTR-013" }
+        risk_bound: { type: string, required: true, source_contract: "M6-CTR-013" }
+
+    response:
+      note: "[PACK] shape"
+      fields:
+        status: { type: enum, values: [CREATED, REJECTED] }
+        request_id: { type: string, note: "the ads_scale_request id (M6-CTR-013)" }
+        approval_state: { type: enum, values: [PENDING], note: "ALWAYS PENDING on create — the endpoint NEVER returns APPROVED (owner decides via M6-CTR-026, RULE-015)" }
+        correlation_id: { type: string }
+
+    validation_errors:
+      note: "[PACK] error model"
+      cases:
+        - code: UNAUTHORIZED
+          when: "caller lacks admin access"
+          http: 401
+        - code: RISK_VETO
+          when: "a Risk condition is active (recall/sale-lock/quality-hold/complaint-P0/platform-spam-flag) — request cannot be created for approval (RULE-017)"
+          http: 422
+        - code: INELIGIBLE
+          when: "gate conditions 1-7 not all MET (M6-CTR-013 eligibility_rule) — request may be saved as DRAFT but not submitted for approval"
+          http: 422
+        - code: SCHEMA_INVALID
+          when: "malformed body (RULE-H03)"
+          http: 400
+
+    boundary:
+      - "M6-owned admin endpoint; plan_only (schema, not code)"
+      - "CREATES a proposal only; owner approval required (RULE-010, doc L374); endpoint NEVER self-approves — approval_state on create is ALWAYS PENDING (RULE-015)"
+      - "risk hard veto (RULE-017); budget_cap value owner-provided (not invented)"
+      - "request body UNTRUSTED — server re-validates; NO raw PII (target_ref masked, RULE-H03/RULE-014, M6-OD-012)"
+      - "access-controlled (admin); staged BLOCKED/OFF => no real scale ever (H01)"
+
+  # =========================================================================
+  # M6-CTR-020 POST /api/admin/ads/learning-candidates — review candidates (no auto-publish w/o safe range)
+  # =========================================================================
+  - contract_id: M6-CTR-020
+    name: "POST /api/admin/ads/learning-candidates"
+    kind: OWNED_SHAPE_DEFINED
+    schema_version: GFD-M6-CTR-020-OWNED-001
+    ownership: M6
+    method: POST
+    path: "/api/admin/ads/learning-candidates"
+    doc_purpose: "Review candidate/hook/keyword/audience"                # [DOC §19 L375] verbatim
+    doc_note: "Không auto-publish nếu chưa safe range"                   # [DOC §19 L375] verbatim — no auto-publish w/o safe range
+    doc_verbatim: true
+    writes_to: "ads_learning_candidate (M6-CTR-014) review_state (owner/marketing decision)"
+
+    source:
+      doc_anchor: "[DOC §19 L375] 'POST /api/admin/ads/learning-candidates | Review candidate/hook/keyword/audience | Không auto-publish nếu chưa safe range'"
+      rule_anchors:
+        - "[REG RULE-011] guarded learning: publish only via owner/marketing approval OR guarded auto-publish inside the owner-approved safe range"
+        - "[REG LEX-006] no full-authority auto-publish; no fabricated origin strategy"
+        - "[REG RULE-015] review approve/reject/hold is owner/marketing — Module 6 never self-approves"
+        - "[CTR-014] ads_learning_candidate shape already defined (M6-P0710)"
+
+    request:
+      note: "field shapes reference M6-CTR-014 ads_learning_candidate; server re-validates (RULE-H03)"
+      fields:
+        candidate_id: { type: string, required: true, source_contract: "M6-CTR-014" }
+        review_decision: { type: enum, values: [APPROVE, REJECT, HOLD], required: true, note: "owner/marketing decision (L352); sets review_state (M6-CTR-014)" }
+        reviewer: { type: string, required: true, note: "owner/marketing actor (audited)" }
+        reason: { type: string, required: false, note: "untrusted text quoted only fenced; PII masked" }
+        safe_range: { type: object, required: false, source_contract: "M6-CTR-014", note: "required to enable guarded publish; VALUES = M6-OD-006 (owner-set). Absent => no publish (fail-closed)" }
+
+    response:
+      note: "[PACK] shape"
+      fields:
+        status: { type: enum, values: [REVIEWED, REJECTED] }
+        candidate_id: { type: string }
+        review_state: { type: enum, values: [PENDING, APPROVED, REJECTED, HOLD], note: "the recorded owner/marketing decision (M6-CTR-014)" }
+        publish_state: { type: enum, values: [NOT_PUBLISHED, GUARDED_PUBLISHED], note: "GUARDED_PUBLISHED only if APPROVED AND inside an owner-approved safe range (M6-OD-006); else NOT_PUBLISHED (doc 'Không auto-publish nếu chưa safe range' L375)" }
+        correlation_id: { type: string }
+
+    validation_errors:
+      note: "[PACK] error model"
+      cases:
+        - code: UNAUTHORIZED
+          when: "caller lacks owner/marketing review access"
+          http: 401
+        - code: PUBLISH_WITHOUT_SAFE_RANGE
+          when: "attempt to publish while no owner-approved safe range exists (M6-OD-006 OPEN) — FORBIDDEN (doc L375, LEX-006, RULE-011)"
+          http: 422
+        - code: SCHEMA_INVALID
+          when: "malformed body (RULE-H03)"
+          http: 400
+
+    boundary:
+      - "M6-owned admin review endpoint; plan_only (schema, not code)"
+      - "review approve/reject/hold is owner/marketing; Module 6 never self-approves (RULE-015)"
+      - "NO auto-publish without an owner-approved safe range (doc L375, LEX-006, RULE-011); until M6-OD-006 decided => NOT_PUBLISHED (fail-closed)"
+      - "scope: reviews M6-CTR-014 learning candidates (keyword/persona/hook/creative/landing/CTA). 'audience' in the doc purpose refers to audience-related review; the actual customer_segments approval is CRM-owned (M6-CTR-009 approval_state) — M6 only syncs APPROVED segments (RULE-004), it does NOT approve segments here"
+      - "request body UNTRUSTED — server re-validates; NO raw PII (reason masked, RULE-H03/RULE-014, M6-OD-012)"
+      - "access-controlled (owner/marketing); staged BLOCKED/OFF => no real publish ever (H01)"
+
+# ===========================================================================
+schema_changelog_proposal:
+  - row: 25
+    date: "2026-07-22"
+    artifact: "M6-CTR-018 GET /api/admin/ads/dashboard (M6-owned, M6-P0712)"
+    change_vs_doc: >
+      New field-level request/response contract from doc §19 L373. Doc-named path + purpose ('Dashboard
+      ROAS/CPA/AOV/funnel') + note ('Chỉ đọc data mart/support view') preserved verbatim. [PACK] additions:
+      query filters, response {metrics (M6-CTR-015 KPIs), data_quality_status, evidence_trace, thresholds_ref,
+      correlation_id}, error model. READ-ONLY support view (RULE-012); ROAS from ORDER_VERIFIED (RULE-003);
+      thresholds = M6-OD-002. No owner value invented; KPI formulas not re-defined (locked in M6-CTR-015).
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0712 (proposal; owner ratifies)"
+    notes: "follows rows 9-24 (M6-P0701..0711); renumber sequentially at apply time. No rename."
+  - row: 26
+    date: "2026-07-22"
+    artifact: "M6-CTR-019 POST /api/admin/ads/scale-requests (M6-owned, M6-P0712)"
+    change_vs_doc: >
+      New field-level request/response contract from doc §19 L374. Doc-named path + purpose ('Tạo đề nghị
+      scale') + note ('Owner approval required') preserved verbatim. [PACK] additions: request (referencing
+      M6-CTR-013), response {status, request_id, approval_state=PENDING(always), correlation_id}, errors
+      (UNAUTHORIZED, RISK_VETO, INELIGIBLE, SCHEMA_INVALID). Creates a proposal only; endpoint NEVER
+      self-approves (RULE-010/015); risk veto (RULE-017). No owner value invented (budget_cap owner-provided).
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0712 (proposal; owner ratifies)"
+    notes: "follows row 25; renumber sequentially at apply time. No rename."
+  - row: 27
+    date: "2026-07-22"
+    artifact: "M6-CTR-020 POST /api/admin/ads/learning-candidates (M6-owned, M6-P0712)"
+    change_vs_doc: >
+      New field-level request/response contract from doc §19 L375. Doc-named path + purpose ('Review
+      candidate/hook/keyword/audience') + note ('Không auto-publish nếu chưa safe range') preserved verbatim.
+      [PACK] additions: request (referencing M6-CTR-014; review_decision [APPROVE|REJECT|HOLD]), response
+      {status, candidate_id, review_state, publish_state, correlation_id}, errors (UNAUTHORIZED,
+      PUBLISH_WITHOUT_SAFE_RANGE, SCHEMA_INVALID). Review is owner/marketing (RULE-015); no auto-publish without
+      owner-approved safe range M6-OD-006 (LEX-006, RULE-011); audience-segment approval stays CRM-owned
+      (M6-CTR-009). No owner value invented.
+    kind: "ADDITION (HARDENING — OWNER REVIEW)"
+    authorized_by: "M6-P0712 (proposal; owner ratifies)"
+    notes: "follows row 26; renumber sequentially at apply time. No rename."
+
+open_decisions:
+  - id: M6-OD-002
+    status: OPEN
+    effect: "CPA/ROAS/AOV/Verified-Rate alert thresholds surfaced by the dashboard (M6-CTR-018 thresholds_ref); owner-set, none invented"
+  - id: M6-OD-005
+    status: OPEN
+    effect: "official attribution model; the dashboard may display multiple models (attribution_model filter), scale uses one official model — does not change the endpoint shape"
+  - id: M6-OD-006
+    status: OPEN
+    effect: "owner-approved safe range for guarded auto-publish (M6-CTR-020 publish_state=GUARDED_PUBLISHED). Until decided => NOT_PUBLISHED (fail-closed)"
+  - id: M6-OD-012
+    status: OPEN
+    effect: "masking format for any identity-derived reference in responses/logs/errors (abc***xy recommended)"
+  - id: M6-OD-011
+    status: OPEN
+    effect: "target repository/stack; API framework, routing, access-control implementation and HTTP status mapping depend on the chosen stack"
+
+boundary:
+  - "M6-owned admin endpoints; plan_only (contract schema, not application code)"
+  - "dashboard is READ-ONLY support view — never triggers an owner action (RULE-012); ROAS from ORDER_VERIFIED (RULE-003)"
+  - "scale-requests CREATE a proposal only; owner approval required (RULE-010, L374); endpoint never self-approves (RULE-015)"
+  - "learning-candidates review is owner/marketing; NO auto-publish without owner-approved safe range (L375, LEX-006, RULE-011); audience-segment approval stays CRM-owned (M6-CTR-009)"
+  - "request bodies UNTRUSTED — server re-validates; NO raw PII/secrets in responses/logs/errors (mask + secret_ref, RULE-H03/RULE-014/H02, M6-OD-012); auth tokens never raw"
+  - "all admin endpoints access-controlled (per security design); no pricing/order-state/CRM action (module boundary); staged BLOCKED/OFF => no real scale/publish/send (H01)"
+
+acceptance_self_map:
+  - "M6-CTR-018 + M6-CTR-019 + M6-CTR-020 defined field-level (request + response + validation_errors) with types + constraints, referencing already-locked records (CTR-015/013/014) without re-invention"
+  - "doc-named content preserved verbatim (all 3 endpoint paths + purpose + note); every [PACK] addition -> changelog rows 25/26/27"
+  - "open owner decisions referenced as parameters (M6-OD-002 thresholds, M6-OD-005 attribution model, M6-OD-006 safe range, M6-OD-012 masking, M6-OD-011 stack); NO owner value invented; HTTP codes are engineering convention"

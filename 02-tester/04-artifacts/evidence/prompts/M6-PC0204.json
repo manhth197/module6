@@ -1,0 +1,45 @@
+{
+  "prompt_id": "M6-PC0204",
+  "status": "PASS",
+  "summary": "RESEARCH_META_PIXEL_CAPI_DEDUP_CRITIC (BOUNDARY_ADVERSARY, analysis_only). Entry gate verified: ledger M6-PC0204=RUNNING, dependency M6-P0204=PASS. Adversarially red-teamed 04-artifacts/analysis/research/RESEARCH_META_PIXEL_CAPI_DEDUP.md via direct citation verification + a find->refute-verify pass (5 finder lenses citation/pii-platform-boundary/platform-fact-discipline/owner-decisions/executability -> 15 candidates -> 15 adversarial verifiers). HERMETIC MODE (deliberate): did NOT web-verify Meta's API - the research responsibly quarantines every external Meta fact under a [PLATFORM] tag (=verify vs current Meta docs before implementation, not authoritative here), so neither research nor critique asserts those facts as settled truth; the review attacked soundness/boundary/tagging/consistency, not Meta's live behaviour. All [DOC]/[REG] anchors verified faithful (extract L248/L249/L254/L255 S12, L481 S25; RULE-005/014, FAIL-001/008, OD-003/004). OUTCOME: 0 BLOCKER, 0 MAJOR, 5 MINOR (6 confirmations across 5 distinct issues; 9 refuted). THREE HIGHEST-STAKES ATTACKS REFUTED: (a) PII is fail-closed/airtight - until M6-OD-003 exists no PII-bearing CAPI field is sendable (S3 boundary lock L71-73), external_id gated as PII by the boundary lock + S5.1, Pixel public-safe; raw-PII-leak attacks failed. (b) OD-003/OD-004 made DECIDABLE not RESOLVED - S5/S6 enumerate the owner's questions ('each item is a question, not a proposed answer' L94); the enumerate-fields=resolve attack was refuted. (c) platform-fact discipline holds - the load-bearing shared-event_id invariant and S4 mapping are correctly [PLATFORM]/[EXT]-tagged and deferred to M6-P0705. CONFIRMED (all MINOR): F1 (unsupported-claim, confirmed 2x): S2 L53-56 attaches [REG FAIL-001] to a double-count and the L26 anchor gloss even REDEFINES FAIL-001 as 'revenue misuse via double count', but FAIL-001's verbatim locked scope is a NON-verified state (quote/cart/draft/payment-waiting/COD-waiting) counted AS revenue; a Meta dedup miss double-counts a genuine ORDER_VERIFIED = over-count of REAL revenue, governed by RULE-005 (co-cited, correct) / the DQ dedup gate (extract L303) - pack-wide recurring slip (same mis-fit confirmed in M6-PC0203 F2); fix: drop the FAIL-001 attribution at L26 and L55. F2 (internal-inconsistency, workflow-surfaced not seeded): S4 L82/S1 L34 say idempotency_key stays INTERNAL and external Meta dedup rides on a DERIVED event_id, but sibling M6-P0203 S4 L87-94 says idempotency_key is CARRIED on the external dispatch and IS the platform-dedup field - the two Phase-0 researches feeding CTR-008 (M6-P0705) describe the same locked key oppositely, and P0204 cites '(ties to M6-P0203 S4)' as if they agree; fix: reconcile the idempotency_key vs event_id external-dedup mapping in M6-P0705 and correct the cross-reference. F3 (platform-fact-discipline): S1 L36 states 'Meta dedups by its own field (event_id)' UNTAGGED under a [DOC]-headed section, breaching the file's own [PLATFORM] labeling rule (the same fact is tagged [PLATFORM] in S2/S9); fully mitigated (forwards to S2, fact correct); fix: add [PLATFORM] at L36. F4 (citation precision): S6.3 L116-117 tags secret handling (access_token/pixel_id/dataset_id/ad-account ids as secret_ref) [REG RULE-014], but RULE-014 governs raw PII not secrets; the secret_ref mandate is RULE-H02 (+FAIL-008 exposure gate); [BRIEF] co-cited so behaviour correct; fix: cite RULE-H02. F5 (citation precision, cosmetic/pack-wide): S7 header [BRIEF / REG S18] labels an owner-DOC section as a register section (no register has a numbered S18; correct tag [DOC S18], surfaced in ENTRY_EVIDENCE_REGISTER 'Consumed-boundary reference (doc S18)'); recurs across the Phase-0 research headers = a pack-wide convention to normalize. DISMISSED (report S5): external_id-may-be-sent-plain (gated by S3 boundary lock + S5.1, fail-closed), S2-consequence-over-asserted (inherits S2 [PLATFORM] header), S4-untagged (S9 classifies it [EXT]/[PLATFORM]), S5-enumerating-fields=resolving-OD-003 (enumerating the question != deciding), Pixel-advanced-matching-ungated (OD-003 covers Pixel/CAPI/Offline + Pixel public-safe). Deliverable analysis-only; no application code/migration/external call/state write; no raw secrets/PII; global_gateway_state=BLOCKED and production_flag=OFF unchanged. Honest self-report; the runner EVIDENCE_GATE decides PASS. Findings feed Phase-0 design, producing prompt M6-P0705 (CTR-008), and owner decisions M6-OD-003/004; the research author does not respond here.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/analysis/research/RESEARCH_META_PIXEL_CAPI_DEDUP.md",
+    "04-artifacts/evidence/prompts/M6-P0204.json",
+    "04-artifacts/analysis/research/RESEARCH_OUTBOX_WORKER_PATTERNS.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/boundary-reports/RESEARCH_META_PIXEL_CAPI_DEDUP_critique.md",
+    "04-artifacts/evidence/prompts/M6-PC0204.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): brief; RESEARCH_META_PIXEL_CAPI_DEDUP.md; M6-P0204.json; ledger rows 36-37 (entry gate: M6-P0204=PASS, M6-PC0204=RUNNING). RESEARCH_OUTBOX_WORKER_PATTERNS.md (M6-P0203) + CONTRACT_REGISTER/DECISION_REGISTER/RULES_LOCKED/FAIL_GATE_REGISTER/ENTRY_EVIDENCE_REGISTER + extract S12/S25 carried from prior M6-PC0200..0203 reads this session (00-spec is locked/unchanged)",
+    "Grep (read-only): confirmed ledger rows for M6-P0204 (PASS) and M6-PC0204 (RUNNING)",
+    "Workflow (analysis only, 20 subagents, 0 errors, HERMETIC - no web fetch): 5 adversarial finder lenses -> deduped to 15 candidates -> 15 adversarial verifiers each attempting refutation and grading BLOCKER/MAJOR/MINOR; verdicts read from journal.jsonl and synthesized (6 CONFIRMED across 5 distinct issues, 9 REJECTED)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/research/RESEARCH_META_PIXEL_CAPI_DEDUP.md",
+    "04-artifacts/boundary-reports/RESEARCH_META_PIXEL_CAPI_DEDUP_critique.md",
+    "04-artifacts/evidence/prompts/M6-P0204.json",
+    "04-artifacts/analysis/research/RESEARCH_OUTBOX_WORKER_PATTERNS.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-PC0204 and marks it. Critique (0 BLOCKER, 0 MAJOR, 5 MINOR) is advisory for Phase-0 design + producing prompt M6-P0705 (CTR-008) + owner decisions M6-OD-003/004: F1 (drop the FAIL-001 mis-attribution - coordinate a single pack-wide fix with M6-PC0203 F2) and F2 (reconcile the idempotency_key vs derived-event_id external-dedup mapping between M6-P0203 and M6-P0204 in the CTR-008 contract) are the useful fixes; F3-F5 are cosmetic tagging fixes. Every [PLATFORM] Meta fact MUST be re-verified against current Meta Marketing/Conversions API docs at implementation time before any code. Then paste the next prompt M6-P0205 (RESEARCH_OFFLINE_CONVERSIONS). No dispatcher makes a real Meta call until M6-OD-003/004 are decided and the gateway is unblocked by the owner."
+}

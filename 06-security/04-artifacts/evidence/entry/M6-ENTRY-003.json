@@ -1,0 +1,47 @@
+{
+  "schema_version": "GFD-M6-ENTRY-EVIDENCE-001",
+  "entry_id": "M6-ENTRY-003",
+  "source_module": "Core Event Governance",
+  "supplied_by": "Core Event Governance evidence — nop boi Nguyen Duc Manh, Tech Lead/PM dieu phoi (KHONG phai owner registry; xem signoff). Nguon = event_registry trong repo platform business-platform @f90152d2.",
+  "captured_at": "2026-07-22T10:00:00Z",
+  "status": "READY_FOR_JUDGE",
+  "scope": "P6 event identity: Core event_registry ton tai + moi event co owner/channel/data-sensitivity/external-send policy. Bang chung tang-code (DDL+seed+runtime) verify+refute 8 agent @f90152d2.",
+  "overall_grade": "2 PARTIAL + 3 GAP. event_registry ton tai + governed + owner/source seed that; NHUNG thieu 3/5 chieu governance (attribution-channel, data-sensitivity, external-send-policy) va KHONG phai Module-3-Core-owned (la platform/P0-06 governance registry). Nop trung thuc -> Judge du kien BLOCKED cho ENTRY-003.",
+  "provenance": {
+    "repo": "PhucApu/ginsengfood-business-platform",
+    "branch": "PhucApu (NHANH CA NHAN CHUA MERGE; day la repo platform/Commerce, dung lam nguon Core event-gov theo quyet dinh owner)",
+    "commit": "f90152d2d3ca7abdb6a61f892760010c01c545e4",
+    "commit_short": "f90152d2",
+    "method": "workflow m6-entry-003-core-eventgov-verify: 4 verify + 4 refute (ASSERT-005 verify loi StructuredOutput -> verify truc tiep: 0-hit + is_ads_conversion FALSE moi row)"
+  },
+  "evidence_refs": [
+    "04-artifacts/evidence/entry/M6-ENTRY-003/event-registry-export.md"
+  ],
+  "assertions": [
+    { "id": "ASSERT-001", "grade": "PARTIAL", "claim": "event_registry TON TAI + governed (V1 CREATE + V26 lifecycle/approval + admin runtime /api/v1/admin/event/registry); owner/source seed that per-event", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-003/event-registry-export.md", "does_not_prove": "KHONG phai Module-3 'Core'-owned: la Platform/P0-06 governance registry (EventSourceCatalog 'Platform-owned'; seed trai FLOW_01..09). M6 phai coi la shared platform registry, va no khong tu thoa man day du bar 4 chieu." },
+    { "id": "ASSERT-002", "grade": "PARTIAL", "claim": "Moi event (trong seed corpus) co OWNER that: owner_flow+owner_service seed per-event, test-enforced 91 event, 0 row seed mang sentinel", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-003/event-registry-export.md", "does_not_prove": "Khong schema-invariant (NOT NULL nhung DEFAULT sentinel UNASSIGNED, KHONG CHECK); runtime Admin create (CreateEventRegistryRequest) KHONG co field owner -> event tao luc chay = UNASSIGNED. 'MOI event' dung cho seed corpus, sai cho runtime corpus." },
+    { "id": "ASSERT-003", "grade": "GAP", "claim": "(YEU CAU: moi event ghi CHANNEL) — KHONG dat", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-003/event-registry-export.md", "does_not_prove": "KHONG co cot channel. event_source_allowed la allowlist EMITTER (ai duoc phep phat event), KHONG phai attribution-channel (FB Ads/Messenger/Live/organic) M6 Ads can. GAP." },
+    { "id": "ASSERT-004", "grade": "GAP", "claim": "(YEU CAU: moi event ghi DATA-SENSITIVITY) — KHONG dat", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-003/event-registry-export.md", "does_not_prove": "KHONG co cot/enum/config phan loai sensitivity per-event o dau ca (grep=0). data_class chi tren bang log runtime (event_packages/audit_logs), khong phai dinh nghia registry. GAP." },
+    { "id": "ASSERT-005", "grade": "GAP", "claim": "(YEU CAU: moi event ghi EXTERNAL-SEND POLICY) — KHONG dat", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-003/event-registry-export.md", "does_not_prove": "KHONG co cot send/outbound/external policy per-event (grep=0). Tin hieu external DUY NHAT la is_ads_conversion boolean, FALSE moi row seed -> khong phan biet duoc event nao duoc gui ra ngoai. GAP (thieu control an toan cot loi cho module Ads)." }
+  ],
+  "sha256_manifest": [
+    { "path": "04-artifacts/evidence/entry/M6-ENTRY-003/event-registry-export.md", "sha256": "1ce02bb8a5c9b749f2e85289673aebfab6f997b7145b31c7a4d9c4c3a4f41fa8" }
+  ],
+  "open_blockers": [
+    "OWNERSHIP: event_registry la Platform/P0-06 governance registry (EventSourceCatalog 'Platform-owned'), KHONG phai Module-3-Core-owned. ENTRY-003 doi 'Core event_registry do Core so huu' -> can Owner xac nhan nguon nay dung, hoac tra ve Core/ops-core that.",
+    "CHANNEL_ATTRIBUTION_MISSING: khong co attribution-channel per-event; event_source_allowed la emitter-allowlist (ASSERT-003 GAP).",
+    "DATA_SENSITIVITY_MISSING: khong co phan loai data-sensitivity/PII per-event trong registry (ASSERT-004 GAP).",
+    "EXTERNAL_SEND_POLICY_MISSING: khong co external-send policy per-event; chi co is_ads_conversion boolean FALSE-moi-row (ASSERT-005 GAP). Nghiem trong voi module Ads.",
+    "OWNER_NOT_ENFORCED: owner seed that nhung khong schema-enforced + runtime Admin create bo owner -> event runtime = UNASSIGNED (ASSERT-002 PARTIAL)."
+  ],
+  "pii_handling": "MASKED_OR_NONE (toan bo la trich DDL/seed/code + file:line).",
+  "signoff": {
+    "authorized_by": "Nguyen Duc Manh, Tech Lead / PM dieu phoi — KHONG phai owner cua event_registry",
+    "authorized_at": "2026-07-22",
+    "core_owner_confirmation": "PENDING — owner cua registry (platform governance; thuc te nam trong repo Phuc) CHUA xac nhan. Chu ky nay chi xac nhan da trich code that, KHONG khang dinh du dieu kien.",
+    "owner_risk_acceptance": "ACCEPTED 2026-07-22 by Nguyen Duc Manh (M6 program/business owner) — Huong A+B, xem _OWNER_RISK_ACCEPTANCE_CORE_GAPS.md + _CORE_FIX_SPEC.md trong folder M6-ENTRY-003. Chap nhan 5 open_blocker CHI de mo M6.2A tren bang chung tang-code; production BLOCKED/OFF giu nguyen; external-send OFF trong pilot (thieu data_sensitivity+external_send_policy); chot business-platform la nguon Core event-gov (giai quyet Huong C). BAT BUOC re-gate M6.2G: Core phai hoan thanh Huong A (them attribution_channel+data_sensitivity+external_send_policy+siet owner+seed) va ENTRY-003 trich lai PROVEN + ky owner that truoc BAT KY scale/external-send nao. B khong kem A = vo hieu. Chu ky != PASS (verdict thuoc Judge M6-P1000).",
+    "attestation": "Tech Lead xac nhan: dossier trich verbatim tu event_registry @f90152d2 (verify+refute 8 agent), khong bia. KHONG khang dinh Core governance du: 3/5 chieu (channel/sensitivity/external-send) la GAP that, owner PARTIAL.",
+    "note": "Chu ky != PASS tu phong; verdict thuoc phien Judge tuoi M6-P1000. Day la Core schema gap that, NANG hon gap M3 (dinh vao control an toan/rieng tu ma module Ads can) -> DE XUAT Owner decision truoc khi coi ENTRY-003 la xong."
+  },
+  "review_note": "Input cho phien Judge tuoi M6-P1000; KHONG phai PASS tu phong. event_registry ton tai va governed that, nhung thieu 3/5 chieu governance ENTRY-003 doi. Owner quyet: (A de xuat) platform/Core BO SUNG 3 chieu (channel-attribution + data_sensitivity + external_send_policy) vao event_registry + seed per-event, roi trich lai -> PROVEN; (B) Owner chap nhan gap co van ban (RUI RO cao hon M3 vi dinh privacy/external-send cua module do luong Ads); (C) xac nhan lai nguon Core dung (registry nay hay ops-core/Module-2 that)."
+}

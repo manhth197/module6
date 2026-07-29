@@ -1,0 +1,43 @@
+{
+  "prompt_id": "M6-P0302",
+  "status": "PASS",
+  "summary": "EVENT_FLOW_DESIGN (PHASE0 design, plan_only). Entry gate OK: ledger M6-P0302=RUNNING, dependency M6-P0301=PASS, role=ANALYST_ARCHITECT. Produced the fail-closed event-pipeline design at 04-artifacts/analysis/design/EVENT_FLOW_DESIGN.md. GOVERNING FRAME: every stage is a gate that can only STOP the flow, never force it; external send happens ONLY via outbox+worker, ONLY when send_policy is fully true, and production_flag=OFF => no real send. PIPELINE (§1-§2) mapped stage-by-stage with PASS path + explicit fail-closed branch: Stage0 track API (CTR-016, 'Khong gui external truc tiep' §19 L371) -> Stage1 VALIDATION GATE {1a event_registry RULE-001 unknown->REJECT/HOLD+audit SMK-001 / DQ item1; 1b consent@event RULE-002 missing->no external/audience/CRM SMK-002 / DQ item2; 1c idempotency RULE-005 dup->dedup no-double-count SMK-003 / DQ item3} -> Stage2 web_event_logs (CTR-004 append-only RULE-007 §7 L117, logged even if blocked from egress) -> Stage3 conversion_events (CTR-007 §7 L119, via conversions API CTR-017, external only via worker/outbox RULE-004) -> Stage4 ads_measurement_events (CTR-001 data_quality_status PASS|HOLD|FAIL; revenue_value ONLY from ORDER_VERIFIED RULE-003 SMK-004/005/015; missing/conflict source->LOW/HOLD RULE-009 SMK-007) -> Stage5 marketing_measurement_outbox (CTR-008 enqueue-only RULE-004, error_log/next_retry_at L252) -> Stage6 dispatcher (CTR-021, send_policy conjunction at send time + hash M6-OD-003 + dedup_key L254, bounded retry->dead-letter SMK-016, raw PII blocked RULE-014 SMK-017) -> Stage7 platform Pixel/CAPI/Offline (§12 L248-250; Pixel public-safe no-PII, CAPI hash+dedup from worker, Offline only after ORDER_VERIFIED; STAGED BLOCKED/OFF no real send). MASTER EGRESS GATE (§3): send_policy = consent_valid AND event_in_registry AND data_quality_pass AND not_duplicate [DOC §12 L257 verbatim] - a conjunction, any false conjunct HOLDS (fail-closed). §4 consolidated fail-closed branch table (13 branches each anchored to RULE/SMK/DQ-item). §5 TWO CONSENT CHECKPOINTS (event time Stage1b + external send time Stage6 inside send_policy) [DOC §15 L302 'tai thoi diem event/external send'] - consent valid at capture is not a standing licence to send. §6 PII/hash discipline (Pixel public-safe, CAPI hash M6-OD-003 OPEN=>framework only, ids masked/secret_ref). VERIFICATION (this prompt has NO downstream critic: M6-P0302->M6-P0303, no M6-PC0302; verification scoped to 2 lenses proportionate to risk surface - doc re-expresses verified rules as a flow): Lens-A (fail-closed branch->RULE/SMK/DQ fidelity) 1 MINOR - §1 diagram + §2 stage 1c over-cited the dedup branch as RULE-005/007 but RULE-007 governs web_event_logs append-only not the dedup decision (RULE-005 is operative; §4 already cited RULE-005 alone) -> FIXED to RULE-005; send_policy/dedup_key/idempotency_key verbatim, all 8 DQ items correctly numbered, all other rule/smoke citations faithful. Lens-B (pipeline fidelity + no-preemption + no-PII) CLEAN - stage order matches locked acceptance §7 L116-120 + §19, no runtime->platform edge, no OD resolved (M6-OD-003 hash OPEN, M6-OD-004 connector generic, M6-OD-009 GOLDEN_HOUR default-disabled, M6-OD-011 no repo), no raw PII, no flag flipped, ORDER_SUCCESS!=ORDER_VERIFIED (L131) + ORDER_VERIFIED=revenue source (L133) correct. Confirmed finding folded via Edit. ACCEPTANCE CHECKS MET: (a) design cites rules/contracts by ID throughout (CTR-001/004/007/008/016/017/021, RULE-001/002/003/004/005/007/009/014/017/H02/H03, DQ items 1-8, SMK-001..017); (b) no owner decision pre-empted (M6-OD-003/004/009/011 + ENTRY-003 remain OPEN gates in §8); (c) BLOCKER critic findings - none: 12 prior research critics PASS/0-blocker and this prompt's 2-lens pass found 0 BLOCKER/0 MAJOR (1 MINOR fixed). BOUNDARY: plan_only - admits/sends nothing; no external send except via outbox+worker under send_policy; staged BLOCKED/OFF; no raw PII/secrets; channel payloads untrusted DATA; measure-only (no order-state/CRM/pricing). Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/SPEC.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/analysis/design/DATA_MODEL_BASELINE.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/design/EVENT_FLOW_DESIGN.md",
+    "04-artifacts/evidence/prompts/M6-P0302.json"
+  ],
+  "commands_run": [
+    "PowerShell Import-Csv (read-only): entry gate M6-P0301=PASS, M6-P0302=RUNNING, M6-P0303=TODO (no M6-PC0302 critic between 0302 and 0303)",
+    "Read (read-only): extract §7 Phase-1 acceptance L108-134 (event registry L116, web_event_logs L117, consent L118, conversion L119, base events L125-134), §12 flows+keys+send_policy L244-257, §15 Data Quality Gate 8 items L297-308, §19 API boundary L371-379; CONTRACT_REGISTER, RULES_LOCKED, DECISION_REGISTER, SMOKE_REGISTER",
+    "2 parallel independent verification agents (analysis_only, read-only, no writes) scoped to this doc's risk surface: fail-closed-branch/rule-smoke-DQ fidelity (1 MINOR -> fixed), pipeline-fidelity/no-preemption/no-PII (CLEAN). Confirmed finding folded via Edit; NO web fetch; NO project data sent externally",
+    "PowerShell (read-only): re-scanned deliverable to confirm no residual RULE-005/007 over-citation on the dedup branch"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/design/EVENT_FLOW_DESIGN.md",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/analysis/design/DATA_MODEL_BASELINE.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0302 and marks it; then paste M6-P0303 (next PHASE0 design prompt, order 53, ANALYST_ARCHITECT). NOTE: M6-P0302 has no dedicated critic; the scoped 2-lens verification pass (§7) substitutes and its one confirmed MINOR finding was folded in. EVENT_FLOW_DESIGN.md completes the ingest->egress spine feeding the CONTRACT_HARMONIZATION prompts for the API/worker/outbox contracts (M6-P0703/0704/0705/0711/0713)."
+}

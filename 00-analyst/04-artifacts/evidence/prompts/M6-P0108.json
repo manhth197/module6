@@ -1,0 +1,31 @@
+{
+  "prompt_id": "M6-P0108",
+  "status": "PASS",
+  "summary": "LOCK_LEXICON. Entry gate OK: ledger M6-P0108=RUNNING, dependency M6-P0107=PASS, role=ANALYST_ARCHITECT. Verified registers/LEXICON_REGISTER.md against the extract and cross-checked the missing-table gating against DECISION_REGISTER (M6-OD-007) and slice_definitions.json. RESULT: both checks PASS. CHECK 1 - lexicon rows verbatim with correct sources: all 6 rows M6-LEX-001..006 verified against their cited extract lines. M6-LEX-003 = extract line 140 'Live comment chỉ quick reply/route, không tư vấn sâu, không báo giá cuối, không lặp PII.' (doc §8) EXACT including trailing period. M6-LEX-005 = extract line 334 'Mọi optimization phải gắn với sellable SKU, program, Golden Hour/24/7 policy, product public claim và brand wording.' (doc §17) EXACT. M6-LEX-004 = extract line 319 'AI/Gateway không public giá cuối, không leak PII, không spam' (doc §16, Public/Privacy row value) EXACT. M6-LEX-006 = extract line 80 'Cho machine tự publish toàn quyền hoặc bịa persona/keyword/hook gốc' (doc §4 - the Learning 'bị cấm' forbidden cell, correctly labelled as the FORBIDDEN cell in the 'Where it applies' note) EXACT. M6-LEX-001 = extract line 344 Creative Hook Library 'Mục đích' column 'Hook không sale sốc, đúng brand, đúng claim' (doc §17) EXACT. All 6 Source citations (344, 344, 140, 319, 334, 80) are correct. The classification labels (content-generation constraints vs channel-conduct constraints) are kept on a SEPARATE pack-annotation note line and are NOT mixed into the verbatim rule cells, exactly as the register header states. CHECK 2 - missing banned-word table row EXISTS and GATES content generation: the '## Missing banned-word table' section holds the row 'Banned words / claim blacklist per SKU (product public claim, Meta-safe terms)' with status 'MISSING / OWNER_DECISION_REQUIRED - linked to M6-OD-007 (Content Block 20 SKU lock). Until supplied, learning/creative prompts stop at framework level and never generate public copy.' The gate is real and wired into slice reality: M6-OD-007 (verified in M6-P0107) blocks M6.2H seed content, and slice_definitions.json M6.2H.out_of_scope explicitly lists 'generating public ad copy while lexicon/claim table is missing (LEXICON_REGISTER)'. The register honestly states the owner document contains wording/communication RULES but no banned-word cell table - the correct basis for the MISSING row. OBSERVATION (non-blocking, not an alteration or mis-citation): M6-LEX-002 'Meta-safe wording, Golden Hour Tri Ân' is a VERBATIM SUBSTRING of line 344's 'Nguồn seed' cell ('Product effectiveness, Meta-safe wording, Golden Hour Tri Ân'), with the non-wording seed-source token 'Product effectiveness,' omitted; the quoted words are verbatim and the source (line 344) is correct - the omission is a scoping choice appropriate to a wording lexicon (Product effectiveness is a seed source, not a wording rule). LEX-001 and LEX-002 both normalize from the same line-344 Creative Hook Library table row (LEX-001 from the purpose column, LEX-002 from the seed-source column) - splitting one doc row into two wording rows, both verbatim. Surfaced for judge transparency; a stricter reviewer may prefer LEX-002 to quote the full cell. No missing/contradictory input and no OPEN owner decision in THIS prompt's own scope => not BLOCKED (the missing banned-word table / M6-OD-007 is the documented SUBJECT being verified, correctly marked MISSING and gating content generation, not a blocker of this verification). global_gateway_state=BLOCKED and production_flag=OFF unchanged; no enabling tokens written. No raw secrets/PII. Honest self-report only; the runner machine gate and the DOC_LOCK judge decide PASS.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/registers/LEXICON_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/slices/slice_definitions.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/prompts/M6-P0108.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): registers/LEXICON_REGISTER.md; extract lines 136-148 (§8, L140 live comment) and 325-346 (§17, L334 optimization + L344 Creative Hook Library); (L80 §4 forbidden cell and L319 §16 public/privacy were read in M6-P0101/M6-P0107 and re-cited); ledger rows 21-22",
+    "Cross-check: missing banned-word row gating vs M6-OD-007 (DECISION_REGISTER, verified M6-P0107) and slice_definitions.json M6.2H.out_of_scope 'generating public ad copy while lexicon/claim table is missing (LEXICON_REGISTER)'"
+  ],
+  "evidence_refs": [
+    "00-spec/registers/LEXICON_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/slices/slice_definitions.json",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P0108 and marks it; then paste M6-P0109 (LOCK_MONITORING). Lexicon register is verified lockable: all 6 M6-LEX rows are verbatim with correct source citations, classification tags are separated from owner wording, and the missing banned-word table row exists as MISSING/OWNER_DECISION_REQUIRED linked to M6-OD-007, gating learning/creative content generation to framework level (consistent with M6.2H out_of_scope). Only non-blocking note: M6-LEX-002 quotes the wording-relevant substring of line 344's seed-source cell (omitting 'Product effectiveness'), for the judge to accept or request full-cell quoting."
+}

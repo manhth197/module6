@@ -1,0 +1,45 @@
+{
+  "prompt_id": "M6-PC0205",
+  "status": "PASS",
+  "summary": "RESEARCH_OFFLINE_CONVERSIONS_CRITIC (BOUNDARY_ADVERSARY, analysis_only). Entry gate verified: ledger M6-PC0205=RUNNING, dependency M6-P0205=PASS; M6.2D slice claims verified faithful (done-gate 'No double count, no PII tho'; scope incl. platform result logs + offline-after-ORDER_VERIFIED). Adversarially red-teamed 04-artifacts/analysis/research/RESEARCH_OFFLINE_CONVERSIONS.md via citation/slice verification + a find->refute-verify pass (5 finder lenses revenue-trigger-boundary/consent-pii-boundary/platform-fact-discipline/owner-decisions/citation-exec -> 15 candidates -> 15 adversarial verifiers). HERMETIC (no web fetch; platform facts [PLATFORM]-quarantined). OUTCOME: 0 BLOCKER, 0 MAJOR, 3 MINOR (8 confirmations across 3 distinct issues; 7 refuted). TWO CRUX ATTACKS REFUTED (research strengths): (a) REVENUE trigger airtight - S2 emits an offline conversion ONLY on the ORDER_VERIFIED transition (fail-closed creation-time trigger, not a post-filter); never-list quote/cart/draft/payment_waiting/COD_waiting explicit; M6 consumes Commerce Verified Revenue, never creates revenue/confirms payment/sets order state; uses FAIL-001 in its CORRECT scope (unlike PC0203/PC0204 mis-cites) and INCLUDES M6-ENTRY-001 in S7 (which PC0203 omitted); all pre-verified-revenue-upload attacks failed. (b) OD-003 NOT resolved - S4 explicitly refuses the match-rate/hash tradeoff ('choosing send more PII for higher match rate is an owner/privacy-legal decision, not one this research makes'; fail-closed until decided); the 'S4 resolves OD-003 permissively via non-PII click-id' attack failed (aligns with locked RULE-014; offline field set MISSING->M6-P0705, no pre-OD-003 upload buildable). CONFIRMED (all MINOR): F1 (consent-enumeration, confirmed by 5 verifiers: 4 MINOR + 1 MAJOR dissent): an offline upload IS external measurement, which RULE-002/FAIL-002 fail-close without valid send-time consent, and M6.2D puts send_policy=consent_valid AND ... in scope with FAIL-002 in-scope; yet the research's S2 'load-bearing boundary', its dedicated S6 'Boundary & safety guards' checklist, and its S7 'explicit list - acceptance requirement' all enumerate the revenue and PII boundaries (each with a dedicated guard/dependency row) but OMIT the consent gate and the M6-CTR-006 consent-snapshot dependency; consent appears only once (S4 L79 '(consent-gated)') scoped to the click-id sub-case. Graded MINOR (majority) because NOT a shippable bypass - offline is explicitly routed via the M6-P0203 outbox send-gate (which re-validates consent) and the M6.2D exit-gate requires the full send_policy conjunction; one verifier rated MAJOR because S6/S7 are billed as the enumerated boundary/acceptance surface. Fix (most actionable): add consent (RULE-002/FAIL-002, send-time re-validation) as an explicit co-boundary in S2/S6 and add M6-CTR-006 + consent scope to S7. F2 (citation precision, confirmed 2x): S6 header L97 '[BRIEF / REG S18]' (and L101 '[REG S18, RULE-003]') labels an owner-DOC section as a register section; no register is S-keyed (they are ID-keyed); correct tag [DOC S18]; pack-wide header nit (same as M6-PC0204 F5). F3 (internal-inconsistency): S3 L58 ties offline batch window/size to the 'M6-OD-002 family', but OD-002 governs CPA/ROAS/AOV/Verified-Rate thresholds (Scale Gate/dashboard, blocks CTR-015/026 + M6.2G), not offline batch cadence, and no owner decision covers batch cadence; this contradicts the same file's S7 L116 which correctly lists batch window/size as a [PLATFORM] verify-at-implementation item; fix: drop '(M6-OD-002 family)'. DISMISSED (report S5): OD-008 omission x3 (OD-008 blocks M6.2E/F not M6.2D; owner-approved-event default-none is fail-closed by construction), S1-examples-as-triggers/match-rate-untagged (S1 is [EXT], S8 tags match-rate [PLATFORM]), S4-click-id-resolves-OD-003 x2 (aligns with RULE-014; offline field set MISSING->M6-P0705; no pre-OD-003 upload buildable). Deliverable analysis-only; no application code/migration/external call/state write; no raw secrets/PII; global_gateway_state=BLOCKED and production_flag=OFF unchanged. Honest self-report; the runner EVIDENCE_GATE decides PASS. Findings feed Phase-0 design, producing prompt M6-P0705 (CTR-008), and slice M6.2D; the research author does not respond here.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/analysis/research/RESEARCH_OFFLINE_CONVERSIONS.md",
+    "04-artifacts/evidence/prompts/M6-P0205.json",
+    "00-spec/slices/M6.2D.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/boundary-reports/RESEARCH_OFFLINE_CONVERSIONS_critique.md",
+    "04-artifacts/evidence/prompts/M6-PC0205.json"
+  ],
+  "commands_run": [
+    "Read tool (read-only): brief; RESEARCH_OFFLINE_CONVERSIONS.md; M6-P0205.json; slices/M6.2D.md (done-gate + send_policy incl consent_valid + FAIL-002 in scope); ledger rows 38-39 (entry gate: M6-P0205=PASS, M6-PC0205=RUNNING). CONTRACT_REGISTER/DECISION_REGISTER/RULES_LOCKED/FAIL_GATE_REGISTER/ENTRY_EVIDENCE_REGISTER + extract S12 carried from prior M6-PC0200..0204 reads this session (00-spec is locked/unchanged)",
+    "Grep (read-only): confirmed ledger rows for M6-P0205 (PASS) and M6-PC0205 (RUNNING)",
+    "Workflow (analysis only, 20 subagents, 0 errors, HERMETIC - no web fetch): 5 adversarial finder lenses -> deduped to 15 candidates -> 15 adversarial verifiers each attempting refutation and grading BLOCKER/MAJOR/MINOR; verdicts read from journal.jsonl and synthesized (8 CONFIRMED across 3 distinct issues, 7 REJECTED)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/research/RESEARCH_OFFLINE_CONVERSIONS.md",
+    "04-artifacts/boundary-reports/RESEARCH_OFFLINE_CONVERSIONS_critique.md",
+    "04-artifacts/evidence/prompts/M6-P0205.json",
+    "00-spec/slices/M6.2D.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-PC0205 and marks it. Critique (0 BLOCKER, 0 MAJOR, 3 MINOR) is advisory for Phase-0 design + producing prompt M6-P0705 (CTR-008) + slice M6.2D: F1 (surface the consent gate RULE-002/FAIL-002 explicitly in the offline boundary/dependency sections and add the M6-CTR-006 consent-snapshot dependency) is the most actionable fix; F2 (retag [REG S18]->[DOC S18], pack-wide) and F3 (drop the batch-cadence<->OD-002 tie) are cosmetic. Then paste the next prompt M6-P0206 (RESEARCH_ATTRIBUTION_MODELS). No offline upload occurs until M6-OD-003/004 are decided, M6-ENTRY-001 (ORDER_VERIFIED boundary) is ready, and the gateway is unblocked by the owner."
+}

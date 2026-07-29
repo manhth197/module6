@@ -1,0 +1,100 @@
+{
+  "module": "M6",
+  "roles": [
+    {
+      "folder": "00-analyst",
+      "role_name": "ANALYST_ARCHITECT",
+      "agent": "m6-analyst-architect",
+      "allowed_write_roots": [
+        "work",
+        "04-artifacts/evidence/prompts",
+        "04-artifacts/analysis"
+      ]
+    },
+    {
+      "folder": "01-coder",
+      "role_name": "CODER",
+      "agent": "m6-coder",
+      "allowed_write_roots": [
+        "work",
+        "04-artifacts/evidence/prompts",
+        "04-artifacts/impl"
+      ]
+    },
+    {
+      "folder": "02-tester",
+      "role_name": "TESTER",
+      "agent": "m6-tester",
+      "allowed_write_roots": [
+        "work",
+        "04-artifacts/evidence/prompts",
+        "04-artifacts/impl",
+        "04-artifacts/test-reports"
+      ]
+    },
+    {
+      "folder": "03-runner",
+      "role_name": "RUNNER",
+      "agent": "m6-runner",
+      "allowed_write_roots": [
+        "work",
+        "04-artifacts/evidence/prompts"
+      ]
+    },
+    {
+      "folder": "04-boundary",
+      "role_name": "BOUNDARY_ADVERSARY",
+      "agent": "m6-boundary-adversary",
+      "allowed_write_roots": [
+        "work",
+        "04-artifacts/evidence/prompts",
+        "04-artifacts/boundary-reports"
+      ]
+    },
+    {
+      "folder": "06-security",
+      "role_name": "SECURITY_PII",
+      "agent": "m6-security-pii",
+      "allowed_write_roots": [
+        "work",
+        "04-artifacts/evidence/prompts",
+        "04-artifacts/security-reports"
+      ]
+    },
+    {
+      "folder": ".",
+      "role_name": "PM_ORCHESTRATOR,JUDGE",
+      "agent": "m6-pm-orchestrator|m6-judge",
+      "allowed_write_roots": [
+        "work-root",
+        "04-artifacts/evidence/prompts",
+        "04-artifacts/evidence/judge",
+        "05-judge"
+      ]
+    },
+    {
+      "folder": "05-judge",
+      "role_name": "JUDGE-OUTPUT-ONLY",
+      "agent": "m6-judge",
+      "allowed_write_roots": [
+        "05-judge"
+      ]
+    }
+  ],
+  "hook_files": [
+    "role_pre_tool_guard.ps1",
+    "role_pre_tool_guard.py",
+    "post_write_secret_scan.ps1",
+    "post_write_secret_scan.py",
+    "stop_role_evidence_guard.ps1",
+    "stop_role_evidence_guard.py"
+  ],
+  "hook_sha256": {
+    "role_pre_tool_guard.ps1": "5699d81f54d7f890f81335df9fe1db514714883fbe5d8b10789675dbff0d4425",
+    "role_pre_tool_guard.py": "4508547b225591f070835fa1e3cbb1c6d288def40dfc99733fcc6c3e68a127c2",
+    "post_write_secret_scan.ps1": "b9862eac33fb1d44c60aec61b93b7146fe09234400dcef73497da89bf1a51147",
+    "post_write_secret_scan.py": "c31f93da36dcc63f46b6903eb7e6846b0e4c69a4409eac0d8af645a92b0d7539",
+    "stop_role_evidence_guard.ps1": "7936d91f728e05934aaa283569f26678c5907518bb67d76c459123fba315be3c",
+    "stop_role_evidence_guard.py": "c75e211b188ec50c27860de8381b79ad118db35f8e2d58cfa9bc2bce67859ed4"
+  }
+}
