@@ -1,0 +1,63 @@
+{
+  "prompt_id": "M6-P1004",
+  "status": "PASS",
+  "summary": "M6_2A_TESTER_RUN (TESTER, mode=test/run) attempt 3, ledger row 82 = RUNNING (note 'Round4: prior run certified 70-test Round-3 code; re-run on frozen Round-4 (96)'). Entry gate satisfied: dependency M6-P1003 = PASS (attempt 4) and M6-P1004 = RUNNING. Executed the slice M6.2A smoke suite with the pinned tester venv (D:\\M6\\Module6-workspace\\02-tester\\.venv\\Scripts\\python.exe; Python 3.12.13, pytest 8.4.2) from 04-artifacts/impl/M6.2A/, cache-free (PYTHONDONTWRITEBYTECODE=1, -p no:cacheprovider), no shell redirection. RESULTS (all green, exit 0): full staged suite = 96 passed, 0 failed, 0 error, 0 skipped (NOT 70 - the +26 over the Round-3 attempt-2 report is exactly tests/test_round4_regressions.py); M6-SMK-001 file = 4/4 passed; M6-SMK-002 file = 7/7 passed; consent fail-closed unit matrix tests/test_consent_fail_closed.py = 6/6 passed. The full-suite count 96 was obtained programmatically and cross-checked three ways that all agree (96 passed / 0 failed): (1) an in-process pytest_runtest_logreport plugin tally COUNTS={passed:96,failed:0,skipped:0,error:0} with pytest.main() RC=0; (2) the -q dotted progress 72+24=96 with no F/E; (3) --collect-only -q per-file totals summing to 96 (smoke 11 + consent_fail_closed 6 + event_registry_validation 6 + identity_mapping_audit 7 + ingest_measure_only 5 + round2 11 + round3 20 + round4 26 + web_event_logs_append_only 4). This programmatic tally was necessary because in this harness pytest's terminal summary line ('==== 96 passed ====') is written to the terminal fd directly and is not captured in the tool stdout buffer for a long run; the short smoke/consent runs DO capture their verbatim 'N passed' summary and those are quoted verbatim in SMOKE_RESULTS.md. M6-SMK-001 'Event khong co trong event_registry' -> 'Reject/HOLD, audit ro' PASS: primary unknown event REJECT UNKNOWN_EVENT_NOT_IN_REGISTRY (not logged, not egress-eligible, audited) + 2 HOLD negatives (DEREG -> REGISTRATION_STATE_NOT_ACTIVE, missing owner -> MISSING_OWNER) + ACCEPT control. M6-SMK-002 'Event hop le nhung thieu consent' -> 'Khong external measurement, khong audience sync' PASS: primary parametrized over both named egress kinds (external_measurement, audience_sync) with seam-produced CONSENT_MISSING audit + egress_eligible False while the valid event is still durably logged, 3 non-valid-consent negatives each seam-audited, absent-snapshot fail-closed (CONSENT_SNAPSHOT_ABSENT), and a gate-level VALID control proving the deny is due to missing consent not a blanket block; corroborated by the 6/6 gate-level consent matrix. Round-4's input type-boundary sits upstream of consent and only fail-closes wrong-TYPE input, so the well-typed SMK-002 consent path/audit are unchanged from Round 3. No failures occurred; nothing was patched (TESTER reports, never fixes). Boundary respected: no application code changed, no migration, no external/platform call, no order/revenue/CRM/scale action; 04-artifacts/state untouched; global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF all immutable and unchanged. No raw secret/token/PII: all fixture/session/consent ids are synthetic pseudonymous handles; subject_ref/identity masked by the audit sink in the code under test; channel-origin event_code/session_id treated strictly as data. STAGED tree left byte-clean (0 __pycache__/.pytest_cache after the run). status PASS is the TESTER's honest result record; it does NOT self-certify gate/leg closure - the runner EVIDENCE_GATE and the slice Judge decide. Exit-gate smoke legs L4 (SMK-001 executed 4/4) and L5 (SMK-002 executed 7/7) are closed with recorded evidence; L1/L2 are supported by the executed registry/consent units within the 96.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/impl/M6.2A/tests/TEST_MANIFEST.md",
+    "04-artifacts/evidence/prompts/M6-P1003.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/test-reports/M6.2A/SMOKE_RESULTS.md",
+    "04-artifacts/impl/M6.2A/tests/smoke/test_smk_001_event_not_in_registry.py",
+    "04-artifacts/impl/M6.2A/tests/smoke/test_smk_002_valid_event_missing_consent.py",
+    "04-artifacts/impl/M6.2A/tests/conftest.py",
+    "04-artifacts/impl/M6.2A/pyproject.toml"
+  ],
+  "files_changed": [
+    "04-artifacts/test-reports/M6.2A/SMOKE_RESULTS.md",
+    "04-artifacts/evidence/prompts/M6-P1004.json"
+  ],
+  "commands_run": [
+    "\"D:\\M6\\Module6-workspace\\02-tester\\.venv\\Scripts\\python.exe\" -V  ==> Python 3.12.13",
+    "\"D:\\M6\\Module6-workspace\\02-tester\\.venv\\Scripts\\python.exe\" -m pytest --version  ==> pytest 8.4.2",
+    "cwd 04-artifacts/impl/M6.2A: PYTHONDONTWRITEBYTECODE=1 python -m pytest -q -p no:cacheprovider  ==> full staged suite green; -q progress 72+24=96 dots, no F/E; terminal summary line bypasses harness stdout capture (written to terminal fd)",
+    "cwd 04-artifacts/impl/M6.2A: PYTHONDONTWRITEBYTECODE=1 python -c '<pytest_runtest_logreport plugin>' pytest.main(['-p','no:cacheprovider','-q'])  ==> COUNTS={'passed':96,'failed':0,'skipped':0,'error':0} RC=0 (authoritative full-suite tally = 96 passed)",
+    "cwd 04-artifacts/impl/M6.2A: PYTHONDONTWRITEBYTECODE=1 python -m pytest -v -p no:cacheprovider tests/smoke/test_smk_001_event_not_in_registry.py  ==> 4 passed in 0.03s, exit 0",
+    "cwd 04-artifacts/impl/M6.2A: PYTHONDONTWRITEBYTECODE=1 python -m pytest -v -p no:cacheprovider tests/smoke/test_smk_002_valid_event_missing_consent.py  ==> 7 passed in 0.03s, exit 0",
+    "cwd 04-artifacts/impl/M6.2A: PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts= -v -p no:cacheprovider tests/test_consent_fail_closed.py  ==> 6 passed in 0.02s, exit 0 (L2 gate-level corroboration)",
+    "cwd 04-artifacts/impl/M6.2A: PYTHONDONTWRITEBYTECODE=1 python -m pytest --collect-only -q -p no:cacheprovider  ==> per-file totals summing to 96 (round4=26, round3=20, round2=11, smoke=11, unit 6+6+7+5+4=28)",
+    "NOTE: no shell redirection in any recorded run; an earlier '2>&1'/'2>/dev/null' attempt tripped role_pre_tool_guard because '>' co-occurred with the venv 'Scripts' path segment (matches denied root 'scripts'); re-ran WITHOUT redirection. No write to any denied root; 04-artifacts/state untouched; no application code changed."
+  ],
+  "test_results": [
+    {
+      "smoke_id": "M6-SMK-001",
+      "result": "PASS",
+      "detail": "EXECUTED 4/4 PASSED, exit 0 (tests/smoke/test_smk_001_event_not_in_registry.py) on frozen Round-4 code. Scenario/expected VERBATIM ('Event khong co trong event_registry' -> 'Reject/HOLD, audit ro'). Primary: unknown event -> REJECT reason UNKNOWN_EVENT_NOT_IN_REGISTRY, res.logged False, len(store)==0, res.egress_eligible False, audited ('audit ro'). Negatives (HOLD arm): DEREG_SAMPLE -> REGISTRATION_STATE_NOT_ACTIVE (audited, not logged); NO_OWNER_SAMPLE -> MISSING_OWNER (audited). Control: VIEW_LANDING -> ACCEPT + logged (non-vacuity). Correlation (synthetic): page_id=pg_smk001, session_id=sess_smk001, raw_event_hash=rawhash_smk001. Closes exit-gate leg L4; supports L1. RULE-001/018; guards FAIL-003. No failure; nothing patched."
+    },
+    {
+      "smoke_id": "M6-SMK-002",
+      "result": "PASS",
+      "detail": "EXECUTED 7/7 PASSED, exit 0 (tests/smoke/test_smk_002_valid_event_missing_consent.py) on frozen Round-4 code. Scenario/expected VERBATIM ('Event hop le nhung thieu consent' -> 'Khong external measurement, khong audience sync'). Seam-driven end-to-end: primary parametrized over external_measurement AND audience_sync -> valid event durably logged (res.logged True) but res.egress_eligible False and the seam audits CONSENT_MISSING on its own fresh function-scoped audit sink (no side-channel gate call); negatives cs_missing/cs_expired/cs_optout each egress_eligible False + seam-audited matching CONSENT_* reason; absent snapshot -> CONSENT_SNAPSHOT_ABSENT (never inferred); gate-level VALID control proves the deny is caused by missing consent, not a blanket block (egress_eligible would be False anyway for VIEW_LANDING while OD-003 is OPEN, so the CONSENT_MISSING audit is the load-bearing proof). Corroborated by tests/test_consent_fail_closed.py 6/6. Correlation (synthetic): page_id=pg_smk002, raw_event_hash=rawhash_smk002, event_code=VIEW_LANDING, guest_id=guest_x, session_id in {sess_external_measurement, sess_audience_sync, sess_cs_missing, sess_cs_expired, sess_cs_optout, sess_absent}; consent snapshots cs_missing/cs_expired/cs_optout (deny), cs_valid (control). Closes exit-gate leg L5; supports L2. RULE-002; guards FAIL-002. No failure; nothing patched."
+    }
+  ],
+  "evidence_refs": [
+    "04-artifacts/test-reports/M6.2A/SMOKE_RESULTS.md",
+    "04-artifacts/impl/M6.2A/tests/smoke/test_smk_001_event_not_in_registry.py",
+    "04-artifacts/impl/M6.2A/tests/smoke/test_smk_002_valid_event_missing_consent.py",
+    "04-artifacts/impl/M6.2A/tests/test_consent_fail_closed.py",
+    "04-artifacts/impl/M6.2A/tests/TEST_MANIFEST.md",
+    "04-artifacts/impl/M6.2A/tests/conftest.py",
+    "04-artifacts/impl/M6.2A/pyproject.toml",
+    "04-artifacts/evidence/prompts/M6-P1003.json",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/slices/M6.2A.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1004 (attempt 3). On PASS, proceed to M6-P1005 (M6_2A_BOUNDARY_ADVERSARY) re-run against the frozen Round-4 code to confirm the input type-boundary class (MAJOR-6/MAJOR-7/FIX-2b) is closed and MAJOR-1..5 stay closed, then M6-P1006 (M6_2A_SECURITY_REVIEW) for SEC-PII-01/02 + OD-003 scope; then M6-P1007 evidence-collect and M6-P1009 slice-gate Judge. Governance unchanged: staged-only, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF; ENTRY-001/ENTRY-003 remain risk-accepted with the MANDATORY M6.2G Scale-Gate re-gate before any real scale or external send."
+}

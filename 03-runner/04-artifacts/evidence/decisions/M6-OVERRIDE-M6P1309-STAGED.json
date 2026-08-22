@@ -1,0 +1,28 @@
+{
+  "decision_id": "M6-OVERRIDE-M6P1309-STAGED",
+  "type": "OWNER_OVERRIDE",
+  "decided_at": "2026-07-30",
+  "decided_by": "Nguyen Duc Manh (owner)",
+  "target_gate": "M6-P1309 (M6.2D slice-exit gate judge)",
+  "judge_verdict_unchanged": "BLOCKED — see 04-artifacts/evidence/judge/M6-P1309_JUDGE_FINAL_SIGN_OFF.json (NOT modified)",
+  "ledger_status_set": "SKIPPED (owner override) — NOT PASS/SIGNED",
+  "decision": "Owner overrides the BLOCKED M6-P1309 slice-exit gate to close slice M6.2D for STAGED work only. The judge's BLOCKED is correct and its 3 blockers are all governance/OPEN-decision, NOT in-scope fail-gate trips: (1) leg-2 hash-policy conformance blocked on M6-OD-003 OPEN [M6-DEFER-OD003-M6.2D.json]; (2) the M6-P1306 security review returned BLOCKED on the same OD-003; (3) the phantom-decision-file reference — now resolved (M6-DEFER-OD003-M6.2D.json created 2026-07-30). This is explicitly NOT a judge PASS.",
+  "what_holds_credited": [
+    "SMK-003 4/4 (dedup, FAIL-001 not tripped); SMK-017 12/12 (no raw PII, hash fail-closed, FAIL-008 not tripped; scan clean 101 files).",
+    "Entry-gate binding F-B/F-C/F-A CLOSED (F-B verified in code gate.py:73 `scope not in frozenset(snapshot.consent_scope)`); RULE-004 no-direct-send holds; rollback documented.",
+    "No in-scope fail gate tripped (FAIL-001/002/008 all held); no leak."
+  ],
+  "risk_accepted": [
+    "M6-OD-003 hash policy remains OPEN (privacy/legal) — deferred per M6-DEFER-OD003-M6.2D.json.",
+    "F-D: measurement-path borrowed-consent, channel-reachable from the untrusted /conversions body; armed-not-fired ONLY because external_send=OFF; coder deferred fix to M6.2E."
+  ],
+  "conditions": [
+    "global_gateway_state stays BLOCKED and production_flag stays OFF and external_send stays OFF and HASH_POLICY_RATIFIED stays False (mechanically enforced; override refused unless locked).",
+    "all M6.2D work stays staged under 04-artifacts/impl/; nothing ships.",
+    "MANDATORY re-gate at M6.2G: M6-OD-003 resolved, F-D/F-E/F-F closed, and an M6-OD-004 connector with secret_ref-only tokens, ALL before external_send can flip.",
+    "F-D must close before M6.2E wires any real send path."
+  ],
+  "references": ["M6-DEFER-OD003-M6.2D.json", "M6-DEFER-F1F2-M6.2B.json", "M6-OVERRIDE-M6P1000-STAGED.json"],
+  "reversible": "Yes — resolve M6-OD-003 + close F-D, re-run M6-P1306 and M6-P1309 on the fixed evidence to replace SKIPPED with real SIGNED.",
+  "signoff": "Owner command 2026-07-30: close M6.2D staged under transparent override; judge verdict stays BLOCKED; keep every lock tight; resolve OD-003 + F-D before any external send."
+}

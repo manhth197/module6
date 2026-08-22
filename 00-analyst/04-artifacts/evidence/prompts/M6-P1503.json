@@ -1,0 +1,85 @@
+{
+  "prompt_id": "M6-P1503",
+  "status": "PASS",
+  "summary": "M6_2F_TESTER_BUILD (mode=build, 'do not yet run'). Entry gate verified in the state ledger before any work: M6-P1500 SIGNED, M6-P1501 PASS, M6-P1502 PASS (required predecessor), M6-P1503 RUNNING (this prompt, order 129). Authored exactly five official smoke files, one per bound smoke id (M6-SMK-004/005/006/010/015), each carrying the SMOKE_REGISTER scenario AND expected result VERBATIM (Vietnamese, diacritics intact) in its docstring, driving the M6.2F dashboard + data-quality layer via handle_dashboard_request / DataMart+ConsumedFacts / compute_metrics (14 CTR-015 KPIs) / DataQualityChecker+AdsDataQualityCheck, and reusing the shared conftest fixtures (make_measurement_event, make_conversion, make_verified_row, make_dashboard_deps, make_data_mart, dq_checker, measurement_store, attribution_materializer, audit). Every file includes negative / fail-closed companions (and non-vacuous positive controls): SMK-004 no-spend fail-closed ROAS None + DQ FAIL on a quote carrying revenue; SMK-005 draft materializes no revenue + DQ FAIL on a draft carrying revenue + a verified-order control; SMK-006 (the M6.2F dashboard-render leg, distinct from the carried M6.2E attribution smoke) absent-spend and unmapped-spend fail-closed + a two-order update case; SMK-010 no CRM/scale/trigger surface on the mart, deps hold only {mart}, view has no trigger handle, reading twice mutates nothing; SMK-015 verified-only-by-construction + DQ Verified-Revenue FAIL on quote/draft-as-revenue + a verified control. ACCEPTANCE CHECKS met: (1) one test per bound smoke id, scenario verbatim; (2) negative cases present in every file; (3) existing coder test patterns reused (tests/test_quote_not_revenue.py, test_order_draft_not_verified.py, test_dashboard_verified_only_revenue.py, test_dashboard_rejects_unverified_as_revenue.py, test_data_mart_support_view_only.py, test_data_quality_checker.py, test_kpi_formulas_verbatim.py) plus conftest fixtures. BUILD VALIDATION was collect-only (imports/collects, NO assertions executed) per the prompt, cache-free, no shell redirection: the five new files collect clean (per-file nodes 3,4,4,3,4 = 18 new) EXIT 0; the full staged suite collects to 273 (= 255 carried M6.2F baseline [239 carried M6.2E tree + 16 coder dashboard/DQ leg tests] + 18 new smoke nodes) EXIT 0, total obtained via an in-process pytest_collection_finish tally (harness clips a long terminal summary). A read-only adversarial static-verification workflow (6 agents: one verifier per smoke file tracing EVERY assertion through the frozen implementation + a completeness critic) returned all-CLEAN, 0 errors: all ~47 assertions predicted PASS at run time with cited source basis, scenario/expected verbatim confirmed, PII-clean and boundary-clean on every file, and the critic confirmed exactly the five ids covered with one verbatim primary + a negative each, no self-certification, no state write. One design subtlety independently confirmed by the verifiers and mirrored from the coder's own reference tests: a quote-only dashboard's Revenue Verified shows 0.0 with no evidence ref, so overall_data_quality would be FAIL there; SMK-004/005 therefore deliberately do NOT assert overall=PASS, while SMK-006/015 (which seed a verified row) correctly assert PASS. TEST_MANIFEST.md rebuilt for M6.2F (binding table, per-smoke verbatim sections, fixtures, boundary, exit-gate legs L1-L6, execution plan for M6-P1504). GOVERNANCE POSTURE UNCHANGED AND IMMUTABLE: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, DASHBOARD_ALERT_THRESHOLDS_DEFINED=False (M6-OD-002 OPEN), HASH_POLICY_RATIFIED=False, SCALE_MODEL_RATIFIED=False (M6-OD-005 OPEN). No application code changed, no migration applied, no external call, no order-state/pricing/CRM-send/commission/scale/flag-flip, no write to 04-artifacts/state/. All ids synthetic; no raw secret/PII (the 'revenue on a non-verified event' negatives are fabricated in-memory events with synthetic ids fed straight to the DQ checker). status=PASS is an honest TESTER self-report of a completed, collect-validated, statically-verified BUILD; it does NOT execute the smokes and does NOT advance any gate. Formal execution is M6-P1504; the runner EVIDENCE_GATE and the slice Judge decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/slices/M6.2F.md",
+    "04-artifacts/impl/M6.2F/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2F/tests/conftest.py",
+    "04-artifacts/impl/M6.2F/app/api/dashboard.py",
+    "04-artifacts/impl/M6.2F/app/measurement/dashboard/kpi_metrics.py",
+    "04-artifacts/impl/M6.2F/app/measurement/dashboard/data_mart.py",
+    "04-artifacts/impl/M6.2F/app/measurement/dashboard/models.py",
+    "04-artifacts/impl/M6.2F/app/measurement/quality/data_quality_check.py",
+    "04-artifacts/impl/M6.2F/app/measurement/quality/data_quality_checker.py",
+    "04-artifacts/impl/M6.2F/app/measurement/store/measurement_event_store.py",
+    "04-artifacts/impl/M6.2F/app/measurement/models/measurement_event.py",
+    "04-artifacts/impl/M6.2F/tests/test_quote_not_revenue.py",
+    "04-artifacts/impl/M6.2F/tests/test_order_draft_not_verified.py",
+    "04-artifacts/impl/M6.2F/tests/test_dashboard_verified_only_revenue.py",
+    "04-artifacts/impl/M6.2F/tests/test_dashboard_rejects_unverified_as_revenue.py",
+    "04-artifacts/impl/M6.2F/tests/test_data_mart_support_view_only.py",
+    "04-artifacts/impl/M6.2F/tests/test_kpi_formulas_verbatim.py",
+    "04-artifacts/impl/M6.2F/tests/test_data_quality_checker.py",
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_006_order_verified_full_source.py"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_004_quote_not_revenue.py",
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_005_order_not_verified_not_revenue.py",
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_006_dashboard_roas_update.py",
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_010_data_mart_support_view_only.py",
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_015_dashboard_quote_draft_not_revenue.py",
+    "04-artifacts/impl/M6.2F/tests/TEST_MANIFEST.md"
+  ],
+  "commands_run": [
+    "02-tester/.venv/Scripts/python.exe -m pytest tests/smoke/test_smk_004_quote_not_revenue.py tests/smoke/test_smk_005_order_not_verified_not_revenue.py tests/smoke/test_smk_006_dashboard_roas_update.py tests/smoke/test_smk_010_data_mart_support_view_only.py tests/smoke/test_smk_015_dashboard_quote_draft_not_revenue.py --collect-only -q -p no:cacheprovider  (from 04-artifacts/impl/M6.2F; PYTHONDONTWRITEBYTECODE=1; per-file nodes 3,4,4,3,4; EXIT=0; NO assertions executed)",
+    "02-tester/.venv/Scripts/python.exe -c \"<in-process pytest_collection_finish tally: len(session.items)>\" --collect-only -q -p no:cacheprovider  (from 04-artifacts/impl/M6.2F; COLLECTED_TOTAL=273; pytest RC=0; count via in-process hook because the harness clips a long terminal summary)"
+  ],
+  "test_results": [
+    {
+      "smoke_id": "M6-SMK-004",
+      "result": "PASS",
+      "detail": "Built tests/smoke/test_smk_004_quote_not_revenue.py (3 nodes) — scenario 'Quote duoc tao nhung chua order' / expected 'Khong revenue, khong ROAS' verbatim; primary quote->Revenue Verified 0.0/ROAS 0.0/AOV None + funnel-counted; negatives: no-spend fail-closed ROAS None, and DQ Verified-Revenue FAIL on a quote carrying revenue. BUILD ONLY: collect-clean (EXIT 0) + adversarial static verification CLEAN (all assertions predicted PASS); NOT executed — execution recorded by M6-P1504."
+    },
+    {
+      "smoke_id": "M6-SMK-005",
+      "result": "PASS",
+      "detail": "Built tests/smoke/test_smk_005_order_not_verified_not_revenue.py (4 nodes) — scenario 'Order Draft / Order Created chua verified' / expected 'Khong tinh Revenue Verified' verbatim; primary ORDER_CREATED->Revenue Verified 0.0 + Verified Rate trace 'ORDER_VERIFIED=0 / ORDER_CREATED=1'; negatives: draft conversion materializes no revenue/order_code, DQ FAIL on a draft carrying revenue; control: a verified order IS counted. BUILD ONLY: collect-clean + static verification CLEAN; NOT executed — M6-P1504 executes."
+    },
+    {
+      "smoke_id": "M6-SMK-006",
+      "result": "PASS",
+      "detail": "Built tests/smoke/test_smk_006_dashboard_roas_update.py (4 nodes) — scenario 'ORDER_VERIFIED co campaign/adset/ad day du' / expected 'ROAS/CPA/AOV dashboard cap nhat' verbatim; the M6.2F dashboard-render leg (distinct from the carried M6.2E attribution smoke). Primary full-source verified order -> ROAS 2.5 / CPA 100000 / AOV 250000 + evidence-first + overall PASS; negatives: absent-spend and unmapped-spend fail-closed None; update: two verified orders move CPA/AOV/ROAS. BUILD ONLY: collect-clean + static verification CLEAN; NOT executed — M6-P1504 executes."
+    },
+    {
+      "smoke_id": "M6-SMK-010",
+      "result": "PASS",
+      "detail": "Built tests/smoke/test_smk_010_data_mart_support_view_only.py (3 nodes) — scenario 'Data Mart tao trigger CRM/scale' / expected 'Fail - Data Mart chi support view' verbatim; primary: mart public surface subset of the read-only aggregate allow-list, no write/CRM/scale/trigger/send/publish verb (RULE-012/FAIL-005); deps hold only {mart}; view has no trigger handle; negative: reading the dashboard twice does not mutate the store. BUILD ONLY: collect-clean + static verification CLEAN; NOT executed — M6-P1504 executes."
+    },
+    {
+      "smoke_id": "M6-SMK-015",
+      "result": "PASS",
+      "detail": "Built tests/smoke/test_smk_015_dashboard_quote_draft_not_revenue.py (4 nodes) — scenario 'Dashboard hien thi quote/order draft nhu revenue' / expected 'Fail' verbatim; primary: with a verified order + quote + draft, Revenue Verified counts only the verified order + overall PASS; DQ FAIL on quote-as-revenue and on draft-as-revenue; control: a genuine ORDER_VERIFIED PASSES the Verified-Revenue gate (discriminating). BUILD ONLY: collect-clean + static verification CLEAN; NOT executed — M6-P1504 executes."
+    }
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_004_quote_not_revenue.py",
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_005_order_not_verified_not_revenue.py",
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_006_dashboard_roas_update.py",
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_010_data_mart_support_view_only.py",
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_015_dashboard_quote_draft_not_revenue.py",
+    "04-artifacts/impl/M6.2F/tests/TEST_MANIFEST.md",
+    "04-artifacts/impl/M6.2F/tests/conftest.py",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/slices/M6.2F.md",
+    "04-artifacts/evidence/prompts/M6-P1502.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1503. On PASS, proceed to M6-P1504 (M6_2F_TESTER_RUN): execute the full staged suite (expected 273 passed) and the five bound smokes tests/smoke/test_smk_004_quote_not_revenue.py, test_smk_005_order_not_verified_not_revenue.py, test_smk_006_dashboard_roas_update.py, test_smk_010_data_mart_support_view_only.py, test_smk_015_dashboard_quote_draft_not_revenue.py (expected 18 passed), and record structured results + evidence refs into 04-artifacts/test-reports/M6.2F/SMOKE_RESULTS.md for exit-gate legs L2-L6. Then M6-P1505 (boundary adversary) and M6-P1506 (security/PII) review the dashboard/DQ layer; the slice gate judge is M6-P1509. Governance flags stay BLOCKED/OFF/OFF; M6-OD-002 (alert thresholds) and M6-OD-005 (scale model) remain OPEN forward gates."
+}

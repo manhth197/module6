@@ -81,7 +81,27 @@ Trạng thái khác (không bao giờ PASS/SIGNED bằng tay):
 ```
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts-win\Set-PromptStatusLocked.ps1 -PromptId <id> -Status BLOCKED|FAIL|TODO|RUNNING -Note "..."
 ```
-`SKIPPED` bắt buộc `-Note "SKIP_APPROVED:<mã quyết định owner>"` và KHÔNG BAO GIỜ áp dụng được cho hàng JUDGE_GATE.
+`SKIPPED` bắt buộc `-Note "SKIP_APPROVED:<mã quyết định owner>"`.
+
+**Hàng `JUDGE_GATE` — phá kính khẩn cấp của OWNER, không phải thao tác thường.**
+Trước 2026-07-29 quy tắc là "không bao giờ skip được"; nay có một đường duy nhất, rất hẹp
+(SCHEMA_CHANGELOG row 13 + 15). Script chỉ chấp nhận khi **ĐỦ CẢ 5**:
+
+1. `-Note "SKIP_APPROVED:OWNER_OVERRIDE:<mã-quyết-định>"`;
+2. `04-artifacts/evidence/decisions/<mã-quyết-định>.json` **tồn tại và parse được**;
+3. quyết định đó có `type = OWNER_OVERRIDE`;
+4. `target_gate` của nó **gọi đúng tên PromptId đang skip** — một override chỉ mở **MỘT** cổng,
+   không bao giờ mở mọi judge gate;
+5. `global_gateway_state=BLOCKED` và `production_flag=OFF` (chỉ dành cho bản staged).
+
+Điều này **KHÔNG** phải là PASS: file sign-off của judge **không bị sửa**, verdict giữ nguyên
+(kể cả BLOCKED), ledger ghi `SKIPPED` chứ không bao giờ `PASS`/`SIGNED`. Đảo ngược được: khi
+bằng chứng đã thật sự đủ, chạy lại prompt judge để thay `SKIPPED` bằng `SIGNED` thật.
+Cùng bộ kiểm tra đó chạy **lại lần nữa lúc gate** (`Test-M6DepsPassed`), nên sửa tay ledger
+cũng không thừa hưởng được override mà owner chưa hề cấp cho cổng đó.
+
+> Đã dùng một lần: `M6-P1000` (entry gate M6.2A) — quyết định
+> `M6-OVERRIDE-M6P1000-STAGED`, verdict judge vẫn **BLOCKED**, bắt buộc re-gate ở **M6.2G**.
 
 ## 4. Bước có Judge (JUDGE_GATE)
 

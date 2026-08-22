@@ -1,0 +1,83 @@
+{
+  "prompt_id": "M6-P1403",
+  "status": "PASS",
+  "summary": "M6_2E_TESTER_BUILD (TESTER, mode=build) attempt 1, ledger row 121 = RUNNING. Entry gate satisfied: dependency M6-P1402 = PASS, M6-P1403 = RUNNING, and the M6.2E entry-gate judge M6-P1400 = SIGNED. Built the FOUR bound M6.2E smoke ids as dedicated smoke files driven through the attribution layer (AttributionResolver + Ads/Live sub-resolvers, AttributionMaterializer set-once Zone-B + request_adjustment, AdsAttributionContext masking/scale-eligibility, append-only AdjustmentLog), reusing the coder's conftest fixtures (make_measurement_event, make_conversion, attribution_resolver, attribution_materializer, measurement_store, adjustment_log, audit) and patterns from the coder's tests/test_attribution_*.py / test_live_session_chain_trace.py / test_verified_immutable_adjustment.py. DELIVERABLES: (1) NEW tests/smoke/test_smk_006_order_verified_full_source.py, test_smk_007_missing_source_low_hold.py, test_smk_013_live_chain_trace.py, test_smk_018_verified_immutable_adjustment.py (4 nodes each, 16 total); (2) rebuilt tests/TEST_MANIFEST.md from the carried-forward M6.2D content into the M6.2E manifest (smoke->test binding for all 4 ids, verbatim scenarios, supporting/regression inventory, done-gate leg map, build-validation record); (3) evidence JSON (this file, written last). SMK-006 'ORDER_VERIFIED co campaign/adset/ad day du' -> 'ROAS/CPA/AOV dashboard cap nhat' (VERBATIM): full campaign/adset/ad+page -> FACEBOOK_AD/HIGH/NONE, revenue+full ad hierarchy materialized into Zone B (the dashboard input; render is M6.2F); negatives: incomplete ad path -> MEDIUM not HIGH not eligible (revenue still stored), non-verified conversion records NO revenue (RULE-003/FAIL-001); control: HIGH/NONE is eligible but scale_evidence False while SCALE_MODEL_RATIFIED False (M6-OD-005 OPEN). SMK-007 'ORDER_VERIFIED thieu source' -> 'Revenue van luu, attribution confidence LOW/HOLD' (VERBATIM): no source -> MISSING_SOURCE/LOW/DIRECT, revenue still stored, never scale evidence (both facets); negatives: conflicting multi-touch -> MULTI_TOUCH/LOW, duplicate_risk signal -> DUPLICATE_RISK/LOW (each not eligible, revenue stored); control: clean full source IS eligible (LOW is source-caused, not blanket). SMK-013 'Live/Comment/Messenger chain' -> 'Trace duoc live_session_id, comment_id, messenger_thread_id' (VERBATIM): live_session_id+comment_id+messenger_thread_id all traced -> LIVE_ORGANIC/HIGH/NONE; negatives: psid masked on export but kept durably (raw never on any export surface), partial live chain (comment, no live_session_id) still traces present ids at MEDIUM; control: no live signals -> DIRECT/MISSING_SOURCE (nothing live traced). psid marker assembled at runtime (no literal PII/id in source). SMK-018 (proposed HARDENING) 'Attribution correction attempted after ORDER_VERIFIED' -> 'Direct mutation rejected; adjustment record created with actor, reason, audit, evidence' (VERBATIM): a DIRECT Zone-B overwrite of verified revenue is REJECTED (MeasurementStoreViolation, set-once RULE-008); the sanctioned correction is an audited AdjustmentRecord{actor,reason,audit_ref,evidence_ref,proposed} (ATTRIBUTION_ADJUSTMENT_RECORDED), verified row unchanged, actor masked on export; negatives: adjustment log append-only (2nd correction appends, never edits the 1st), re-materialize same inputs is an idempotent no-op (changed False; set-once permits replay, rejects a DIFFERENT value); control: set-once is per-row (a different verified event materializes, the first untouched). SMK-018 is proposed HARDENING (owner review) and is EXECUTED here per the M6.2E done-gate leg 5 (not waived). BUILD-VALIDATION (ran, not collect-only, per the established operator precedent) with the pinned tester venv (Python 3.12.13, pytest 8.4.2) from 04-artifacts/impl/M6.2E/, cache-free (PYTHONDONTWRITEBYTECODE=1, -p no:cacheprovider), no shell redirection: the four new smoke files = 16 passed exit 0; full staged suite = 239 passed / 0 failed (in-process pytest_runtest_logreport tally {passed:239,failed:0,skipped:0,error:0}, pytest.main RC=0; the terminal summary bypasses this harness's stdout capture on a long run, hence the programmatic tally, cross-checked by the --collect-only per-file sum = 239 = carried-forward 223 + these new smokes 16). 0 __pycache__/.pytest_cache remain under the staged tree. Boundary respected: no code under test was fixed (TESTER reports, never fixes); no application code/migration/external call; no order-state write / Core override (FAIL-004); no commission (RULE-019); 04-artifacts/state untouched; global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, HASH_POLICY_RATIFIED=False, SCALE_MODEL_RATIFIED=False all immutable and unchanged. No raw secret/token/PII in any artifact: psid/actor masked on export, psid marker synthetic + runtime-assembled, all ids synthetic. status PASS is the TESTER's honest self-report of a successful build+validation; it does NOT advance any gate or leg. The formal executed-results recording for the exit-gate smoke legs (L2 SMK-006, L3 SMK-007, L4 SMK-013, L5 SMK-018) belongs to M6-P1404 -> 04-artifacts/test-reports/M6.2E/SMOKE_RESULTS.md. The runner EVIDENCE_GATE and the slice Judge decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2E.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/evidence/prompts/M6-P1402.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/impl/M6.2E/tests/conftest.py",
+    "04-artifacts/impl/M6.2E/tests/test_attribution_trace_to_source.py",
+    "04-artifacts/impl/M6.2E/tests/test_attribution_missing_source_low_hold.py",
+    "04-artifacts/impl/M6.2E/tests/test_live_session_chain_trace.py",
+    "04-artifacts/impl/M6.2E/tests/test_verified_immutable_adjustment.py",
+    "04-artifacts/impl/M6.2E/app/measurement/models/attribution_context.py",
+    "04-artifacts/impl/M6.2E/app/measurement/attribution/resolver.py",
+    "04-artifacts/impl/M6.2E/app/measurement/attribution/materializer.py",
+    "04-artifacts/impl/M6.2E/app/measurement/attribution/adjustment.py",
+    "04-artifacts/impl/M6.2E/tests/TEST_MANIFEST.md"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2E/tests/smoke/test_smk_006_order_verified_full_source.py",
+    "04-artifacts/impl/M6.2E/tests/smoke/test_smk_007_missing_source_low_hold.py",
+    "04-artifacts/impl/M6.2E/tests/smoke/test_smk_013_live_chain_trace.py",
+    "04-artifacts/impl/M6.2E/tests/smoke/test_smk_018_verified_immutable_adjustment.py",
+    "04-artifacts/impl/M6.2E/tests/TEST_MANIFEST.md",
+    "04-artifacts/evidence/prompts/M6-P1403.json"
+  ],
+  "commands_run": [
+    "cwd 04-artifacts/impl/M6.2E: PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts= -v -p no:cacheprovider tests/smoke/test_smk_006_order_verified_full_source.py tests/smoke/test_smk_007_missing_source_low_hold.py tests/smoke/test_smk_013_live_chain_trace.py tests/smoke/test_smk_018_verified_immutable_adjustment.py  ==> 16 passed in 0.13s, exit 0 (header confirms Python 3.12.13, pytest 8.4.2); 4 nodes each",
+    "cwd 04-artifacts/impl/M6.2E: PYTHONDONTWRITEBYTECODE=1 python -c '<pytest_runtest_logreport plugin>' pytest.main(['-p','no:cacheprovider','-q'])  ==> COUNTS={'passed':239,'failed':0,'skipped':0,'error':0} RC=0 (authoritative full-suite tally)",
+    "cwd 04-artifacts/impl/M6.2E: PYTHONDONTWRITEBYTECODE=1 python -m pytest --collect-only -q -p no:cacheprovider  ==> per-file totals summing to 239 (new smokes 4+4+4+4=16; carried-forward=223)",
+    "PowerShell (read-only): enumerated 04-artifacts/impl/M6.2E for __pycache__/.pytest_cache  ==> none present (staged tree cache-free)",
+    "NOTE: no shell redirection in any recorded run; per the established lesson a '>'/'2>&1' co-occurring with the venv 'Scripts' path segment trips role_pre_tool_guard (matches denied root 'scripts'), so all runs avoid redirection. The SMK-013 psid marker is assembled at runtime (no literal PII/id in source). No write to any denied root; 04-artifacts/state untouched; no application code changed."
+  ],
+  "test_results": [
+    {
+      "smoke_id": "M6-SMK-006",
+      "result": "PASS",
+      "detail": "BUILT + build-validated 4/4 PASSED, exit 0 (tests/smoke/test_smk_006_order_verified_full_source.py). Scenario/expected VERBATIM ('ORDER_VERIFIED co campaign/adset/ad day du' -> 'ROAS/CPA/AOV dashboard cap nhat'). Primary: full campaign/adset/ad+page -> FACEBOOK_AD/HIGH/NONE; revenue (250000) + full ad hierarchy materialized into Zone B (the dashboard input; render is M6.2F); outcome.changed True. Negatives: incomplete ad path (campaign only) -> MEDIUM not HIGH, not scale eligible, revenue still stored; a non-verified conversion records NO revenue/order_code (RULE-003, FAIL-001). Control: full-source HIGH/NONE is scale_evidence_eligible True but scale_evidence False while SCALE_MODEL_RATIFIED False (M6-OD-005 OPEN, fail-closed). One primary per bound id; negatives present; existing patterns reused. Formal L2 recording is M6-P1404. RULE-008/009; guards FAIL-001."
+    },
+    {
+      "smoke_id": "M6-SMK-007",
+      "result": "PASS",
+      "detail": "BUILT + build-validated 4/4 PASSED, exit 0 (tests/smoke/test_smk_007_missing_source_low_hold.py). Scenario/expected VERBATIM ('ORDER_VERIFIED thieu source' -> 'Revenue van luu, attribution confidence LOW/HOLD'). Primary: verified order with no source -> conflict MISSING_SOURCE, confidence LOW, channel DIRECT; revenue (99000) still stored; never scale evidence on both the data-quality bar and the model gate. Negatives: conflicting multi-touch (ad + live) -> MULTI_TOUCH/LOW, not eligible, revenue still stored; explicit duplicate_risk signal -> DUPLICATE_RISK/LOW, not eligible. Control: a clean full single-source order IS eligible -> proving LOW is source-caused, not blanket. One primary per bound id; negatives present; existing patterns reused. Formal L3 recording is M6-P1404. RULE-009; guards FAIL-001."
+    },
+    {
+      "smoke_id": "M6-SMK-013",
+      "result": "PASS",
+      "detail": "BUILT + build-validated 4/4 PASSED, exit 0 (tests/smoke/test_smk_013_live_chain_trace.py). Scenario/expected VERBATIM ('Live/Comment/Messenger chain' -> 'Trace duoc live_session_id, comment_id, messenger_thread_id'). Primary: live_session_id (event) + comment_id + messenger_thread_id (signals) all traced into the snapshot -> LIVE_ORGANIC/HIGH/NONE. Negatives: psid is PII -> durable snapshot keeps the raw value but every export masks it (to_public psid != raw and not None; raw psid absent from the export view), and a partial live chain (comment, no live_session_id) still traces present ids at MEDIUM. Control: no live signals -> DIRECT/MISSING_SOURCE (nothing live traced -> the live ids come from the live source, not a default). psid marker assembled at runtime (no literal PII/id in source). One primary per bound id; negatives present; existing patterns reused. Formal L4 recording is M6-P1404. RULE-008; RULE-014/H02 masking."
+    },
+    {
+      "smoke_id": "M6-SMK-018",
+      "result": "PASS",
+      "detail": "BUILT + build-validated 4/4 PASSED, exit 0 (tests/smoke/test_smk_018_verified_immutable_adjustment.py). Proposed HARDENING smoke, EXECUTED not waived (done-gate leg 5). Scenario/expected VERBATIM ('Attribution correction attempted after ORDER_VERIFIED' -> 'Direct mutation rejected; adjustment record created with actor, reason, audit, evidence'). Primary: a DIRECT Zone-B overwrite of verified revenue with a different value is REJECTED (MeasurementStoreViolation, set-once RULE-008), verified row untouched; the sanctioned correction is an audited AdjustmentRecord carrying actor/reason/audit_ref/evidence_ref/proposed (audit ATTRIBUTION_ADJUSTMENT_RECORDED), the verified row is still unchanged, and actor is masked on export. Negatives: the AdjustmentLog is append-only (a second correction appends a 2nd record, first untouched); re-materialize with the SAME inputs is an idempotent no-op (changed False; set-once permits replay, rejects a DIFFERENT value). Control: set-once is per-row (materializing a different verified event succeeds, the first untouched). One primary per bound id; negatives present; existing patterns reused. Formal L5 recording is M6-P1404. RULE-008."
+    }
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2E/tests/smoke/test_smk_006_order_verified_full_source.py",
+    "04-artifacts/impl/M6.2E/tests/smoke/test_smk_007_missing_source_low_hold.py",
+    "04-artifacts/impl/M6.2E/tests/smoke/test_smk_013_live_chain_trace.py",
+    "04-artifacts/impl/M6.2E/tests/smoke/test_smk_018_verified_immutable_adjustment.py",
+    "04-artifacts/impl/M6.2E/tests/TEST_MANIFEST.md",
+    "04-artifacts/impl/M6.2E/tests/conftest.py",
+    "04-artifacts/impl/M6.2E/app/measurement/models/attribution_context.py",
+    "04-artifacts/impl/M6.2E/app/measurement/attribution/resolver.py",
+    "04-artifacts/impl/M6.2E/app/measurement/attribution/materializer.py",
+    "04-artifacts/impl/M6.2E/app/measurement/attribution/adjustment.py",
+    "04-artifacts/impl/M6.2E/tests/test_attribution_trace_to_source.py",
+    "04-artifacts/impl/M6.2E/tests/test_verified_immutable_adjustment.py",
+    "04-artifacts/evidence/prompts/M6-P1402.json",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/slices/M6.2E.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1403. On PASS, proceed to M6-P1404 (M6_2E_TESTER_RUN): from 04-artifacts/impl/M6.2E/ run `python -m pytest -q` (full staged suite, expected 239) and the four bound smoke files, then write 04-artifacts/test-reports/M6.2E/SMOKE_RESULTS.md with structured per-smoke results + evidence refs to close exit-gate legs L2 (SMK-006), L3 (SMK-007), L4 (SMK-013), L5 (SMK-018) and support L1 (trace-to-source). Then M6-P1405 (boundary adversary) and M6-P1406 (security/PII) against the M6.2E attribution layer, which per the M6-P1402 hand-off MUST verify F-D closed (mandatory customer_or_guest_key<->consent subject_ref bind) and consider the flagged carried M6.2A ingest raw-subject comparison (out-of-scope observation). Governance unchanged: staged-only, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, HASH_POLICY_RATIFIED=False, SCALE_MODEL_RATIFIED=False; M6-OD-003/004 before any real send, M6-OD-005 before single-model scale evidence; the MANDATORY M6.2G Scale-Gate re-gate remains in force before any real scale or external send."
+}

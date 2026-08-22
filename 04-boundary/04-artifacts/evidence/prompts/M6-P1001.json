@@ -1,0 +1,55 @@
+{
+  "prompt_id": "M6-P1001",
+  "status": "PASS",
+  "summary": "M6_2A_CODER_PLAN (CODER, plan_only). Produced 04-artifacts/impl/M6.2A/PLAN.md: the minimal, staged change set for slice M6.2A (clean measurement foundation - valid events, correct identity, fail-closed consent). ENTRY VERIFICATION (read-only): M6-P1001=RUNNING (ledger row 79); dependency M6-P1000=SKIPPED via OWNER OVERRIDE (ledger row 78 note SKIP_APPROVED:OWNER_OVERRIDE:M6-OVERRIDE-M6P1000-STAGED;prod-locked;regate-M6.2G;judge-BLOCKED); IMPLEMENTATION_TARGET_LOCKED.json=LOCKED with M6-OD-011=DECIDED (GREENFIELD, python 3.12, pytest -q); CTR-003/004/005/006=DRAFT_LOCKED (schemas applied, judged PASS at M6-P0715=SIGNED). GOVERNANCE (loud): the M6.2A entry gate is OWNER-OVERRIDDEN to STAGED-ONLY, NOT a judge PASS - the M6-P1000 judge verdict remains BLOCKED and is unmodified. RULE-020 (entry-evidence gate) is satisfied only by the owner's documented risk-acceptance of ENTRY-001 (P3 verified-revenue boundary: fail-open recall + QuoteSnapshot + no runtime proof) and ENTRY-003 (Core event_registry: channel/data_sensitivity/external_send_policy may be MISSING, owner not runtime-enforced); a MANDATORY re-gate at M6.2G Scale Gate stands before ANY scale or external send. The plan encodes these gaps as fail-closed design constraints (PLAN section 9): MISSING external_send_policy => BLOCKED (egress framework-only), MISSING data_sensitivity => treat as PII/mask, non-ACTIVE/stale registration_state => REJECT/HOLD, consent != VALID => deny, missing/ambiguous guest->customer mapping => LOW/HOLD never overwrite. CHANGE SET: 3 CONSUMED read-models (CTR-003/005/006) + 1 M6-OWNED append-only web_event_logs (CTR-004); three decision paths - event validity (RULE-001, prevents FAIL-003, SMK-001, leg L1), consent fail-closed (RULE-002, prevents FAIL-002, SMK-002, leg L2), identity mapping+audit (RULE-006, leg L3); append-only store (RULE-007) with the LOCKED RULE-005 idempotency key; a thin ingest seam; one staged migration (0001_create_web_event_logs.sql, up+down, never applied, live_migrations=false); 5 pytest modules; read-only ports so M6 cannot mutate consumed tables. SCOPE: HTTP track endpoint (CTR-016), ads_measurement_event (CTR-001) and request idempotency are M6.2B (verified against 00-spec/slices/M6.2B.md); no workers; SMK-003 end-to-end is M6.2B/D (M6.2A proves only store-level dedup); external send / attribution / dashboard / scale all out of scope. TARGET REPO verified EMPTY greenfield on disk, so 'reuse target conventions' is honestly reported as 'nothing to reuse yet' and this slice establishes the reusable python/pytest baseline. Every planned item maps to a done-gate leg and/or smoke id; rollback documented per item (all staged => non-destructive; append-only integration revert = down-DDL). Staged, measure-only: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF - no code written, no migration applied, nothing sent/scaled/published, no flag flipped, 04-artifacts/state not touched, no raw secret/PII. No self-certify; the runner EVIDENCE_GATE decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2A.md",
+    "00-spec/slices/M6.2B.md",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/evidence/prompts/M6-P1000.json",
+    "04-artifacts/evidence/decisions/M6-OVERRIDE-M6P1000-STAGED.json",
+    "04-artifacts/gate-hardening/computed/M6-P1000_computed_gate.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/contracts/CONTRACT_EVENT_REGISTRY.contract.yaml",
+    "00-spec/contracts/CONTRACT_WEB_EVENT_LOGS.contract.yaml",
+    "00-spec/contracts/CONTRACT_IDENTITY_CONSENT.contract.yaml"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2A/PLAN.md",
+    "04-artifacts/evidence/prompts/M6-P1001.json"
+  ],
+  "commands_run": [
+    "Read (read-only): context brief, IMPLEMENTATION_TARGET_LOCKED.json, M6.2A + M6.2B slice files, ARCH_BASELINE.md, M6-P1000 evidence, owner-override decision file, M6-P1000 computed gate, SMOKE_REGISTER, three contract yaml (event_registry/web_event_logs/identity_consent)",
+    "Read (read-only): PROMPT_EXECUTION_LEDGER_LOCKED.csv rows 76-82 and 1-58 -> M6-P0715=SIGNED, M6-P1000=SKIPPED(owner override), M6-P1001=RUNNING, M6-P1002+=TODO",
+    "Grep (read-only): RULES_LOCKED RULE-001/002/006/007/018/020; FAIL_GATE_REGISTER M6-FAIL-002/003; ledger rows for M6-P0715/1000/1001/1002",
+    "Glob + Bash ls (read-only): work-root/target-repo is EMPTY greenfield; 04-artifacts/impl not yet present",
+    "Bash sed on 00-spec was BLOCKED by role_pre_tool_guard (mutating-verb heuristic near denied root); re-did the same peek with the read-only Read tool. No write attempted to any denied root; 04-artifacts/state untouched."
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2A/PLAN.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2A.md",
+    "00-spec/slices/M6.2B.md",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/evidence/prompts/M6-P1000.json",
+    "04-artifacts/evidence/decisions/M6-OVERRIDE-M6P1000-STAGED.json",
+    "04-artifacts/gate-hardening/computed/M6-P1000_computed_gate.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/contracts/CONTRACT_EVENT_REGISTRY.contract.yaml",
+    "00-spec/contracts/CONTRACT_WEB_EVENT_LOGS.contract.yaml",
+    "00-spec/contracts/CONTRACT_IDENTITY_CONSENT.contract.yaml"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1001. On PASS, proceed to M6-P1002 (M6_2A_CODER_IMPLEMENT) to build the staged files exactly per 04-artifacts/impl/M6.2A/PLAN.md (target-relative paths staged under 04-artifacts/impl/M6.2A/), then M6-P1003/M6-P1004 (TESTER) to build and run SMK-001/SMK-002 and record results/evidence for exit-gate legs L4/L5. Governance unchanged throughout: staged-only, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF; the ENTRY-001/ENTRY-003 owner risk-acceptance and the MANDATORY M6.2G Scale-Gate re-gate remain in force before any real scale or external send."
+}

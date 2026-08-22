@@ -1,0 +1,50 @@
+{
+  "prompt_id": "M6-P1100",
+  "status": "PASS",
+  "summary": "M6_2B_ENTRY_GATE_JUDGE (JUDGE, gate_review, fresh session, evidence-only). Verdict PASS: slice M6.2B entry gate opens STAGED with F1/F2 (+MINOR-9/O1) BOUND as fix-first coder preconditions; full reasoning in 04-artifacts/evidence/judge/M6-P1100_JUDGE_FINAL_SIGN_OFF.json. REVISION (honest, on the merits): an initial draft returned BLOCKED on 'M6-CTR-016 not applied to canon'; corrected here after reading the full set incl. 04-artifacts/evidence/decisions/M6-DEFER-F1F2-M6.2B.json (which by its own MACHINE-BINDING TODO was designed to be a RequiredInput of this gate but was not yet wired). Entry for THIS prompt: ledger M6-P1100=RUNNING, dependency M6-P1009=SIGNED; global_gateway_state=BLOCKED, production_flag=OFF unchanged and not flipped; 00-spec/ not edited, 04-artifacts/state/ not touched. CHECK 1 (previous gate from sign-off) PASS: M6-P1009=SIGNED (ledger) and its judge sign-off verdict=PASS on disk. CHECK 2 (target LOCKED + M6-OD-011 decided) PASS: IMPLEMENTATION_TARGET_LOCKED.json status=LOCKED, workspace_mode=STAGED_ONLY, safety all false; M6-OD-011=DECIDED 2026-07-23. CHECK 3 (slice contracts) PASS: M6-CTR-001 (ads_measurement_event)=DRAFT_LOCKED (doc §10, SPEC §10.1); M6-CTR-016 (POST /api/ads/events/track)=MISSING but SATISFIED for entry per the canonical slice checklist (M6.2B.md line 36: 'if MISSING, its harmonization prompt must be PASS') -- producer M6-P0711=PASS, gate M6-P0715=SIGNED, complete schema staged at 04-artifacts/analysis/contracts/CONTRACT_TRACK_APIS.contract.yaml; per SCHEMA_CHANGELOG rows 17/18 'MISSING'=not-yet-applied-to-canon (schema exists, canon flip deferred to the slice), so the canon-apply is a NON-BLOCKING deferred housekeeping step. CHECK 4 (entry evidence if required) SATISFIED: M6.2B lists no entry-evidence rows; ENTRY-001/002/003 bound to M6.2A entry + M6.2G, ENTRY-004 to M6.2G/PR-PILOT -- none checked-at M6.2B; ENTRY-001/003 remain RISK-ACCEPTED under M6-OVERRIDE-M6P1000-STAGED (M6-P1000 verdict stays BLOCKED, NOT set to PASS/PROVEN), ENTRY-002 clean; mandatory M6.2G re-gate stands. BINDING FORWARD CONDITIONS (per M6-DEFER-F1F2-M6.2B.json, owner 2026-07-30, linked from DECISION_REGISTER row 30): F1 (seam can still RAISE -> lost audit: widen normalize_ts guard to OverflowError + tzinfo-raised exceptions and wrap validate/resolve/subject_matches/store.append as audited denies) and F2 (consent gate fail-open via a ConsentSnapshot subclass: gate.evaluate must assert/coerce snapshot.consent_scope is frozenset[ConsentScope], the gate-level half of MAJOR-7) are REAL residual MAJORs armed-not-fired in M6.2A that GO LIVE at M6.2B when POST /api/ads/events/track + a real ConsentReader adapter wire into the seam; they are FIX-FIRST preconditions -- M6-P1101 (plan) MUST include them and M6-P1102 (implement) MUST close them BEFORE wiring the endpoint or any real adapter. Also carry MINOR-9 (identifier-shaped event_code verbatim in audit sink) + O1 (session_id/correlation_id raw) to close before durable binding. These bind the coder; they do not block the entry gate. No open owner decision blocks M6.2B (OD-008/003/012/001/009 resolve elsewhere or via pack default). Production BLOCKED/OFF unchanged; external_send OFF; M6.2G re-gate mandatory; no self-cert of ledger; no application code/migration/flag change; module boundary intact; no raw secrets/PII.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2B.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1009.json",
+    "04-artifacts/evidence/judge/M6-P1009_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/analysis/contracts/CONTRACT_TRACK_APIS.contract.yaml",
+    "04-artifacts/evidence/decisions/M6-OVERRIDE-M6P1000-STAGED.json",
+    "04-artifacts/evidence/decisions/M6-DEFER-F1F2-M6.2B.json"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/judge/M6-P1100_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/prompts/M6-P1100.json"
+  ],
+  "commands_run": [
+    "Read (read-only): CLAUDE_CONTEXT_BRIEF, slice M6.2B spec, IMPLEMENTATION_TARGET_LOCKED.json, CONTRACT_REGISTER, ENTRY_EVIDENCE_REGISTER, SCHEMA_CHANGELOG (rows 13-18), DECISION_REGISTER (rows 28-30), SMOKE_REGISTER, M6-P1009 evidence + sign-off (verdict PASS on disk), the staged CONTRACT_TRACK_APIS.contract.yaml, and the two owner decisions M6-OVERRIDE-M6P1000-STAGED.json + M6-DEFER-F1F2-M6.2B.json",
+    "Grep (read-only): PROMPT_EXECUTION_LEDGER_LOCKED.csv -> M6-P1100=RUNNING, M6-P1009=SIGNED, harmonization band M6-P0700..0715 all PASS/SIGNED (M6-P0711 CONTRACT_TRACK_APIS=PASS, M6-P0715 gate=SIGNED); DECISION_REGISTER for CTR/OD/override references",
+    "Glob (read-only): 00-spec/contracts/ (3 M6.2A files) and 04-artifacts/analysis/contracts/ (CONTRACT_TRACK_APIS.contract.yaml staged and present, plus the other deferred contracts)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/judge/M6-P1100_JUDGE_FINAL_SIGN_OFF.json",
+    "00-spec/slices/M6.2B.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1009.json",
+    "04-artifacts/evidence/judge/M6-P1009_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/analysis/contracts/CONTRACT_TRACK_APIS.contract.yaml",
+    "04-artifacts/evidence/decisions/M6-OVERRIDE-M6P1000-STAGED.json",
+    "04-artifacts/evidence/decisions/M6-DEFER-F1F2-M6.2B.json",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine JUDGE_GATE for M6-P1100; on this PASS sign-off slice M6.2B opens STAGED and the sequence proceeds to M6-P1101 (M6_2B_CODER_PLAN). BINDING for the coder (per M6-DEFER-F1F2-M6.2B.json): M6-P1101 plan and M6-P1102 implement MUST close F1 (widen normalize_ts guard to OverflowError/tzinfo-raise + wrap validate/resolve/subject_matches/store.append as audited denies) and F2 (gate.evaluate coerce/assert snapshot.consent_scope is frozenset[ConsentScope]) BEFORE wiring POST /api/ads/events/track or any real ConsentReader adapter into the seam; also close MINOR-9 (audit event_code shape) + O1 (session_id/correlation_id masking-on-export) before durable binding. NON-BLOCKING housekeeping for the operator: apply the CTR-016 canon flip (CONTRACT_TRACK_APIS.contract.yaml -> 00-spec/contracts/ + CONTRACT_REGISTER M6-CTR-016 DRAFT_LOCKED + SCHEMA_CHANGELOG row; CTR-016 only, CTR-017 is M6.2C; reconcile the staged yaml's stale M6-OD-011=OPEN note), and wire M6-DEFER-F1F2-M6.2B.json into M6-P1100 RequiredInputs per that file's MACHINE-BINDING TODO. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF and the mandatory M6.2G Scale-Gate re-gate (ENTRY-001/002/003, CORE_EVENT_REGISTRY_PATCH + M3_SELLABLE_GATE_FAILOPEN_PATCH) remain in force; nothing here authorizes scale or external send."
+}

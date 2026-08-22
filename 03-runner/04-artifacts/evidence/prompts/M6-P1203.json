@@ -1,0 +1,67 @@
+{
+  "prompt_id": "M6-P1203",
+  "status": "PASS",
+  "summary": "M6_2C_TESTER_BUILD (TESTER, mode=build) attempt 1, ledger row 101 = RUNNING. Entry gate satisfied: dependency M6-P1202 = PASS, M6-P1203 = RUNNING, and the M6.2C entry-gate judge M6-P1200 = SIGNED. Built the two bound M6.2C smoke ids as dedicated smoke files driven through the M6.2C outbox pipeline (runtime-side enqueue seam enqueue_measurement/enqueue_audience_sync which hold NO transport, and the dispatcher workers MeasurementDispatcher/AudienceDispatcher which are the only transport holders, over the generic OutboxStore), reusing the coder's conftest fixtures (make_conversion, measurement_outbox, audience_outbox, segment_reader, consent_gate, app_consent_reader, audit, succeeding_transport, failing_transport) and patterns from tests/test_consent_failclosed_at_send.py / tests/test_dispatcher_retry_deadletter.py / tests/test_audience_chain.py. DELIVERABLES: (1) NEW tests/smoke/test_smk_002_outbox_consent_failclosed.py (4 nodes) and tests/smoke/test_smk_016_outbox_retry_deadletter.py (4 nodes); (2) rebuilt tests/TEST_MANIFEST.md from the carried-forward M6.2B content into the M6.2C manifest (smoke->test binding, verbatim scenarios, supporting/regression inventory, done-gate leg map, build-validation record); (3) evidence JSON (this file, written last). M6-SMK-002 'Event hop le nhung thieu consent' -> 'Khong external measurement, khong audience sync' (VERBATIM): primary proves BOTH clauses via the two-checkpoint consent gate (RULE-002) -- (a) a valid VIEW_LANDING conversion with cs_missing consent, dispatched with an injected transport that WOULD succeed, is never delivered (policy-block -> DEAD_LETTER, transport.deliver never called), 0 SENT, audited SEND_BLOCKED_CONSENT (no external measurement); (b) on an APPROVED segment a non-consented (cs_optout) member is a fail-closed REMOVE not an ADD, while a consented member IS an ADD (no audience sync for a non-consented subject, with discrimination); negatives cover checkpoint-2 (cs_valid_b valid-at-event but lapsed-at-send -> blocked) and audience fail-closed (non-APPROVED seg_pending enqueues nothing, AUDIENCE_SEGMENT_NOT_APPROVED); control cs_valid delivers 2 SENT (block is consent-caused, not blanket). M6-SMK-016 (proposed HARDENING) 'Outbox item fails to send N times' -> 'Bounded retry with error_log + next_retry_at, then dead-letter; no infinite retry, no silent loss' (VERBATIM): primary with an injected failing_transport + max_retries=3 -> first pass leaves each row RETRY (retry_count 1, next_retry_at set, error_log SEND_FAILED); running past each window exhausts to DEAD_LETTER at retry_count==3 (bounded, no infinite retry) with the full error trace retained (no silent loss), audited OUTBOX_RETRY then OUTBOX_DEAD_LETTER; negatives: dead-lettered item not reprocessed (max_retries=1, transport.attempts frozen after dead-letter), and a consent policy-block is a DISTINCT terminal that never reaches the transport (attempts==0, not a retry loop); control succeeding transport -> 2 SENT, no retry/dead-letter. M6-SMK-016 is proposed HARDENING (owner review) and is EXECUTED here per the M6.2C done-gate leg 4 (not waived). BUILD-VALIDATION (ran, not collect-only, per the established operator precedent) with the pinned tester venv (Python 3.12.13, pytest 8.4.2) from 04-artifacts/impl/M6.2C/, cache-free (PYTHONDONTWRITEBYTECODE=1, -p no:cacheprovider), no shell redirection: the two new smoke files = 8 passed exit 0; full staged suite = 171 passed / 0 failed (in-process pytest_runtest_logreport tally {passed:171,failed:0,skipped:0,error:0}, pytest.main RC=0; the terminal summary bypasses this harness's stdout capture on a long run, hence the programmatic tally, cross-checked by the --collect-only per-file sum = 171 = carried-forward 139 + coder M6.2C 24 + these new smokes 8). 0 __pycache__/.pytest_cache remain under the staged tree. Boundary respected: no code under test was fixed (TESTER reports, never fixes); no application code/migration/external call; 04-artifacts/state untouched; StagedBlockedTransport keeps external_send=OFF (the smokes inject Transport-port test doubles, never a real platform send, never a flag flip); global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF immutable and unchanged. No raw secret/token/PII: all fixture/consent/member ids are synthetic; outbox dedup keys hashed; identity refs (customer_or_guest_key/member_key/subject_ref) masked on export (O1). status PASS is the TESTER's honest self-report of a successful build+validation; it does NOT advance any gate or leg. The formal executed-results recording for the exit-gate smoke legs (L3 SMK-002, L4 SMK-016) belongs to M6-P1204 -> 04-artifacts/test-reports/M6.2C/SMOKE_RESULTS.md. The runner EVIDENCE_GATE and the slice Judge decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2C.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/evidence/prompts/M6-P1202.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/impl/M6.2C/tests/conftest.py",
+    "04-artifacts/impl/M6.2C/tests/test_dispatcher_retry_deadletter.py",
+    "04-artifacts/impl/M6.2C/tests/test_consent_failclosed_at_send.py",
+    "04-artifacts/impl/M6.2C/tests/test_audience_chain.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/outbox_store.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/transport.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/enqueue.py",
+    "04-artifacts/impl/M6.2C/tests/TEST_MANIFEST.md"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2C/tests/smoke/test_smk_002_outbox_consent_failclosed.py",
+    "04-artifacts/impl/M6.2C/tests/smoke/test_smk_016_outbox_retry_deadletter.py",
+    "04-artifacts/impl/M6.2C/tests/TEST_MANIFEST.md",
+    "04-artifacts/evidence/prompts/M6-P1203.json"
+  ],
+  "commands_run": [
+    "cwd 04-artifacts/impl/M6.2C: PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts= -v -p no:cacheprovider tests/smoke/test_smk_002_outbox_consent_failclosed.py tests/smoke/test_smk_016_outbox_retry_deadletter.py  ==> 8 passed in 0.05s, exit 0 (header confirms Python 3.12.13, pytest 8.4.2); SMK-002 4 nodes, SMK-016 4 nodes",
+    "cwd 04-artifacts/impl/M6.2C: PYTHONDONTWRITEBYTECODE=1 python -c '<pytest_runtest_logreport plugin>' pytest.main(['-p','no:cacheprovider','-q'])  ==> COUNTS={'passed':171,'failed':0,'skipped':0,'error':0} RC=0 (authoritative full-suite tally)",
+    "cwd 04-artifacts/impl/M6.2C: PYTHONDONTWRITEBYTECODE=1 python -m pytest --collect-only -q -p no:cacheprovider  ==> per-file totals summing to 171 (new smokes: test_smk_002_outbox_consent_failclosed=4, test_smk_016_outbox_retry_deadletter=4; coder M6.2C=24; carried-forward=139)",
+    "PowerShell (read-only): enumerated 04-artifacts/impl/M6.2C for __pycache__/.pytest_cache  ==> none present (staged tree cache-free)",
+    "NOTE: no shell redirection in any recorded run; per the established lesson a '>'/'2>&1' co-occurring with the venv 'Scripts' path segment trips role_pre_tool_guard (matches denied root 'scripts'), so all runs avoid redirection. No write to any denied root; 04-artifacts/state untouched; no application code changed."
+  ],
+  "test_results": [
+    {
+      "smoke_id": "M6-SMK-002",
+      "result": "PASS",
+      "detail": "BUILT + build-validated 4/4 PASSED, exit 0 (tests/smoke/test_smk_002_outbox_consent_failclosed.py). Scenario/expected VERBATIM ('Event hop le nhung thieu consent' -> 'Khong external measurement, khong audience sync'). Primary proves BOTH clauses via the RULE-002 two-checkpoint consent gate: (a) MEASUREMENT -- a valid VIEW_LANDING conversion with cs_missing consent, dispatched with an injected succeeding transport, is NEVER delivered (policy-block -> DEAD_LETTER, transport.deliver not called), 0 SENT, audited SEND_BLOCKED_CONSENT; (b) AUDIENCE -- on an APPROVED segment the non-consented cs_optout member is a fail-closed REMOVE (never an ADD), while a consented member IS an ADD (discrimination). Negatives: checkpoint-2 lapsed-at-send (cs_valid_b) blocked; non-APPROVED segment (seg_pending) enqueues nothing (AUDIENCE_SEGMENT_NOT_APPROVED). Control: cs_valid delivers 2 SENT (block is consent-caused, not blanket). One primary per bound id; negatives present; existing patterns reused. Formal L3 recording is M6-P1204. RULE-002/004; guards FAIL-002."
+    },
+    {
+      "smoke_id": "M6-SMK-016",
+      "result": "PASS",
+      "detail": "BUILT + build-validated 4/4 PASSED, exit 0 (tests/smoke/test_smk_016_outbox_retry_deadletter.py). Proposed HARDENING smoke, EXECUTED not waived (done-gate leg 4). Scenario/expected VERBATIM ('Outbox item fails to send N times' -> 'Bounded retry with error_log + next_retry_at, then dead-letter; no infinite retry, no silent loss'). Primary: injected failing_transport + max_retries=3 -> first pass leaves each row RETRY (retry_count 1, next_retry_at set, error_log SEND_FAILED); running past each retry window exhausts to DEAD_LETTER at retry_count==3 (bounded, no infinite retry) with the full error trace retained (no silent loss), audited OUTBOX_RETRY then OUTBOX_DEAD_LETTER. Negatives: dead-lettered item not reprocessed (max_retries=1; transport.attempts frozen after dead-letter); consent policy-block is a DISTINCT terminal that never reaches the transport (attempts==0, not a retry loop). Control: injected succeeding transport -> 2 SENT, no RETRY, no DEAD_LETTER. One primary per bound id; negatives present; existing patterns reused. Formal L4 recording is M6-P1204. RULE-004."
+    }
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2C/tests/smoke/test_smk_002_outbox_consent_failclosed.py",
+    "04-artifacts/impl/M6.2C/tests/smoke/test_smk_016_outbox_retry_deadletter.py",
+    "04-artifacts/impl/M6.2C/tests/TEST_MANIFEST.md",
+    "04-artifacts/impl/M6.2C/tests/conftest.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/enqueue.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/transport.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/outbox_store.py",
+    "04-artifacts/impl/M6.2C/tests/test_consent_failclosed_at_send.py",
+    "04-artifacts/impl/M6.2C/tests/test_dispatcher_retry_deadletter.py",
+    "04-artifacts/impl/M6.2C/tests/test_audience_chain.py",
+    "04-artifacts/evidence/prompts/M6-P1202.json",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/slices/M6.2C.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1203. On PASS, proceed to M6-P1204 (M6_2C_TESTER_RUN): from 04-artifacts/impl/M6.2C/ run `python -m pytest -q` (full staged suite, expected 171) and the two bound smoke files, then write 04-artifacts/test-reports/M6.2C/SMOKE_RESULTS.md with structured per-smoke results + evidence refs to close exit-gate legs L3 (SMK-002 executed) and L4 (SMK-016 executed) and support L1 (no direct external send) / L2 (retry-dead-letter). Then M6-P1205 (boundary adversary) and M6-P1206 (security/PII) against the M6.2C outbox pipeline (no direct send, consent two-checkpoint, retry/dead-letter, no raw PII in outbox rows/keys/payloads). Governance unchanged: staged-only, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF; M6-OD-003 (hash) + M6-OD-004 (connector) remain hard forward gates before M6.2D real send; the MANDATORY M6.2G Scale-Gate re-gate remains in force before any real scale or external send."
+}

@@ -6,6 +6,9 @@
 ## Read policy
 Read this brief + the active prompt + the files the prompt scopes (its slice file, its registers). Do NOT read full SPEC.md, the full register set, or the archived .docx unless your prompt's mode is analysis/governance and says so.
 
+## Source-of-truth precedence (decision status)
+For a decision's CURRENT status, `04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json` + `00-spec/registers/DECISION_REGISTER.md` are authoritative and WIN over any dated `04-artifacts/analysis/design/*` PHASE0 artifact. Example: M6-OD-011 still reads "OPEN" in the dated PHASE0 design docs but is **DECIDED 2026-07-23** per the manifest + register. Dated design artifacts are point-in-time evidence — never rewritten in place.
+
 ## Core boundary (one breath)
 Module 6 MEASURES: events, attribution, verified revenue consumption, data quality, dashboards, scale proposals, guarded learning. Module 6 NEVER: creates revenue/orders, confirms payments, prices anything, sends CRM, computes commission, raises budget, publishes optimizations without approval, invents events/policies, or overrides Core/Golden Hour/24-7/Diamond owners.
 

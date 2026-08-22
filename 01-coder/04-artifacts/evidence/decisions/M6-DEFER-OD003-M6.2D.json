@@ -1,0 +1,21 @@
+{
+  "decision_id": "M6-DEFER-OD003-M6.2D",
+  "type": "OWNER_DECISION_DEFERRAL",
+  "decided_at": "2026-07-30",
+  "decided_by": "Nguyen Duc Manh (owner)",
+  "context": "Slice M6.2D's core deliverable is the external-send hash policy for Pixel/CAPI/Offline. M6-OD-003 (which identity fields may be sent + the hashing approach incl. salt/pepper + normalization) is OPEN and needs privacy/legal review; the CONTRACT/DECISION registers design it to resolve 'at M6.2D exit'. The MECHANISM is proven and doubly fail-closed (SMK-017 12/12): config.HASH_POLICY_RATIFIED=False AND _RAW_ALLOWED_FIELDS=frozenset() so everything is hashed and the raw branch is unreachable; the payload carries only a hashed identity; the result log stores no user_data; StagedPlatformTransport builds+logs but has no connector and never sends. Independent scan of 101 M6.2D files: 0 raw PII, 0 secrets. In-scope fail gates FAIL-001/002/008 NOT tripped.",
+  "decision": "Owner defers M6-OD-003 to a real owner + privacy/legal decision. Slice M6.2D proceeds STAGED. The security review M6-P1306 honestly returned BLOCKED (hash-policy conformance uncertifiable while OD-003 is OPEN); it was marked SKIPPED on THIS basis. This is explicitly NOT a certification that any hash policy is conformant — there is no ratified policy yet. The scan is clean and no fail gate is tripped: this is a single OPEN owner decision, not a discovered leak.",
+  "retro_note": "This file legitimizes the earlier M6-P1306 SKIP whose note referenced `M6-DEFER-OD003-M6.2D` before the file existed (flagged by the M6-P1309 judge). The SKIP basis is now on disk.",
+  "open_sub_questions_for_od003": [
+    "permitted send fields (which identity attributes may egress at all)",
+    "hashing approach incl. salt/pepper (code uses unsalted sha256 = Meta CAPI standard; O-1: is unsalted acceptable to privacy/legal?)",
+    "normalization (lowercase/trim before hash, per platform spec)"
+  ],
+  "binding": [
+    "M6-OD-003 is a HARD forward-gate: HASH_POLICY_RATIFIED stays False and NOTHING egresses until owner + privacy/legal ratify it.",
+    "Re-checked at the M6.2G Scale Gate before any scale or external send; and before an M6-OD-004 connector / real platform token (secret_ref only) is ever bound.",
+    "O-1 (unsalted sha256) is an OD-003 sub-question, not a separate defect."
+  ],
+  "governance": "global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, HASH_POLICY_RATIFIED=False — all untouched. Nothing sends.",
+  "reversible": "Yes — resolve M6-OD-003, ratify the policy on the existing mechanism, re-run M6-P1306 (real PASS) and M6-P1309 (real PASS)."
+}

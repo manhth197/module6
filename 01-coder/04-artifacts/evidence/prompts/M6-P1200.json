@@ -1,0 +1,50 @@
+{
+  "prompt_id": "M6-P1200",
+  "status": "PASS",
+  "summary": "M6_2C_ENTRY_GATE_JUDGE (JUDGE, gate_review, fresh session, evidence-only). Verdict PASS: slice M6.2C entry gate opens STAGED with the external-send governance enumerated as FORWARD gates (not entry blockers); full reasoning in 04-artifacts/evidence/judge/M6-P1200_JUDGE_FINAL_SIGN_OFF.json. Entry for THIS prompt: ledger M6-P1200=RUNNING, dependency M6-P1109=SIGNED; global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF unchanged and not flipped; 00-spec/ not edited, 04-artifacts/state/ not touched. CHECK 1 (previous gate from sign-off) PASS: M6-P1109=SIGNED (ledger) and its judge sign-off verdict=PASS on disk. CHECK 2 (target LOCKED + M6-OD-011 decided) PASS: IMPLEMENTATION_TARGET_LOCKED.json status=LOCKED, workspace_mode=STAGED_ONLY, safety all false (external_platform_calls=false mechanically blocks the staged dispatchers from real sends); M6-OD-011=DECIDED 2026-07-23. CHECK 3 (slice contracts) PASS: all EIGHT contracts (CTR-007/008/009/010/011/017/021/022) are MISSING in CONTRACT_REGISTER but HARMONIZED and satisfied-for-entry per the slice checklist ('if MISSING, its harmonization prompt must be PASS') + deferral model (SCHEMA_CHANGELOG rows 17/18). Producing prompts all PASS and gate M6-P0715 SIGNED with staged schemas present: CTR-007->M6-P0704 (CONTRACT_CONVERSION_EVENTS), CTR-008->M6-P0705 (CONTRACT_MEASUREMENT_OUTBOX), CTR-009/010/011->M6-P0706 (CONTRACT_AUDIENCE_CHAIN), CTR-017->M6-P0711 (CONTRACT_TRACK_APIS, field-level complete), CTR-021/022->M6-P0713 (CONTRACT_WORKERS). CTR-016/017 canon-flip remains non-blocking operator housekeeping. CHECK 4 (entry evidence if required) SATISFIED: M6.2C lists no entry-evidence rows; ENTRY-001/002/003 bound to M6.2A entry + M6.2G (002 also M6.2I), ENTRY-004 to M6.2G/PR-PILOT -- none checked-at M6.2C; ENTRY-001/003 remain RISK-ACCEPTED under M6-OVERRIDE-M6P1000-STAGED (M6-P1000 verdict stays BLOCKED, not converted, not set PASS/PROVEN); mandatory M6.2G re-gate stands. EXTERNAL-SEND GOVERNANCE enumerated (all forward, none an entry blocker): M6.2C proves the outbox+worker capability STAGED with NO direct external send (done-gate 'No direct external send'; RULE-004 outbox-only; out-of-scope platform hash/dedup = M6.2D); external_send/production/gateway immutable OFF/OFF/BLOCKED + external_platform_calls=false; M6-OD-003 (hash policy/permitted send fields) is a HARD FORWARD GATE before M6.2D real send; M6-OD-004 (connector) M6.2D; M6-OD-008 (revenue) CTR-017 defaults ORDER_VERIFIED-only fail-closed; M6-OD-012 pack default; the M6.2B forward residuals (F-A/F-B/O-1/MINOR-6/MINOR-9-res) bind at the integration step, with O-1 design-relevant to outbox payload construction (must stay fail-closed on PII; M6.2C exit gate SMK-002 + no-direct-send verifies); mandatory M6.2G re-gate (ENTRY-001/002/003 + CORE_EVENT_REGISTRY_PATCH + M3_SELLABLE_GATE_FAILOPEN_PATCH) before any real scale/send. WHY PASS not BLOCKED: all four entry criteria hold; no OPEN owner decision governs the STAGED M6.2C scope (they govern the M6.2D real send); FAIL-002 + RULE-002/004 are exit-gate concerns proven with SMK-002/016 evidence, not entry preconditions; blocking on M6-OD-003 would repeat the M6-P1100 over-strict error (forward gate != entry blocker); no M6.2C-scoped owner deferral exists or is needed (M6.2B F1/F2 already closed). No self-certification of ledger; no application code/migration/flag change; module boundary intact; no raw secrets/PII.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2C.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1109.json",
+    "04-artifacts/evidence/judge/M6-P1109_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/analysis/contracts/CONTRACT_TRACK_APIS.contract.yaml",
+    "04-artifacts/evidence/decisions/M6-OVERRIDE-M6P1000-STAGED.json",
+    "04-artifacts/evidence/decisions/M6-DEFER-F1F2-M6.2B.json"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/judge/M6-P1200_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/prompts/M6-P1200.json"
+  ],
+  "commands_run": [
+    "Read (read-only): CLAUDE_CONTEXT_BRIEF, slice M6.2C spec, IMPLEMENTATION_TARGET_LOCKED.json, CONTRACT_REGISTER, ENTRY_EVIDENCE_REGISTER, DECISION_REGISTER, SCHEMA_CHANGELOG, SMOKE_REGISTER, M6-P1109 evidence + sign-off (verdict PASS on disk), the staged CONTRACT_TRACK_APIS.contract.yaml (CTR-017), and the owner decisions M6-OVERRIDE-M6P1000-STAGED + M6-DEFER-F1F2-M6.2B",
+    "Grep/Read (read-only): PROMPT_EXECUTION_LEDGER_LOCKED.csv -> M6-P1200=RUNNING, M6-P1109=SIGNED, M6.2C band M6-P1201..1209=TODO; harmonization band rows 66-77 -> M6-P0704/0705/0706/0711/0713 all PASS, M6-P0715 SIGNED",
+    "Glob (read-only): 04-artifacts/evidence/decisions/ -> only M6-OD-011, M6-OVERRIDE-M6P1000-STAGED, M6-DEFER-F1F2-M6.2B (no M6.2C-scoped deferral); 04-artifacts/analysis/contracts/ -> staged schemas for CTR-007/008/009-011/017/021-022 all present"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/judge/M6-P1200_JUDGE_FINAL_SIGN_OFF.json",
+    "00-spec/slices/M6.2C.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/SCHEMA_CHANGELOG.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1109.json",
+    "04-artifacts/evidence/judge/M6-P1109_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/analysis/contracts/CONTRACT_TRACK_APIS.contract.yaml",
+    "04-artifacts/evidence/decisions/M6-OVERRIDE-M6P1000-STAGED.json",
+    "04-artifacts/evidence/decisions/M6-DEFER-F1F2-M6.2B.json",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine JUDGE_GATE for M6-P1200; on this PASS sign-off slice M6.2C opens STAGED and the sequence proceeds to M6-P1201 (M6_2C_CODER_PLAN). BINDING for the slice (STAGED, capability-only): external_send/production/gateway stay OFF/OFF/BLOCKED and external_platform_calls=false -- M6.2C builds the outbox + dispatcher-worker framework but performs NO real platform send (RULE-004 outbox-only; done-gate 'No direct external send'); outbox payload construction must be fail-closed on PII (no raw PII; hash/mask per M6-OD-003 when decided). M6-OD-003 (hash policy + permitted send fields) and M6-OD-004 (connector) MUST be decided before M6.2D actual external send. The M6.2B forward residuals (F-A/F-B/O-1/MINOR-6/MINOR-9-res) bind at the owner HTTP/durable integration step. The MANDATORY M6.2G Scale-Gate re-gate re-proves ENTRY-001/002/003 (upstream CORE_EVENT_REGISTRY_PATCH + M3_SELLABLE_GATE_FAILOPEN_PATCH) before any real scale or external send; ENTRY-001/003 stay RISK-ACCEPTED with M6-P1000 verdict BLOCKED (not converted). NON-BLOCKING housekeeping: operator applies the CTR-017 canon-flip out-of-band (CONTRACT_TRACK_APIS.contract.yaml -> 00-spec/contracts/ + CONTRACT_REGISTER DRAFT_LOCKED + SCHEMA_CHANGELOG row). Nothing here authorizes scale or external send."
+}

@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-07-30T09:06:37Z",
+  "claimed_fail_gate_tripped": false,
+  "classification": "standard",
+  "computed_fail_gate_tripped": false,
+  "computed_status": "CLEAN",
+  "evidence_present": true,
+  "evidence_sha256": {
+    "04-artifacts/evidence/prompts/M6-P1307.json": "150e1f1d7e427be9260ba7ff4a1454e2f300a7546b1144d8b44760ffd9abef64"
+  },
+  "failures": [],
+  "integrity_violations": [],
+  "mode": "gate",
+  "prompt_id": "M6-P1307",
+  "rules_version": "M6-SGV-1.0",
+  "warnings": []
+}

@@ -1,0 +1,61 @@
+{
+  "prompt_id": "M6-P1105",
+  "status": "PASS",
+  "summary": "M6_2B_BOUNDARY_ADVERSARY (analysis_only) attempt 1, against the FROZEN staged M6.2B tracking pipeline. ENTRY GATE verified: ledger row 93 M6-P1105=RUNNING; dependency M6-P1104=PASS (full suite 139 passed, SMK-001 6/6, SMK-003 4/4); M6.2A slice SIGNED, M6.2B entry judge M6-P1100 SIGNED, coder M6-P1101/1102 + tester M6-P1103/1104 PASS; posture immutable (BLOCKED/OFF/OFF) confirmed at runtime. METHOD: one read-only executed harness (04-boundary/work/attacks/m6_2b_attacks.py) driving the real POST /api/ads/events/track handler, the frontend hook, the registry gate, BOTH append-only stores (web_event_logs + ads_measurement_events), the RULE-005 key, the hardened seam and the audit sink; pinned launcher Python 3.12.10, sys.dont_write_bytecode + -B, staged tree byte-clean (0 __pycache__/.pytest_cache; 04-artifacts/impl/M6.2B untracked, no diff); 42 recorded outcomes (DEFENDED=29, OPEN-non-gate=9, controls=2, notes=2). Coverage widened by a 5-agent adversarial-ideation pass (drift/dedup/fix-first/robustness/overreach); every BREACH/UNCERTAIN vector was then EXECUTED in the harness (no unexecuted breach recorded). VERDICT: NO BLOCKER; M6-FAIL-003 (event drift) is NOT tripped. Unregistered/de-registered/missing-owner/near-miss events are REJECTED at the endpoint with 0 rows in BOTH stores, audited at the seam (SMK-001 layer-2); the two unknown-event layers are INDEPENDENT (CLICK_CTA passes the client hook but the backend registry gate REJECTs it); the frontend hook refuses unknown/non-str/not-yet-ratified codes; normalize copies the ACCEPTED code and is unreachable by a rejected event; CONSUMED ports expose 0 write methods (RULE-018). Dedup (RULE-005/007, SMK-003) holds for EXACT replay: an identical body (even with a different correlation_id or client idempotency_key, which is server-recomputed) dedups to DUPLICATE with the same event_id and exactly one row in EACH store; distinct events are not deduped; the two stores never disagree on count; update/delete raise; a revenue-bearing insert is a fail-closed violation; the RULE-005 key is injective (7776-tuple fuzz, 0 collisions). FIX-FIRST re-verify: the M6.2A residuals F1/F2/MINOR-9/O1 are EXECUTED-CLOSED on M6.2B -- F1 (throwing registry/store/reader/resolver + OverflowError + hostile tzinfo via the endpoint -> 0 raises, audited denies), F2 (a ConsentSnapshot subclass with a raw-string scope + a dict scope -> gate.evaluate False, CONSENT_SCOPE_UNTRUSTED_TYPE at gate.py:56-66), MINOR-9 (identifier-shaped event_code wrapped, genuine code verbatim), O1 (correlation_id masked on the audit export). OPEN findings (all armed-not-fired; none trips M6-FAIL-003; for CODER/M6-P1106, not blockers): F-A [MINOR] handle_track_request RAISES on a hostile body -- its pre-seam PII scan (_contains_raw_pii/_iter_strings, track.py:121,225-241) and hash (_raw_event_hash, track.py:127,244-253) run BEFORE the hardened seam and are UNWRAPPED: a ~4000-deep nested JSON payload (REACHABLE from a real body) -> RecursionError escapes the handler unaudited (a 500 + lost audit); mixed-type body keys, a datetime with a hostile tzinfo, and a circular payload also raise (non-JSON-only). A raised handler logs nothing, so no event drifts -> not FAIL-003; it is an availability + lost-audit gap; fix: wrap steps 6-7 in the audited-deny pattern and bound payload depth. F-B [MINOR] the server-side raw_event_hash is over-broad -> OVER-count: it canons the RAW event_ts string and every non-volatile body field, so the SAME logical event sent with a different tz notation, a sub-second precision, or an appended junk key forks the RULE-005 key -> a 2nd row in BOTH stores (web=2 meas=2). This is NOT an exact-replay (byte-identical replay dedups -> SMK-003 holds) and NOT event drift (the rows are the same registered event) -> not FAIL-003; it degrades dedup quality; fix: hash a canonical projection (normalize_ts, not the raw string; restrict to the CTR-016 contract fields). MINOR-6 [carried] validator.validate does not assert row.event_code == requested; a loose/normalizing registry adapter would log an unregistered code under its own name -- needs a hostile adapter (the shipped strict InMemoryEventRegistry closes it). MINOR-9-residual [route to M6-P1106] the digit-run threshold (>=6) + finite id-prefix list leave a 5-digit / unlisted-prefix id verbatim. Observations: O-1 the RAW_PII tripwire scans payload only, so PII in session_id/page_id/source/guest_id is stored raw (masked on export) -> M6-P1106; O-2 the measurement-store scope guard is revenue-only (order_code/attribution not guarded, not endpoint-reachable); O-3 the ads_measurement_events store does no registry re-validation (by design; gated upstream). GOVERNANCE: analysis_only -- no application code, migration, state ledger, or flag written; no external call; BLOCKED/OFF/OFF unchanged; no self-certification. status PASS is the adversary's honest self-report (fail_gate_tripped=false); the runner EVIDENCE_GATE and the slice Judge (M6-P1109) decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2B.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1104.json",
+    "04-artifacts/test-reports/M6.2B/SMOKE_RESULTS.md",
+    "04-artifacts/impl/M6.2B/app/api/track.py",
+    "04-artifacts/impl/M6.2B/app/measurement/tracking/hooks.py",
+    "04-artifacts/impl/M6.2B/app/measurement/tracking/base_events.py",
+    "04-artifacts/impl/M6.2B/app/measurement/normalize.py",
+    "04-artifacts/impl/M6.2B/app/measurement/models/measurement_event.py",
+    "04-artifacts/impl/M6.2B/app/measurement/store/measurement_event_store.py",
+    "04-artifacts/impl/M6.2B/app/measurement/ingest.py",
+    "04-artifacts/impl/M6.2B/app/measurement/consent/gate.py",
+    "04-artifacts/impl/M6.2B/app/measurement/registry/validator.py",
+    "04-artifacts/impl/M6.2B/app/measurement/audit.py",
+    "04-artifacts/impl/M6.2B/app/measurement/logs/idempotency.py",
+    "04-artifacts/impl/M6.2B/app/measurement/adapters/consent_reader.py",
+    "04-artifacts/impl/M6.2B/tests/conftest.py"
+  ],
+  "files_changed": [
+    "04-artifacts/boundary-reports/M6.2B_boundary.md",
+    "04-artifacts/evidence/prompts/M6-P1105.json",
+    "04-boundary/work/attacks/m6_2b_attacks.py"
+  ],
+  "commands_run": [
+    "py -3.12 --version -> Python 3.12.10 (pinned launcher; matches IMPLEMENTATION_TARGET_LOCKED 3.12 pin)",
+    "PYTHONDONTWRITEBYTECODE=1 py -3.12 -B work/attacks/m6_2b_attacks.py -> 42 recorded outcomes: DEFENDED=29, OPEN_NONGATE=9, CONTROL=2, NOTE=2; IN-SCOPE FAIL-GATE BREACHES (M6-FAIL-003)=NONE",
+    "git -C Module6-workspace status --porcelain -- 04-artifacts/impl/M6.2B -> '?? 04-artifacts/impl/M6.2B/' (untracked, no diff); 0 __pycache__/.pytest_cache under 04-artifacts/impl/M6.2B after the run",
+    "NOTE: analysis_only. No application code, migration, state ledger, or flag written; no external/network call; no shell redirection used (role guard blocks a redirection co-occurring with a venv 'Scripts' path segment). 5-agent adversarial-ideation workflow run to widen novel-vector coverage; every BREACH/UNCERTAIN vector was executed in the harness before being recorded."
+  ],
+  "evidence_refs": [
+    "04-artifacts/boundary-reports/M6.2B_boundary.md",
+    "04-boundary/work/attacks/m6_2b_attacks.py",
+    "04-artifacts/impl/M6.2B/app/api/track.py",
+    "04-artifacts/impl/M6.2B/app/measurement/tracking/hooks.py",
+    "04-artifacts/impl/M6.2B/app/measurement/tracking/base_events.py",
+    "04-artifacts/impl/M6.2B/app/measurement/normalize.py",
+    "04-artifacts/impl/M6.2B/app/measurement/models/measurement_event.py",
+    "04-artifacts/impl/M6.2B/app/measurement/store/measurement_event_store.py",
+    "04-artifacts/impl/M6.2B/app/measurement/ingest.py",
+    "04-artifacts/impl/M6.2B/app/measurement/consent/gate.py",
+    "04-artifacts/impl/M6.2B/app/measurement/registry/validator.py",
+    "04-artifacts/impl/M6.2B/app/measurement/audit.py",
+    "04-artifacts/impl/M6.2B/app/measurement/logs/idempotency.py",
+    "04-artifacts/impl/M6.2B/tests/conftest.py",
+    "04-artifacts/test-reports/M6.2B/SMOKE_RESULTS.md",
+    "04-artifacts/evidence/prompts/M6-P1104.json",
+    "00-spec/slices/M6.2B.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1105. M6-FAIL-003 (event drift) is NOT tripped, so this evidence is PASS-eligible; the boundary report is 04-artifacts/boundary-reports/M6.2B_boundary.md. On PASS, proceed to M6-P1106 (M6_2B_SECURITY_REVIEW), which owns the PII residuals (MINOR-9-residual, O-1 raw PII in non-payload scalars, RAW_PII tripwire coverage). Before M6.2B is wired to the real HTTP framework, the CODER should close the two armed-not-fired residuals: F-A (wrap the endpoint's pre-seam _contains_raw_pii + _raw_event_hash in the audited-deny pattern and bound payload nesting depth so a deeply-nested JSON body cannot 500 the handler unaudited) and F-B (hash a canonical projection -- normalize_ts, restricted to the CTR-016 contract fields -- so cosmetic ts/field variations do not over-count); optionally close MINOR-6 (assert row.event_code == requested in validator.py). Governance unchanged: staged-only, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF; the MANDATORY M6.2G Scale-Gate re-gate remains in force before any real scale or external send."
+}

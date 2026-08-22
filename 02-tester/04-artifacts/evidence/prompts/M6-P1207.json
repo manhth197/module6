@@ -1,0 +1,60 @@
+{
+  "prompt_id": "M6-P1207",
+  "status": "PASS",
+  "summary": "M6_2C_EVIDENCE_COLLECT (PM_ORCHESTRATOR, analysis_only, mechanical coordination). Entry verified: ledger row 105 M6-P1207=RUNNING; dependency M6-P1206=PASS; posture immutable (global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF). Deliverable assembled: 04-artifacts/evidence/prompts/M6_2C_EVIDENCE_INDEX.md indexes every band evidence file (M6-P1200..M6-P1206), every staged artifact, the test report, and the boundary + security reports, and maps them to all 7 slice M6.2C exit-gate checklist items with a comprehensive unresolved-blockers/carry-forward section (acceptance checks: every exit-gate item indexed; unresolved blockers listed). EXIT-GATE MAP RESULT (descriptive, NOT a verdict): items 3 (SMK-002 executed 4/4) and 4 (proposed SMK-016 EXECUTED 4/4, not waived) and 7 (rollback documented per item in PLAN.md + IMPLEMENTATION_NOTES.md sec.7 + migrations 0003/0004/0005 down-DDL) are MET; items 1 (no direct external send / RULE-004) and 2 (bounded retry -> dead-letter, no silent loss) are SUPPORTED at the staged level only - the bound smoke + supporting suites pass within the 171-test run and the boundary adversary executed both RULE-004 (endpoint holds no transport; only the two dispatcher workers hold a transport; StagedBlockedTransport raises on every deliver; egress doubly bolted) and the bounded retry/dead-letter mechanic, but the tester (M6-P1204) deliberately called legs L1/L2 'supported' (not 'closed') and the F-A/F-B/F-C residuals remain, so final L1/L2 closure is the slice-gate Judge's call and is not asserted here; items 5 (all slice prompts have evidence JSON) and 6 (slice-gate Judge PASS sign-off) are PENDING because M6-P1208 (Docs) and M6-P1209 (Judge) have not run - the correct state at this evidence-collect step. POSTURE (accurately, per primary evidence): the entry gate is a real Judge PASS (M6-P1200 SIGNED, verdict PASS on disk); this is the FIRST slice with a real egress surface (an outbox + two dispatcher workers), so the consent gate is the load-bearing M6-FAIL-002 control - and per M6-P1205 (boundary, executed) and M6-P1206 (security), FAIL-002 is NOT tripped: no non-consented item reaches a transport (measurement MISSING/EXPIRED/OPT_OUT/absent/scope-not-granted/lapsed-at-send/DQ-HOLD all block with the transport never called; audience non-APPROVED enqueues nothing, opt-out -> REMOVE never ADD; consent re-validated at dispatch = RULE-002 checkpoint 2), and PII/secret scan is CLEAN over 89 files. GOVERNANCE CONTEXT carried forward in the index (each already adjudicated by the responsible upstream prompt as NOT tripping M6-FAIL-002 and NOT that prompt's blocker; all armed-not-fired; surfaced for the slice-gate Judge and owner): (B2) M6.2C boundary/security residuals routed to CODER before M6.2D wires a real transport - F-A (dispatchers + audience enqueue wrap reader.get but NOT permits_send/evaluate/current_state; a hostile consent adapter escapes run_once and aborts the drain batch = robustness/drain-DoS/lost-audit, no send), F-B (a set-subclass consent_scope with a lying __contains__ + empty backing defeats the F2 guard and would grant an un-held scope -> would SEND, executed with an injected transport; needs a compromised consent adapter, blocked by the staged transport today; fix scope in frozenset(snapshot.consent_scope)), F-C (enqueue_audience_sync never binds member.member_key to snap.subject_ref, so a mispointed CONSUMED membership -> a member ADDed on another subject's VALID consent = borrowed consent; the measurement path binds subject, the audience path never did; fix bind member_key to subject_ref before ADD); (B3) security/DQ observations forward-routed - O-2 (audience outbox + conversion rows hold one raw identity ref each by design, masked on export + hashed into the dedup key + PII-safe payload_ref, in-memory/staged, never sinked; enforce OD-012 masking + pseudonymous-id charset validation before durable binding; the measurement outbox row carries no raw PII), O-4 (a NaN/Inf revenue_value on ORDER_VERIFIED passes the isinstance number check; fix math.isfinite; DQ gap -> M6.2F), plus forward request authN/authz on the conversions endpoint + worker service-account scoping for the two dispatchers at the M6-OD-011 binding; (B4) external-send FORWARD gates hard before any M6.2D real send - M6-OD-003 (hash policy + permitted send fields) and M6-OD-004 (connector); egress in M6.2C doubly bolted (permits_external_send() hard-False + StagedBlockedTransport raises); M6.2D platform tokens must be secret_ref-only; (B5) contract housekeeping non-blocking - all eight slice contracts CTR-007/008/009/010/011/017/021/022 are MISSING/OWNER_DECISION_REQUIRED in canon but satisfied-for-entry (harmonization producers M6-P0704/0705/0706/0711/0713 PASS, gate M6-P0715 SIGNED); the canon-flip is deferred operator housekeeping; (B6) inherited cross-slice carry-forwards still in force - ENTRY-001/003 RISK-ACCEPTED under M6-OVERRIDE-M6P1000-STAGED (M6-P1000 verdict stays BLOCKED, not converted), bound to M6.2A entry + the mandatory M6.2G re-gate, NOT checked at M6.2C; the M6.2B endpoint residuals (its own F-A deep-JSON RecursionError, F-B over-broad hash, O-1, MINOR-6, MINOR-9-res - DISTINCT from M6.2C's F-A/F-B above) bind at the same integration step; open owner decisions M6-OD-003 (hash, M6.2D), M6-OD-004 (connector, M6.2D), M6-OD-008 (revenue - CTR-017 defaults ORDER_VERIFIED-only, fail-closed), M6-OD-012 (masking format); (B7) immutable posture BLOCKED/OFF/OFF, platform-specific dedup/hash (M6.2D) + attribution (M6.2E) out of scope, mandatory M6.2G Scale-Gate re-gate before any real scale or external send. VERIFICATION: the index was built from the seven primary evidence JSONs + the artifacts + the SMOKE/CONTRACT registers, read directly; a 3-lens read-only adversarial verification (coverage/mapping, overstatement/honesty, omitted-blockers) returned coverage_ok=true with ZERO findings on all three lenses. The index was scanned with the gate's own secret/PII regexes (email/token/secret-assignment/user-id/VN-phone): CLEAN. GOVERNANCE DISCIPLINE: analysis_only respected; 04-artifacts/state not touched; no application code / migration / flag change; no external call; no self-certification (this evidence advances no gate - the runner EVIDENCE_GATE and the slice-gate Judge decide closure). No raw secret/token/PII: all subject ids are referenced as field names or synthetic handles, none as raw values. The evidence-COLLECTION task itself has no open blocker (all seven inputs present, all indexed artifacts exist on disk, index complete and independently verified), so status=PASS with open_blockers empty and fail_gate_tripped=false; the unresolved SLICE-level items are documented in the index (section 5), which is the correct place for them, not this collection prompt's open_blockers.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2C.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1200.json",
+    "04-artifacts/evidence/prompts/M6-P1201.json",
+    "04-artifacts/evidence/prompts/M6-P1202.json",
+    "04-artifacts/evidence/prompts/M6-P1203.json",
+    "04-artifacts/evidence/prompts/M6-P1204.json",
+    "04-artifacts/evidence/prompts/M6-P1205.json",
+    "04-artifacts/evidence/prompts/M6-P1206.json",
+    "04-artifacts/test-reports/M6.2C/SMOKE_RESULTS.md",
+    "04-artifacts/impl/M6.2C/IMPLEMENTATION_NOTES.md"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/prompts/M6_2C_EVIDENCE_INDEX.md",
+    "04-artifacts/evidence/prompts/M6-P1207.json"
+  ],
+  "commands_run": [
+    "Read (read-only): slice spec M6.2C, ledger rows for M6-P1200..M6-P1209, the seven band evidence JSONs (M6-P1200..M6-P1206), the test report SMOKE_RESULTS.md, and IMPLEMENTATION_NOTES.md (rollback)",
+    "Glob (read-only): 04-artifacts/impl/M6.2C/** (PLAN, IMPLEMENTATION_NOTES, TEST_MANIFEST, migrations 0003/0004/0005), test-reports/M6.2C/**, boundary-reports/M6.2C*, security-reports/M6.2C*, evidence/judge/M6-P120*_JUDGE_FINAL_SIGN_OFF.json -> confirmed every indexed artifact exists; only the M6-P1200 entry-gate sign-off exists (no M6-P1209 slice-gate sign-off yet)",
+    "Grep (read-only): CONTRACT_REGISTER M6-CTR-007/008/009/010/011/017/021/022 -> all MISSING/OWNER_DECISION_REQUIRED, all bound M6.2C; rollback across IMPLEMENTATION_NOTES.md -> sec.7 + additive-extension rollback confirmed; the gate's own secret/PII regex families over the assembled index -> CLEAN",
+    "Read-only adversarial verification workflow (3 lenses: coverage/mapping, overstatement/honesty, omitted-blockers) over the drafted index vs the primary sources -> coverage_ok=true, ZERO findings on all three lenses",
+    "NOTE: no write to any denied root; 04-artifacts/state untouched; no application code/migration/flag change; no external call. Gate contract (open_blockers empty, fail_gate_tripped=false boolean, no tripping findings/test_results keys) applied per the M6-P1007 (M6.2A) determination of Check-PromptGateLocked.ps1 + m6_substance_verifier.py."
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/prompts/M6_2C_EVIDENCE_INDEX.md",
+    "00-spec/slices/M6.2C.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1200.json",
+    "04-artifacts/evidence/prompts/M6-P1201.json",
+    "04-artifacts/evidence/prompts/M6-P1202.json",
+    "04-artifacts/evidence/prompts/M6-P1203.json",
+    "04-artifacts/evidence/prompts/M6-P1204.json",
+    "04-artifacts/evidence/prompts/M6-P1205.json",
+    "04-artifacts/evidence/prompts/M6-P1206.json",
+    "04-artifacts/evidence/judge/M6-P1200_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/impl/M6.2C/PLAN.md",
+    "04-artifacts/impl/M6.2C/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2C/tests/TEST_MANIFEST.md",
+    "04-artifacts/test-reports/M6.2C/SMOKE_RESULTS.md",
+    "04-artifacts/boundary-reports/M6.2C_boundary.md",
+    "04-artifacts/security-reports/M6.2C_security.md",
+    "04-artifacts/impl/M6.2C/migrations/0004_create_marketing_measurement_outbox.sql",
+    "04-artifacts/impl/M6.2C/migrations/0005_create_marketing_audience_outbox.sql",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1207 (scripts-win/Check-PromptGateLocked.ps1). On PASS, proceed to M6-P1208 (M6_2C_DOCS) and then M6-P1209 (M6_2C_SLICE_GATE_JUDGE) in a fresh session; the slice-gate Judge renders the slice verdict strictly from the evidence files (this index is descriptive, not a verdict) and should weigh: the healthy posture (real entry-gate PASS at M6-P1200; RULE-004 no-direct-send and the load-bearing consent control FAIL-002 both hold, executed; SMK-016 executed not waived) against the B2 consent fail-OPEN residuals (F-B/F-C) + robustness F-A and the B3 O-2/O-4 items, all to close before M6.2D wires a real transport; the B4 forward gates (M6-OD-003 hash, M6-OD-004 connector); the B5 CTR canon-flip housekeeping; and the inherited B6 risk-acceptances (ENTRY-001/003) + the M6.2B endpoint residuals. Exit-gate items 5 and 6 close only when M6-P1208 and M6-P1209 produce their evidence and the M6-P1209 slice-gate sign-off is PASS. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF and the mandatory M6.2G Scale-Gate re-gate remain in force before any real scale or external send."
+}

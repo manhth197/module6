@@ -1,0 +1,51 @@
+{
+  "prompt_id": "M6-P1600",
+  "status": "BLOCKED",
+  "summary": "M6_2G_ENTRY_GATE_JUDGE (JUDGE, gate_review, fresh session, evidence-only) — the MANDATORY Scale-Gate re-gate. Verdict BLOCKED (fail-closed); full reasoning in 04-artifacts/evidence/judge/M6-P1600_JUDGE_FINAL_SIGN_OFF.json. Production/gateway stay BLOCKED/OFF regardless. Entry precondition met: ledger M6-P1600=RUNNING, dependency M6-P1509=SIGNED. Checks 1-3 SATISFIED: previous gate M6-P1509 PASS; IMPLEMENTATION_TARGET_LOCKED status=LOCKED + M6-OD-011 DECIDED; contracts M6-CTR-013/019/026 MISSING but harmonization M6-P0709/M6-P0712 PASS + M6-P0715 SIGNED (resolved-for-entry, not the blocker). Check 4 (entry evidence, REQUIRED by M6.2G which lists all four ENTRY rows) FAILS HARD -> BLOCKED. This is the gate the pack's forward-routing pointed at: the cross-module entry evidence RISK-ACCEPTED to open M6.2A staged (production OFF) is now due at the Scale Gate and has NOT been upgraded to PROVEN. FOUR BLOCKERS (all verified on real source): (1) M6-ENTRY-004.json MISSING from disk — glob of evidence/entry returns only 001/002/003; it is a RequiredInput of M6-P1600 and the register says it 'hard-blocks M6.2G (file not yet on disk)'; public/privacy conduct evidence (no public final price / no PII leak / no spam) owed by M4+M5 owners, not yet commissioned -> fail-closed (hard rule 3). (2) M6-ENTRY-001 NOT PROVEN — status=READY_FOR_JUDGE but overall_grade=PARTIAL (all 4 assertions PARTIAL), 4 open_blockers (NO_RUNTIME_PROOF; FAIL_OPEN_RECALL SellableGateAdminServiceImpl:805; PREPAID_TO_VERIFIED_NO_E2E; QUOTESNAPSHOT_PRODUCER_MISSING), Commerce/M3 owner confirmation PENDING; its own signoff makes the M6.2G re-gate conditional on fixing fail-open recall + e2e order->ORDER_VERIFIED + real M3-owner signature before scale. (3) M6-ENTRY-003 NOT PROVEN — overall_grade '2 PARTIAL + 3 GAP': per-event CHANNEL (ASSERT-003), DATA-SENSITIVITY (ASSERT-004), EXTERNAL-SEND POLICY (ASSERT-005) all GAP (the exact safety/privacy controls a scale/external-send gate needs), owner-not-enforced, Core owner PENDING; its own signoff makes the re-gate conditional on Direction-A completion + re-extracted PROVEN + real Core-owner signature before any scale/external-send. (4) M6-DEFER-FBC-M6.2D.json still NOT FILED (decisions-dir glob) — the F-B/F-C/F-A + F-D consent fail-open binding re-escalated since M6.2E, to be filed + wired into M6-P1600 RequiredInputs. Only M6-ENTRY-002 (P5 channel identity) is clean. RULE-020 risk-acceptance is explicitly bounded to 'open M6.2A staged, re-gate M6.2G mandatory' and does NOT carry through the Scale Gate. FAIL-006 (auto-scale without approval) is the in-scope fail gate; this BLOCK prevents it (fail_gate_tripped=false — fail-closed discipline, not a violation). Overdetermined by incontrovertible source (missing file + self-declared PARTIAL/GAP evidence), so PASS is unavailable on any reading; contracts + previous gate are fine so this is not an over-strict block but the mandatory re-gate working as designed (mirrors honest M6-P1000/M6-P1309 BLOCKED). No self-certification; no application code/migration/flag change; module boundary intact; no raw secrets/PII.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2G.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1509.json",
+    "04-artifacts/evidence/judge/M6-P1509_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/entry/M6-ENTRY-001.json",
+    "04-artifacts/evidence/entry/M6-ENTRY-003.json"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/judge/M6-P1600_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/prompts/M6-P1600.json"
+  ],
+  "commands_run": [
+    "Read (read-only): CLAUDE_CONTEXT_BRIEF, IMPLEMENTATION_TARGET_LOCKED.json, slice M6.2G spec, ENTRY_EVIDENCE_REGISTER (ENTRY-004 hard-blocks M6.2G), FAIL_GATE_REGISTER (FAIL-006), M6-P1509 evidence+signoff (PASS), and the entry-evidence dossiers M6-ENTRY-001.json (overall_grade PARTIAL) + M6-ENTRY-003.json (2 PARTIAL + 3 GAP)",
+    "Grep (read-only): PROMPT_EXECUTION_LEDGER_LOCKED.csv -> M6-P1600=RUNNING, M6-P1509=SIGNED; CONTRACT_REGISTER -> CTR-013/019/026 MISSING (harmonization M6-P0709/M6-P0712 PASS); FAIL_GATE_REGISTER -> FAIL-006 auto-scale",
+    "Glob (read-only): 04-artifacts/evidence/entry/*.json -> only M6-ENTRY-001/002/003 present (M6-ENTRY-004.json ABSENT); 04-artifacts/evidence/decisions/*.json -> M6-DEFER-FBC-M6.2D.json ABSENT"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/judge/M6-P1600_JUDGE_FINAL_SIGN_OFF.json",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2G.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1509.json",
+    "04-artifacts/evidence/judge/M6-P1509_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/entry/M6-ENTRY-001.json",
+    "04-artifacts/evidence/entry/M6-ENTRY-002.json",
+    "04-artifacts/evidence/entry/M6-ENTRY-003.json"
+  ],
+  "open_blockers": [
+    "M6-ENTRY-004.json MISSING from 04-artifacts/evidence/entry/ (RequiredInput of M6-P1600; register: hard-blocks M6.2G; public/privacy conduct evidence owed by M4+M5 owners, not yet commissioned) -> fail-closed BLOCKED",
+    "M6-ENTRY-001 NOT PROVEN (status READY_FOR_JUDGE but overall_grade PARTIAL; 4 open_blockers incl. FAIL_OPEN_RECALL SellableGateAdminServiceImpl:805 + NO_RUNTIME_PROOF + PREPAID_NO_E2E + QUOTESNAPSHOT_MISSING; Commerce/M3 owner PENDING; the mandatory M6.2G re-gate requires it PROVEN + M3-owner-signed)",
+    "M6-ENTRY-003 NOT PROVEN (overall_grade 2 PARTIAL + 3 GAP: attribution_channel, data_sensitivity, external_send_policy all GAP; owner-not-enforced; Core owner PENDING; the mandatory M6.2G re-gate requires Direction-A completion + re-extracted PROVEN + Core-owner-signed before any scale/external-send)",
+    "M6-DEFER-FBC-M6.2D.json NOT FILED in 04-artifacts/evidence/decisions/ (the F-B/F-C/F-A + F-D consent fail-open binding, re-escalated since M6.2E, to be filed + wired into the M6-P1600 RequiredInputs before the Scale Gate)"
+  ],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Do NOT proceed to M6-P1601 (M6.2G coder plan); the Scale-Gate entry is BLOCKED and staged implementation of a real-scale/real-send capability must not begin on unproven cross-module safety evidence. Owner decides one of two paths, then the operator re-runs M6-P1600: (A) SUPPLY / UPGRADE THE EVIDENCE — M4+M5 owners file 04-artifacts/evidence/entry/M6-ENTRY-004.json (public/privacy conduct: no public final price, no PII leak, no spam); Commerce/M3 owner fixes the fail-open recall (SellableGateAdminServiceImpl:805) + adds an e2e order->ORDER_VERIFIED proof + signs M6-ENTRY-001 to PROVEN; Core completes Direction-A (add per-event attribution_channel + data_sensitivity + external_send_policy + enforce owner + reseed) + re-extracts and signs M6-ENTRY-003 to PROVEN; and files 04-artifacts/evidence/decisions/M6-DEFER-FBC-M6.2D.json wired into the M6-P1600 RequiredInputs. OR (B) FILE AN EXPLICIT WRITTEN OWNER_OVERRIDE for M6.2G (as for M6.2A / M6.2D) -> ledger row set to SKIPPED (never PASS/SIGNED) while THIS judge verdict stays BLOCKED and production/gateway stay BLOCKED/OFF; note that an override at the Scale Gate is materially heavier than the staged-slice overrides because it opens the design of a real-scale/real-send capability on admittedly unproven verified-revenue-integrity / external-send-policy / data-sensitivity / public-PII-conduct evidence — the owner should weigh that squarely. The judge neither recommends nor presumes the override. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, HASH_POLICY_RATIFIED=False, SCALE_MODEL_RATIFIED=False, live_migrations=false remain in force; M6-P1000 + M6-P1309 verdicts remain BLOCKED (not converted). Nothing here authorizes scale or external send."
+}

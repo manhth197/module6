@@ -1,0 +1,21 @@
+{
+  "checked_at": "2026-07-29T04:30:18Z",
+  "claimed_fail_gate_tripped": false,
+  "classification": "judge",
+  "computed_fail_gate_tripped": true,
+  "computed_status": "FAIL",
+  "evidence_present": true,
+  "evidence_sha256": {
+    "04-artifacts/evidence/prompts/M6-P1000.json": "d882397fc69f816cd91b4158e001daa5e91dc421f63a8f654d045d0dcf721cbf"
+  },
+  "failures": [
+    "computed fail gate: open_blockers non-empty (3 item(s))"
+  ],
+  "integrity_violations": [
+    "CLAIMED_VS_COMPUTED_MISMATCH: fail_gate_tripped=false but recomputed verdict trips (M6-FAIL-009 gate bypass)"
+  ],
+  "mode": "gate",
+  "prompt_id": "M6-P1000",
+  "rules_version": "M6-SGV-1.0",
+  "warnings": []
+}

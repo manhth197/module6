@@ -1,0 +1,56 @@
+{
+  "prompt_id": "M6-P1002",
+  "status": "PASS",
+  "summary": "M6_2A_CODER_IMPLEMENT (CODER, implement, STAGED) Round 4 re-run (ledger row 80, attempt 4 = RUNNING; note 'Round4: close the input type-boundary class'). Read the ROUND4 brief (D:\\M6\\BRIEF_M6-P1002_ROUND4.md). Rounds 2 and 3 each closed the listed bugs, then an adversary found the SAME CLASS at a new site: an untrusted/external data path entering the seam WITHOUT a TYPE check. Round 3 applied 'strict callee, forgiving seam' but only for normalize_ts and the reader.get() EXCEPTION; two wrong-TYPE sites (plus one sweep miss) remained, all probe-confirmed on the real seam. Round 4 installs ONE type boundary at the head of ingest_event() and closes the whole class. This is hardening ADDED ON TOP of R1/R2/R3 -- none of their verified closures are undone (gate.py still uses 'is not ConsentState.VALID'; RULE-005 five-component formula unchanged; consent_reader/audit still mandatory). Governance immutable and unchanged: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF; no migration applied; no external/platform call; no dispatcher added; no flag flipped; 04-artifacts/state untouched; no self-certification of gate advancement (RULE-015). FIX 1 (MAJOR-6 + junk-accept, ingest.py): a TYPE BOUNDARY at the head of ingest_event(), before identity -- every channel-origin scalar is type-checked once via the centralized helper _require_str(name, value, notes, *, optional). Required fields (event_code/page_id/session_id/source/raw_event_hash) of a non-str type => fail-closed REJECT with audit FIELD_TYPE_INVALID (field name in detail), IngestResult(logged=False, egress_eligible=False), early return, NO raise. Optional fields (guest_id/consent_snapshot_id/correlation_id) of the wrong type => dropped to ABSENT + audit HOLD FIELD_TYPE_INVALID, value never used. NEVER str()-coerced (a list coerced to \"['x']\" is ingested GARBAGE, not fail-closed) -- this also closes the probe finding that page_id/session_id/source/raw_event_hash as a LIST were silently junk-accepted (str(list) baked into the RULE-005 idempotency key, logged=True). FIX 2 (MAJOR-7, the fail-OPEN, ingest.py): immediately after resolved_snapshot = consent_reader.get(handle_id), 'if not isinstance(resolved_snapshot, ConsentSnapshot)' => fail-closed, note+audit CONSENT_SNAPSHOT_UNTRUSTED_TYPE, resolved_snapshot set to None so the id is NEVER written to the append-only (RULE-007) log. Placed BEFORE subject binding so a duck-typed snapshot (never through __post_init__, whose raw-string consent_scope substring-matches 'external_measurement' inside 'no_external_measurement_allowed' and fails OPEN in the gate) can never reach the gate at all. isinstance is the right check because a REAL ConsentSnapshot has already passed __post_init__ hardening at construction. FIX 2b (same class, different site, ingest.py): the caller-supplied consent_snapshot OBJECT param was dereferenced (.consent_snapshot_id) with no type check => AttributeError out of the seam; now guarded by 'if isinstance(consent_snapshot, ConsentSnapshot)' before dereference, wrong type => absent + audit CONSENT_SNAPSHOT_UNTRUSTED_TYPE, no raise. FIX 3 (property test, new tests/test_round4_regressions.py, 26 tests): the Round-3 property test fuzzed event_ts but not non-str scalars and its reader always returned a real ConsentSnapshot -- that narrow domain is why the class survived. The new file adds targeted regressions (MAJOR-7 duck-type => egress_eligible=False + id-not-logged + audited; non-str event_code => REJECT; the 4 required scalars as list/number/None => REJECT not junk-accept; non-str guest_id dropped before the resolver ever sees it; non-str optional ids dropped absent; FIX 2b stray object => absent + audit, with a real-object control) AND a seam TYPE-BOUNDARY property test sweeping 957 wrong-type combinations (event_code x guest_id x consent-source(object+id) x reader = 945, plus 4 required scalars x 3 bad types = 12) asserting for EVERY one: ingest_event() never raises; every non-logged event carries >=1 audit; NO non-str scalar is ever logged (no junk-accept); a wrong-typed consent value never grants egress. FIX (docstring, sec.5): the seam docstring's 'never raises on hostile input' claim is now TRUE for hostile TYPES too; a Flow step T (type boundary) and a design-contract sentence were added. PLAN-DELTA (IMPLEMENTATION_NOTES Round 4 R4.3): ONE Round-3 test assertion was UPDATED (not loosened) -- test_round3_regressions.py::test_fixa_malformed_consent_state_is_audited_deny_not_raised feeds a reader-returned DUCK-TYPE and asserted reason CONSENT_STATE_MALFORMED (from the gate-call try/except); FIX 2 now catches that duck-type EARLIER at the isinstance boundary, before the gate, so the audited reason is the stronger, earlier CONSENT_SNAPSHOT_UNTRUSTED_TYPE. The test's security invariant is UNCHANGED and still asserted (no raise, egress_eligible is False, deny is audited); only the expected reason code moved -- a direct, necessary consequence of the mandated FIX 2, not a green-washing loosen. The gate-call try/except (CONSENT_STATE_MALFORMED) is KEPT as defense-in-depth (belt-and-suspenders after FIX 2). No other R1/R2/R3 test changed; two private helpers (_require_str, _field_type_reject) were added to IngestService with no public method, no new IngestResult field, and no ingest_event() signature change, so every existing caller binds unchanged. VERIFICATION (pinned interpreter, cwd 04-artifacts/impl/M6.2A): baseline pre-R4 full suite = 70 passed exit 0; green-after full suite = 96 passed exit 0 (70 + 26 Round-4 tests); python -m app prints the staged posture BLOCKED/OFF/OFF and exits 0; enabling-flag sweep across the staged tree found none; all __pycache__/.pytest_cache removed from the staged tree (0 remaining, 37 files). sec.7 done-list fully covered: MAJOR-7 (duck-type => egress_eligible=False, id not logged, audited) ok; MAJOR-6 (non-str event_code/guest_id => no raise, audit REJECT/HOLD) ok; FIX 2b (stray object => no raise, absent + audit) ok; junk-accept (list page_id/... => REJECT, not logged=True) ok; extended property test + full suite green ok; Round-1 five hits + Round-2/3 invariants still green (no regression) ok. No raw secret/token/PII anywhere; all fixture/test ids synthetic; _require_str records only the field NAME (never the offending value, which could be attacker-shaped/unhashable). fail_gate_tripped=false. The runner EVIDENCE_GATE and the re-run boundary (M6-P1005) / security (M6-P1006) adversaries decide closure; this slice does not self-certify advancement.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/impl/M6.2A/PLAN.md",
+    "04-artifacts/evidence/prompts/M6-P1001.json",
+    "04-artifacts/evidence/prompts/M6-P1002.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/impl/M6.2A/app/measurement/ingest.py",
+    "04-artifacts/impl/M6.2A/app/measurement/models/consumed.py",
+    "04-artifacts/impl/M6.2A/app/measurement/consent/gate.py",
+    "04-artifacts/impl/M6.2A/app/measurement/registry/validator.py",
+    "04-artifacts/impl/M6.2A/app/measurement/audit.py",
+    "04-artifacts/impl/M6.2A/app/measurement/logs/idempotency.py",
+    "04-artifacts/impl/M6.2A/app/measurement/identity/resolver.py",
+    "04-artifacts/impl/M6.2A/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2A/tests/conftest.py",
+    "04-artifacts/impl/M6.2A/tests/test_round3_regressions.py",
+    "04-artifacts/impl/M6.2A/tests/test_round2_regressions.py",
+    "04-artifacts/impl/M6.2A/tests/test_ingest_measure_only.py",
+    ".claude/hooks/role_pre_tool_guard.ps1"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2A/app/measurement/ingest.py",
+    "04-artifacts/impl/M6.2A/tests/test_round3_regressions.py",
+    "04-artifacts/impl/M6.2A/tests/test_round4_regressions.py",
+    "04-artifacts/impl/M6.2A/IMPLEMENTATION_NOTES.md"
+  ],
+  "commands_run": [
+    "cd 04-artifacts/impl/M6.2A ; D:\\M6\\Module6-workspace\\01-coder\\.venv\\Scripts\\python.exe -m pytest -q  ==> BASELINE (pre-Round-4) 70 passed, exit 0",
+    "cd 04-artifacts/impl/M6.2A ; D:\\M6\\Module6-workspace\\01-coder\\.venv\\Scripts\\python.exe -m pytest -q  ==> GREEN-AFTER 96 passed, exit 0 (70 + 26 Round-4 tests; final run used PYTHONDONTWRITEBYTECODE=1 and -p no:cacheprovider so no cache was written)",
+    "cd 04-artifacts/impl/M6.2A ; D:\\M6\\Module6-workspace\\01-coder\\.venv\\Scripts\\python.exe -m app  ==> prints staged posture BLOCKED/OFF/OFF, exit 0",
+    "cd 04-artifacts/impl/M6.2A ; D:\\M6\\Module6-workspace\\01-coder\\.venv\\Scripts\\python.exe -c '(pathlib.rglob + shutil.rmtree over __pycache__/.pytest_cache)'  ==> removed 11 cache dirs total across runs; 0 remaining, 37 files in the staged tree",
+    "NOTE: a read-only 'ls .../.venv/Scripts/python.exe 2>/dev/null' was BLOCKED by role_pre_tool_guard because the '2>' redirection co-occurred with the venv path segment 'Scripts' (matches denied root 'scripts'); re-verified read-only via Glob and ran pytest without any redirection. No write to any denied root; 04-artifacts/state untouched."
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2A/app/measurement/ingest.py",
+    "04-artifacts/impl/M6.2A/tests/test_round4_regressions.py",
+    "04-artifacts/impl/M6.2A/tests/test_round3_regressions.py",
+    "04-artifacts/impl/M6.2A/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2A/app/measurement/consent/gate.py",
+    "04-artifacts/impl/M6.2A/app/measurement/models/consumed.py",
+    "04-artifacts/impl/M6.2A/PLAN.md",
+    "04-artifacts/evidence/prompts/M6-P1001.json",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1002. On PASS, proceed to M6-P1003 (TESTER build) to add tests/test_round4_regressions.py to TEST_MANIFEST and re-collect the seam-driven SMK-001/SMK-002, then M6-P1004 (TESTER run) to execute and record SMK-001/SMK-002 for exit-gate legs L4/L5, then RE-RUN M6-P1005 (boundary) and M6-P1006 (security/PII) against the Round-4 code to confirm the input type-boundary class is closed (MAJOR-6/MAJOR-7/FIX-2b) and that MAJOR-1..5 + SEC-PII-01/02 stay closed. Governance unchanged: staged-only, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF; ENTRY-001/ENTRY-003 remain risk-accepted with the MANDATORY M6.2G Scale-Gate re-gate before any scale or external send."
+}

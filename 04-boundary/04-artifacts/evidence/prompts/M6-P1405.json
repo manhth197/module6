@@ -1,0 +1,61 @@
+{
+  "prompt_id": "M6-P1405",
+  "status": "PASS",
+  "summary": "M6_2E_BOUNDARY_ADVERSARY (analysis_only) attempt 1, against the FROZEN staged M6.2E attribution layer (resolve-to-verified-revenue; LOW/HOLD never scale evidence; snapshots immutable after verify). ENTRY GATE verified: ledger row 123 M6-P1405=RUNNING; dependency M6-P1404=PASS (full suite 239, SMK-006/007/013/018 4/4 each); M6.2E entry judge M6-P1400 SIGNED, coder M6-P1401/1402 + tester M6-P1403/1404 PASS; posture immutable (BLOCKED/OFF/OFF/HASH_POLICY_RATIFIED=False/SCALE_MODEL_RATIFIED=False) confirmed at runtime. METHOD: one read-only executed harness (04-boundary/work/attacks/m6_2e_attacks.py) driving the real path -- the resolver fail-closed grading, AdsAttributionContext.is_scale_evidence_eligible across all 12 confidence x conflict combos, the materializer revenue/set-once/scale-evidence gating, the adjustment path, the store set-once immutability, and the F-D endpoint bind / F-E platform_event_id / F-F safe_subject_ref; pinned launcher Python 3.12.10, -B byte-clean (0 __pycache__; 04-artifacts/impl/M6.2E untracked, no diff); 26 recorded outcomes (DEFENDED=19, OPEN-non-gate=3, notes=4). PII-shaped probes constructed programmatically + never echoed. Coverage widened by a 5-agent adversarial-ideation pass; every BREACH/UNCERTAIN vector executed (no unexecuted breach recorded). VERDICT: NO BLOCKER; neither in-scope fail gate is tripped (M6-FAIL-001 revenue, M6-FAIL-004 core override). FAIL-001 (revenue/scale evidence): is_scale_evidence_eligible is True for EXACTLY ONE of the 12 confidence x conflict combos -- (HIGH, NONE); every LOW/MEDIUM and every conflict (MULTI_TOUCH/MISSING_SOURCE/DUPLICATE_RISK) -> False; even a HIGH+NONE has scale_evidence False while SCALE_MODEL_RATIFIED=False (doubly fail-closed); forcing the flag elevates only a genuine HIGH+NONE, a LOW stays False; grading is fail-closed (10 source shapes, 0 mismatches -- missing/dup/multi -> LOW, incomplete single -> MEDIUM, only a complete single channel -> HIGH; injecting a crm signal DEGRADES a complete ad to MULTI_TOUCH/LOW, cannot inflate); revenue only from ORDER_VERIFIED (a VIEW_LANDING/PAYMENT_COMPLETED conversion carrying a revenue_value materializes with revenue None); set-once (a DIFFERENT revenue on re-materialize raises MeasurementStoreViolation, an identical re-materialize is a no-op, the row stays 100000.0); revenue requires an order_code; a revenue-bearing Zone-A insert + update/delete all raise; platform_event_id now injective (F-E). FAIL-004 (immutability/commission/override): request_adjustment is an append-only overlay that NEVER mutates the verified row (proposed revenue 300000 -> row revenue still 100000.0); AdjustmentLog append-only; actor masked on export; referral_link_id/diamond_id RECORDED only, NO commission computed/field; a tokenizer sweep of the 5 attribution/store modules finds 0 commission/order-state/QuoteSnapshot/CRM/pricing/network/db identifiers and 0 override-action defs. FIX-FIRST (carried F-D/F-E/F-F, all EXECUTED-CLOSED): F-D the measurement borrowed consent -> conversions.py:96-108 MANDATORY safe_subject_ref(snap)==customer_or_guest_key (a conversion citing another subject's VALID consent is REJECTED; matching CREATED; a None reader REJECTED fail-closed); F-E platform_event_id escapes the join (injective, the M6.2A MAJOR-5 class); F-F transport.safe_subject_ref uses type(x) is str (reads the C type slot, not __class__) so a raising subject_ref property / str-subclass -> None and the dispatcher run_once does not crash. OPEN residual (all armed-not-fired; none trips an in-scope gate; for CODER/M6-P1406): F-G [MINOR] the adjustment path is under-validated -- three same-class sub-gaps, none a row mutation: (a) request_adjustment accepts EMPTY actor/reason/audit_ref/evidence_ref (no non-empty validation); (b) it never checks the target row exists or is verified (an adjustment can be recorded against no_such_event); (c) AdjustmentRecord is frozen but proposed is a plain dict so records[0].proposed is mutable in place after append. In every case the verified row is unchanged (the overlay is never applied) -> not a FAIL-004 override; a data-quality/accountability/immutability-completeness gap. Fix: require non-empty fields; assert the row exists+verified; store proposed as MappingProxyType/copy-on-read; optionally a proposed field allow-list. Observations: O-1 AdjustmentRecord.proposed has no field allow-list (a caller commission_value is stored but NEVER computed/applied -> RULE-019 holds; M6-P1406); O-2 the durable Zone-B attribution_context keeps raw psid (masked on export via to_public) -> M6-P1406/M6-OD-012; O-3 a carried M6.2A ingest raw-subject comparison remains flagged (FAIL-002-adjacent, armed-not-fired, later hardening); O-4 the materializer verified_event_codes is a constructor arg (default ORDER_VERIFIED correct; a mis-wired assembler could book non-verified revenue -- not channel-reachable); O-5 a NaN/Inf revenue breaks the set-once idempotent replay (NaN != NaN -> an honest replay raises; root cause is non-finite revenue -> M6.2F DQ / M6-P1406). GOVERNANCE: analysis_only -- no application code, migration, state ledger, or flag written; no external call; BLOCKED/OFF/OFF/HASH_POLICY_RATIFIED=False/SCALE_MODEL_RATIFIED=False unchanged; no self-certification. status PASS is the adversary's honest self-report (fail_gate_tripped=false); the runner EVIDENCE_GATE and the slice Judge (M6-P1409, which specifically verifies F-D) decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2E.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1404.json",
+    "04-artifacts/test-reports/M6.2E/SMOKE_RESULTS.md",
+    "04-artifacts/impl/M6.2E/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2E/app/measurement/attribution/resolver.py",
+    "04-artifacts/impl/M6.2E/app/measurement/attribution/materializer.py",
+    "04-artifacts/impl/M6.2E/app/measurement/attribution/adjustment.py",
+    "04-artifacts/impl/M6.2E/app/measurement/models/attribution_context.py",
+    "04-artifacts/impl/M6.2E/app/measurement/store/measurement_event_store.py",
+    "04-artifacts/impl/M6.2E/app/measurement/models/measurement_event.py",
+    "04-artifacts/impl/M6.2E/app/config.py",
+    "04-artifacts/impl/M6.2E/app/api/conversions.py",
+    "04-artifacts/impl/M6.2E/app/measurement/outbox/transport.py",
+    "04-artifacts/impl/M6.2E/app/measurement/outbox/measurement_dispatcher.py",
+    "04-artifacts/impl/M6.2E/tests/conftest.py"
+  ],
+  "files_changed": [
+    "04-artifacts/boundary-reports/M6.2E_boundary.md",
+    "04-artifacts/evidence/prompts/M6-P1405.json",
+    "04-boundary/work/attacks/m6_2e_attacks.py"
+  ],
+  "commands_run": [
+    "py -3.12 --version -> Python 3.12.10 (pinned launcher; matches IMPLEMENTATION_TARGET_LOCKED 3.12 pin)",
+    "PYTHONDONTWRITEBYTECODE=1 py -3.12 -B work/attacks/m6_2e_attacks.py -> 26 recorded outcomes: DEFENDED=19, OPEN_NONGATE=3, NOTE=4; IN-SCOPE FAIL-GATE BREACHES (FAIL-001/004)=NONE",
+    "git -C Module6-workspace status --porcelain -- 04-artifacts/impl/M6.2E -> '?? 04-artifacts/impl/M6.2E/' (untracked, no diff); 0 __pycache__/.pytest_cache under 04-artifacts/impl/M6.2E after the run",
+    "NOTE: analysis_only. No application code, migration, state ledger, or flag written; no external/network call; no shell redirection used (role guard blocks a redirection co-occurring with a venv 'Scripts' path segment). PII-shaped probes are runtime-assembled and never echoed. 5-agent adversarial-ideation workflow run; every BREACH/UNCERTAIN vector executed in the harness before being recorded."
+  ],
+  "evidence_refs": [
+    "04-artifacts/boundary-reports/M6.2E_boundary.md",
+    "04-boundary/work/attacks/m6_2e_attacks.py",
+    "04-artifacts/impl/M6.2E/app/measurement/attribution/resolver.py",
+    "04-artifacts/impl/M6.2E/app/measurement/attribution/materializer.py",
+    "04-artifacts/impl/M6.2E/app/measurement/attribution/adjustment.py",
+    "04-artifacts/impl/M6.2E/app/measurement/models/attribution_context.py",
+    "04-artifacts/impl/M6.2E/app/measurement/store/measurement_event_store.py",
+    "04-artifacts/impl/M6.2E/app/config.py",
+    "04-artifacts/impl/M6.2E/app/api/conversions.py",
+    "04-artifacts/impl/M6.2E/app/measurement/outbox/transport.py",
+    "04-artifacts/impl/M6.2E/app/measurement/integration/payload.py",
+    "04-artifacts/impl/M6.2E/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2E/tests/conftest.py",
+    "04-artifacts/test-reports/M6.2E/SMOKE_RESULTS.md",
+    "04-artifacts/evidence/prompts/M6-P1404.json",
+    "00-spec/slices/M6.2E.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1405. Neither in-scope fail gate (FAIL-001/004) is tripped, so this evidence is PASS-eligible; the boundary report is 04-artifacts/boundary-reports/M6.2E_boundary.md. The carried F-D/F-E/F-F are executed-CLOSED (the JUDGE M6-P1409 specifically verifies F-D). On PASS, proceed to M6-P1406 (M6_2E_SECURITY_REVIEW), which owns the PII (psid/actor masking, durable-psid O-2), the no-commission review (RULE-019, the proposed field allow-list O-1), and should also review the non-finite-revenue DQ gap (O-5). The CODER should close F-G (require non-empty adjustment fields; assert the target row exists+verified before recording; store proposed as an immutable mapping). Governance unchanged: staged-only, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, HASH_POLICY_RATIFIED=False, SCALE_MODEL_RATIFIED=False; M6-OD-003/004 before any real send, M6-OD-005 before single-model scale evidence; the MANDATORY M6.2G Scale-Gate re-gate remains in force before any real scale or external send."
+}

@@ -2,74 +2,97 @@
   "schema_version": "GFD-M6-ENTRY-EVIDENCE-001",
   "entry_id": "M6-ENTRY-001",
   "source_module": "Module 3",
-  "supplied_by": "Commerce/Module 3 evidence — nop boi Nguyen Duc Manh, Tech Lead/PM dieu phoi (KHONG phai Commerce/M3 owner; xem signoff). Commerce/M3 owner Phuc CHUA xac nhan doc lap.",
+  "supplied_by": "Commerce/Module 3 evidence — RE-EXTRACT 2026-08-11 boi Nguyen Duc Manh (Tech Lead/PM dieu phoi, KHONG phai Commerce/M3 owner). Bo sung RUNTIME PROOF (OrderFullFlowPostgresTest @a3aad246, hash-verified) + re-verify doc lap 3 residual tren code that @a3aad246. Commerce/M3 owner Phuc CHUA ky doc lap (xem signoff).",
   "captured_at": "2026-07-22T09:00:00Z",
+  "re_extracted_at": "2026-08-11T00:00:00Z",
+  "independent_rejudge": "PROVEN for the M6 boundary (2026-08-11) — fresh evidence-only judge + adversary confirmed the boundary holds at a3aad246, 5/5 residuals not load-bearing. See M6-ENTRY-001/_REJUDGE_VERDICT_2026-08-11.json. Pending: Commerce/M3 owner (Phuc) sign-off. Official grade still via operator M6-P1600 re-gate.",
   "status": "READY_FOR_JUDGE",
-  "scope": "P3 Verified Revenue boundary tren CODE M3 that @f90152d2: dinh nghia ORDER_VERIFIED, luong Payment/COD/Order-Verified, guard khong-tao-order-revenue-bearing-khi-chua-confirm, revenue chi tinh tu ORDER_VERIFIED. Bang chung TANG-CODE (static/unit) verify+refute 8 agent; CHUA co runtime/e2e proof.",
-  "overall_grade": "PARTIAL — ca 4 assertion PARTIAL sau verify+refute doi khang (khong PROVEN, khong GAP). Boundary M6 can (revenue chi tu ORDER_VERIFIED; ORDER_VERIFIED fail-closed) vung o tang code; con thieu runtime proof + 3 defect (xem open_blockers).",
+  "scope": "P3 Verified Revenue boundary. Tang-code (static/unit) trich @f90152d2 (8-agent verify+refute) + RE-VERIFY 3 residual @a3aad246 (workflow 3-agent) + RUNTIME e2e @a3aad246 (Testcontainers Postgres, MockMvc HTTP, green). Boundary M6: revenue chi tu ORDER_VERIFIED; ORDER_VERIFIED that + fail-closed.",
+  "overall_grade": "SUBSTANTIALLY PROVEN cho ranh gioi M6 (final grade cho phien re-judge doc lap quyet). ASSERT-001 & ASSERT-004 = PROVEN: dinh nghia ORDER_VERIFIED DB-authoritative fail-closed (DB CHECK V56 cam TRUSTED; legacy markVerified da qua gate evaluateOrder) + revenue CHI tu VERIFIED tren ca 2 surface (AdminRevenueReport + ProductAnalytics), verify @a3aad246. Runtime producer proof da co (green, hash 7c0ffe...). FAIL_OPEN_RECALL (B2) DONG @a3aad246. Residual KHONG load-bearing cho amount/gate M6: (a) real-VNPAY-prepaid->VERIFIED chua e2e (test dung ONLINE_MOCK) [ASSERT-002]; (b) Golden-Hour create-gate CHUA re-verify @a3aad246 + cau chu 'khong order truoc confirm' literal (row CONFIRMING la non-revenue) [ASSERT-003]; (c) drift VERIFIED-or-TRUSTED cosmetic + dead-code enum, nhanh TRUSTED chet o tang data [ASSERT-001]; (d) read-side chua assert runtime (da verify code). QuoteSnapshot producer reclassify -> known-limitation (display-only, khong sai amount).",
   "provenance": {
-    "repo": "PhucApu/ginsengfood-business-platform",
-    "branch": "PhucApu (NHANH CA NHAN CHUA MERGE vao dev)",
-    "commit": "f90152d2d3ca7abdb6a61f892760010c01c545e4",
-    "commit_short": "f90152d2",
-    "method": "workflow m3-entry-evidence-verify: 4 verify doc lap + 4 refute doi khang (8 agent), commit-pinned"
+    "repo": "PhucApu/ginsengfood-business-platform (local D:/APU/project/ginsengfood ben Phuc; mirror D:/M3-work/business-platform)",
+    "branch": "PhucApu (nhanh ca nhan chua merge vao dev)",
+    "commit": "a3aad246d986fbc273cf41aaa93eec6659669656",
+    "commit_short": "a3aad246",
+    "prior_static_commit": "f90152d2 (extract tang-code goc; da re-verify lai @a3aad246, khong con dung mot minh)",
+    "method": "static-tier: 8-agent verify+refute @f90152d2; re-verify 3 residual @a3aad246 (3-agent workflow); runtime: OrderFullFlowPostgresTest green @a3aad246"
+  },
+  "runtime_evidence": {
+    "test": "com.ginsengfood.project.order.OrderFullFlowPostgresTest#fullFlowCreatesCanonicalSnapshotRefsAndOrderVerifiedEvidence",
+    "type": "@SpringBootTest + @Testcontainers real PostgreSQL + Flyway + MockMvc HTTP",
+    "result": "Tests run 1, Failures 0, Errors 0, Skipped 0, Time 131.44s, BUILD SUCCESS",
+    "commit": "a3aad246",
+    "artifact": "04-artifacts/evidence/entry/M6-ENTRY-001/TEST-com.ginsengfood.project.order.OrderFullFlowPostgresTest.xml",
+    "artifact_sha256": "7c0ffe1a9ec6b00e9da8a5f105293eb1d2b9c3c3c48f7a0d906b4ac4213471c0",
+    "sha256_independently_recomputed": true,
+    "proves": "producer/gate path create->mock-pay->CONFIRMED/PAID->DELIVERED->ORDER_VERIFIED; asserts verification_status=VERIFIED + 4 canonical snapshot refs resolvable + order_verification_checkpoints VERIFIED + event_packages ORDER_VERIFIED idempotency count=1",
+    "does_not_prove": "real-VNPAY-HMAC prepaid->VERIFIED e2e (payment via ONLINE_MOCK webhook, no signature; VNPAY props set but unused); net_revenue READ side (khong query revenue read-model); negative/fail-closed case (chi happy-path; addFilters=false, permission port mocked)"
   },
   "evidence_refs": [
     "04-artifacts/evidence/entry/M6-ENTRY-001/order-verified-definition.md",
     "04-artifacts/evidence/entry/M6-ENTRY-001/payment-cod-flow.md",
     "04-artifacts/evidence/entry/M6-ENTRY-001/no-order-before-confirm.md",
-    "04-artifacts/evidence/entry/M6-ENTRY-001/verified-revenue-only.md"
+    "04-artifacts/evidence/entry/M6-ENTRY-001/verified-revenue-only.md",
+    "04-artifacts/evidence/entry/M6-ENTRY-001/TEST-com.ginsengfood.project.order.OrderFullFlowPostgresTest.xml"
   ],
   "assertions": [
     {
       "id": "ASSERT-001",
-      "grade": "PARTIAL",
+      "grade": "PROVEN",
       "claim": "ORDER_VERIFIED co dinh nghia chinh thuc, DB-authoritative, fail-closed trong CODE: guard DELIVERED+PAID+snapshot+risk/after-sales CLEAR, DB CHECK pin state set, seeded ORDER_VERIFICATION_POLICY, RBAC ORDER.VERIFY, event_registry is_ads_conversion=TRUE (ranh gioi M6/Ads)",
       "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-001/order-verified-definition.md",
-      "does_not_prove": "0 runtime proof (test mock/static; Postgres test seed thang VERIFIED); enum opensPostPurchaseLifecycle() dead-code; drift dinh nghia VERIFIED-or-TRUSTED vs DB CHECK cam TRUSTED; legacy markVerified() dan nhan ORDER_VERIFIED vo dieu kien o response"
+      "reverified_a3aad246": "DB CHECK V56__p3_07:30-32 pin verification_status IN(PENDING,VERIFIED,REVOKED,BLOCKED) tren orders + :48-49 tren order_verification_checkpoints -> TRUSTED KHONG the persist. Legacy markVerified() (OrderVerificationCheckpointServiceImpl:120-137) da route qua gate evaluateOrder (:261-357: DELIVERED+PAID, force BLOCKED neu thieu snapshot, doi verificationDueAt) -> fail-closed, chi ghi 'VERIFIED'.",
+      "does_not_prove": "2 residual COSMETIC/LATENT (khong pha fail-closed): (a) drift VERIFIED-or-TRUSTED con o VerificationStatus.canOpenPostPurchaseLifecycle():41-42 + OrderRepository 3 query IN(VERIFIED,TRUSTED) — nhung DB cam ghi TRUSTED + write-path chi ghi VERIFIED/BLOCKED/PENDING -> nhanh TRUSTED CHET o tang data; (b) OrderCheckpoint.opensPostPurchaseLifecycle() dead-code 0 caller. Nen prune, khong load-bearing."
     },
     {
       "id": "ASSERT-002",
       "grade": "PARTIAL",
       "claim": "Prepaid (VNPAY HMAC-SHA512 that, khong mock) va COD (IVR->CONFIRMED, proof->PAID) cai that va tach bach; hoi tu ve mot gate ORDER_VERIFIED method-agnostic fail-closed (DELIVERED+PAID). Khong mock/stub/TODO tren critical path",
       "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-001/payment-cod-flow.md",
-      "does_not_prove": "0 bang chung chay that @f90152d2 (report e2e committed chi 1 test lac); prepaid->VERIFIED KHONG co e2e (VNPAY dung o PAID, triple env-gated); ca package order khong co @SpringBootTest/integration; test 'acceptance' Java la string-grep"
+      "reverified_a3aad246": "Gate method-agnostic ORDER_VERIFIED (DELIVERED+PAID) gio RUNTIME-proven: OrderFullFlowPostgresTest day het state chain toi VERIFIED va assert event idempotent.",
+      "does_not_prove": "Real-VNPAY-HMAC prepaid->VERIFIED VAN chua e2e: test dat PAID qua webhook ONLINE_MOCK (khong signature; providerCode ONLINE_MOCK, paymentMethod 'ONLINE'); VNPAY tmn-code/hash-secret set nhung khong chay. Leg prepaid-that->VERIFIED con thieu (mock-only)."
     },
     {
       "id": "ASSERT-003",
       "grade": "PARTIAL",
       "claim": "Khong co order CONFIRMED/PAID/VERIFIED (revenue-bearing) truoc khi qua transition confirm co gac (code-proven da lop: 1 constructor -> CONFIRMING; CONFIRMED chi ghi boi applyOnlinePaymentSuccess/applyIvrConfirm deu rejectIfNot(CONFIRMING); ORDER_VERIFIED doi DELIVERED+PAID)",
       "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-001/no-order-before-confirm.md",
-      "does_not_prove": "Cau chu 'khong tao order khi chua xac nhan' SAI LITERAL: row CONFIRMING VAN ghi truoc confirm (khong DRAFT). Phan 'tao som bi chan' khong kin: FAIL-OPEN recall khi WMS null (SellableGateAdminServiceImpl:805 bo recall/sale_lock/quality_hold) + Golden Hour bo gate luc tao. 0 runtime proof; test real-logic duy nhat cho ra fail-open"
+      "reverified_a3aad246": "FAIL_OPEN_RECALL (B2) DONG @a3aad246: SellableGateAdminServiceImpl (da doi package sellablegate/):814-817 khi WMS null + catalog source WMS_API -> blockers.add('WMS_UNKNOWN_BLOCKED') (fail-closed), khong con resolve SELLABLE_BASE nhu bug :805 cu.",
+      "does_not_prove": "Cau chu 'khong tao order khi chua xac nhan' SAI LITERAL: row CONFIRMING VAN ghi truoc confirm (nhung CONFIRMING la non-revenue-bearing, chua tinh doanh thu). Residual CHUA re-verify @a3aad246: Golden Hour co bo gate luc tao khong (goc noi co). Can soi tiep neu muon dong hoan toan."
     },
     {
       "id": "ASSERT-004",
-      "grade": "PARTIAL",
+      "grade": "PROVEN",
       "claim": "Verified Revenue cong CHI tu order VERIFIED+DELIVERED+PAID+verified_at IS NOT NULL (chat hon ca checkpoint ORDER_VERIFIED); ca 2 surface (AdminRevenueReport + ProductAnalytics) strict-gated; khong code path nao cong quote/draft/unverified vao doanh thu; amount that (line_total NOT NULL)",
       "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-001/verified-revenue-only.md",
-      "does_not_prove": "0 test loai-tru-theo-amount runtime (SQL-string tren mock + 1 check Postgres gian tiep); semantic subset (dem VERIFIED-only, loai TRUSTED — nhung TRUSTED khong co producer); degradation LIVE: thieu QuoteSnapshot producer -> pricing_breakdown_available luon false, discount NULL (chi hong hien thi breakdown, KHONG anh huong amount/gate)"
+      "reverified_a3aad246": "CLEARED ca 2 surface. AdminRevenueReportJdbcRepository:447-455 successful_orders CTE gate verified_at NOT NULL + verification_status='VERIFIED' + order_status='DELIVERED' + payment_status IN('PAID','PARTIALLY_REFUNDED'); revenue = JOIN order_items SUM(line_total) (:467-472,:511,:655); quote_snapshot_items chi LEFT JOIN hien thi, khong cong. ProductAnalyticsJdbcRepository sum verified_revenue_amount chi accrue qua recordOrderVerified (goi duy nhat trong transition VERIFIED, OrderVerificationCheckpointServiceImpl:424), idempotent ON CONFLICT DO NOTHING; view/cart/ORDER_SUCCESS = 0 revenue.",
+      "does_not_prove": "1 note KHONG vi pham: AdminGuestCheckoutCustomerJdbcRepository:213 total_spend cong grand_total khong gate — nhung la cot CRM per-customer-spend, KHONG phai Verified Revenue (reclassify, khong phai leak). Read-side chua assert runtime (da verify code)."
     }
   ],
   "sha256_manifest": [
     { "path": "04-artifacts/evidence/entry/M6-ENTRY-001/order-verified-definition.md", "sha256": "bb573f617be6d5813c4450b691a50f01ee5fae9c8bb3e2bbf57eeacb69654585" },
     { "path": "04-artifacts/evidence/entry/M6-ENTRY-001/payment-cod-flow.md", "sha256": "e9e699bd346c1fa10d7be0d5d65c4e5acc7b82bc97079547635247033d32c90a" },
     { "path": "04-artifacts/evidence/entry/M6-ENTRY-001/no-order-before-confirm.md", "sha256": "b93d6a979b44d4ff60a7cb3c6fd2c592fe604cbbead3752fd42687032912d84c" },
-    { "path": "04-artifacts/evidence/entry/M6-ENTRY-001/verified-revenue-only.md", "sha256": "78096b23027586214cc1ad08df78f79ed1e13abad97f889e4fef6ba99cfa5c11" }
+    { "path": "04-artifacts/evidence/entry/M6-ENTRY-001/verified-revenue-only.md", "sha256": "78096b23027586214cc1ad08df78f79ed1e13abad97f889e4fef6ba99cfa5c11" },
+    { "path": "04-artifacts/evidence/entry/M6-ENTRY-001/TEST-com.ginsengfood.project.order.OrderFullFlowPostgresTest.xml", "sha256": "7c0ffe1a9ec6b00e9da8a5f105293eb1d2b9c3c3c48f7a0d906b4ac4213471c0" }
   ],
   "open_blockers": [
-    "NO_RUNTIME_PROOF: khong co integration/e2e (Testcontainers/Postgres) test day 1 order that qua create->confirm->pay->DELIVERED->ORDER_VERIFIED; moi test Mockito/@WebMvcTest/static; report e2e committed chi co 1 test lac.",
-    "FAIL_OPEN_RECALL: SellableGateAdminServiceImpl:805 — WMS snapshot null thi bo qua recall/sale_lock/quality_hold -> SKU khong sellable van resolve SELLABLE_BASE (test xac nhan). Golden Hour bo gate luc tao. (Trung standing finding review M3.)",
-    "PREPAID_TO_VERIFIED_NO_E2E: luong prepaid chi co e2e toi PAID, khong toi ORDER_VERIFIED.",
-    "QUOTESNAPSHOT_PRODUCER_MISSING: khong code nao ghi quote_snapshots/order_items.quote_snapshot_item_id -> revenue pricing_breakdown luon false, discount NULL (Finance chua doi soat duoc tach giam gia). Chi hong hien thi, khong sai amount."
+    "RESOLVED@a3aad246 NO_RUNTIME_PROOF: OrderFullFlowPostgresTest (Testcontainers Postgres, MockMvc) day create->pay->DELIVERED->ORDER_VERIFIED va assert DB, green (hash 7c0ffe... recomputed). Caveat: happy-path only, addFilters=false, permission port mocked.",
+    "RESOLVED@a3aad246 FAIL_OPEN_RECALL: SellableGateAdminServiceImpl (sellablegate/):814-817 WMS null -> WMS_UNKNOWN_BLOCKED (fail-closed); bug :805 cu da het.",
+    "RESIDUAL PREPAID_TO_VERIFIED_NO_E2E (mot phan): state chain toi VERIFIED da runtime-proven qua ONLINE_MOCK; real-VNPAY-HMAC prepaid->VERIFIED van chua e2e.",
+    "RECLASSIFIED QUOTESNAPSHOT_PRODUCER_MISSING -> known-limitation: quote_snapshot_items chi LEFT JOIN hien thi, ASSERT-004 xac nhan KHONG cong vao revenue; order_items du cho ROAS M6.",
+    "RESIDUAL (moi, cosmetic/latent): drift VERIFIED-or-TRUSTED (enum + 3 OrderRepository query) + dead-code OrderCheckpoint.opensPostPurchaseLifecycle() — nhanh TRUSTED chet o tang data (DB CHECK cam), nen prune.",
+    "RESIDUAL (chua re-verify @a3aad246): Golden Hour create-gate + literal 'no order before confirm' (row CONFIRMING non-revenue)."
   ],
-  "pii_handling": "MASKED_OR_NONE (khong co du lieu khach that; toan bo la trich code + file:line).",
+  "pii_handling": "MASKED_OR_NONE (khong co du lieu khach that; toan bo la trich code + file:line + surefire XML khong PII).",
   "signoff": {
     "authorized_by": "Nguyen Duc Manh, Tech Lead / PM dieu phoi — KHONG phai Commerce/Module 3 owner",
     "authorized_at": "2026-07-22",
-    "commerce_m3_owner_confirmation": "PENDING — Commerce/M3 owner (Phuc / gh PhucApu) CHUA xac nhan doc lap tung claim. Chu ky nay KHONG thay owner-sign cua M3.",
-    "owner_risk_acceptance": "ACCEPTED 2026-07-22 by Nguyen Duc Manh (owner chuong trinh / business owner) - xem file _OWNER_RISK_ACCEPTANCE_M3_GAPS.md trong folder M6-ENTRY-001. Chap nhan 4 open_blocker M3 CO VAN BAN, rui ro thuoc owner; CHI de mo M6.2A tren bang chung tang-code voi production BLOCKED/OFF; KHONG dong defect M3 (van PARTIAL); BAT BUOC re-gate tai M6.2G Scale Gate (Phuc phai fix fail-open recall + them e2e order->VERIFIED + ky owner truoc khi scale that).",
-    "attestation": "Tech Lead xac nhan: dossier trich verbatim tu code M3 that @f90152d2 (verify+refute 8 agent), khong bia, PII-safe. KHONG khang dinh M3 du dieu kien — ca 4 assertion PARTIAL va 4 open_blocker duoi day la that, chua dong.",
-    "note": "Chu ky != PASS tu phong; verdict thuoc phien Judge tuoi M6-P1000. Khac don M5 (Manh la owner M5 -> ky du): don M3 owner la Phuc, nen day la submission Tech-Lead + gap ghi ro, CHUA phai owner-complete."
+    "re_extracted_by": "Nguyen Duc Manh (Tech Lead) 2026-08-11 — bo sung runtime proof + re-verify @a3aad246. Grade nang len theo bang chung that, KHONG tu cham PASS.",
+    "commerce_m3_owner_confirmation": "PENDING — Commerce/M3 owner (Phuc / gh PhucApu) da CHAY test va cung cap XML+sha, nhung CHUA ky xac nhan owner tung claim. Chu ky nay KHONG thay owner-sign cua M3.",
+    "owner_risk_acceptance": "Xem _OWNER_RISK_ACCEPTANCE_M3_GAPS.md. Sau re-extract: 2 blocker goc (runtime + fail-open recall) DA DONG; QuoteSnapshot reclassify; con residual real-VNPAY-e2e + cosmetic + Golden-Hour-chua-reverify.",
+    "attestation": "Tech Lead xac nhan: dossier trich verbatim tu code M3 @a3aad246 (+ static @f90152d2), runtime XML hash-verified doc lap, khong bia, PII-safe. Grade ASSERT-001/004 = PROVEN, ASSERT-002/003 = PARTIAL — dung theo bang chung, KHONG thoi.",
+    "note": "Chu ky != PASS tu phong; verdict thuoc phien re-judge doc lap + Judge tuoi M6-P1600. Don M3 owner la Phuc -> day la submission Tech-Lead + gap ghi ro, CHUA phai owner-complete."
   },
-  "review_note": "Input cho phien Judge tuoi M6-P1000; KHONG phai PASS tu phong. Bang chung tang-code trich verbatim tu M3 @f90152d2, tu red-team bang 4 refute doi khang truoc khi nop. Voi 4 open_blocker + owner-confirmation PENDING, nop trung thuc thi entry nay du kien ra PARTIAL/BLOCKED — do la ket qua fail-closed dung. Owner quyet: (A) Phuc fix fail-open recall + them >=1 e2e order->VERIFIED + chot QuoteSnapshot roi nop; hoac (B) Owner chap nhan gap co van ban."
+  "review_note": "RE-EXTRACT 2026-08-11 cho phien re-judge doc lap. Bang chung: tang-code @f90152d2 + re-verify @a3aad246 (workflow 3-agent) + runtime green @a3aad246 (hash 7c0ffe... recomputed doc lap). 2/4 open_blocker goc DONG (runtime + fail-open recall), 1 reclassify (QuoteSnapshot), con residual: real-VNPAY-e2e + cosmetic TRUSTED-drift/dead-code + Golden-Hour-chua-reverify + read-side-chua-runtime. Ranh gioi M6 (revenue chi tu ORDER_VERIFIED fail-closed) da PROVEN o ASSERT-001+004. Judge quyet grade cuoi co tinh residual."
 }

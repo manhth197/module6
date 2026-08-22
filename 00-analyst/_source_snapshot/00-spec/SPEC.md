@@ -256,16 +256,25 @@ ads_attribution_context:
 
 ### 10.3 Remaining canonical outputs — honest status
 
-The owner document names the following without field-level schemas. Their
-contracts are `MISSING — must be defined before the listed slice` via the
-CONTRACT_HARMONIZATION prompts (see `registers/CONTRACT_REGISTER.md` for the
-full table with producing prompt IDs): event_registry consumed shape (M6.2A),
-web_event_logs (M6.2A), guest_contacts + guest_marketing_consent_snapshot
-consumed shapes (M6.2A), conversion_events / marketing_measurement_outbox /
+The owner document names the following without field-level schemas. As of
+2026-07-23 the four **M6.2A** contracts have been harmonized to `DRAFT_LOCKED`
+— their schemas live in `00-spec/contracts/CONTRACT_EVENT_REGISTRY.contract.yaml`,
+`CONTRACT_IDENTITY_CONSENT.contract.yaml` and `CONTRACT_WEB_EVENT_LOGS.contract.yaml`,
+applied via M6-P0715 (sign-off `04-artifacts/evidence/judge/M6-P0715_JUDGE_FINAL_SIGN_OFF.json`),
+recorded in SCHEMA_CHANGELOG rows 9–12: event_registry consumed shape,
+web_event_logs, guest_contacts + guest_marketing_consent_snapshot consumed
+shapes (all M6.2A). The remaining contracts stay `MISSING — must be defined
+before the listed slice` via the CONTRACT_HARMONIZATION prompts (their approved
+schemas are staged in `04-artifacts/analysis/contracts/` but NOT yet applied to
+canon; see `registers/CONTRACT_REGISTER.md` for the full table with producing
+prompt IDs): conversion_events / marketing_measurement_outbox /
 customer_segments / customer_segment_members / marketing_audience_outbox
 (M6.2C), ads_data_quality_check (M6.2F), ads_scale_request + approval flow
 (M6.2G), ads_learning_candidate (M6.2H), all five API contracts, all four
-worker contracts. **No fake DRAFT_LOCKED statuses exist in this pack.**
+worker contracts. **Every `DRAFT_LOCKED` status is backed by a field-level
+schema — reproduced in `00-spec/SPEC.md` or an approved
+`00-spec/contracts/*.contract.yaml` cited in CONTRACT_REGISTER — never asserted
+without one.**
 
 ### 10.4 Locked send discipline (verbatim, doc §12, extract lines 254–257)
 

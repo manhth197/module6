@@ -94,16 +94,34 @@ if ($evidence) {
             Add-Fail ("evidence_refs entry must be an EXISTING FILE PATH relative to the pack root (put descriptions in 'summary', not here): '" + $refStr + "'")
         }
     }
-    # files_changed within the role allowlist
+    # files_changed within the role allowlist.
+    # A role folder (00-analyst/.../06-security, 05-judge) is a JUNCTION into the pack root, so a role
+    # may honestly record a work-root file two equivalent ways: pack-root-with-role-prefix
+    # ("06-security/work/x") or role-relative ("work/x"). The allowlist roots are role-relative, so we
+    # match the raw path FIRST (keeps "05-judge/...", "04-artifacts/..." working exactly as before) and,
+    # only if that fails, retry with ONE leading role-folder segment stripped. This is an ADDITIVE format
+    # normalization: it can only make a previously-failing path pass, never the reverse, so no regression.
+    # It is not a security relaxation -- files_changed is the role's own self-report and the REAL write
+    # boundary is the PreToolUse hook (role_pre_tool_guard), not this sanity check. A non-work role prefix
+    # such as "06-security/00-spec/x" still fails (stripped -> "00-spec/x", not in any allowlist).
+    $roleFolders = @('00-analyst','01-coder','02-tester','03-runner','04-boundary','05-judge','06-security')
     $allowMap = Get-M6RoleAllowlist
     $allow = @()
     if ($allowMap.ContainsKey([string]$row.Role)) { $allow = @($allowMap[[string]$row.Role]) }
     foreach ($fc in @($evidence.files_changed)) {
         $rel = ([string]$fc).Replace("\", "/").TrimStart("/")
+        $candidates = @($rel)
+        $firstSeg = $rel.Split("/")[0]
+        if (($roleFolders -contains $firstSeg) -and $rel.Contains("/")) {
+            $candidates += $rel.Substring($firstSeg.Length + 1)
+        }
         $ok = $false
-        foreach ($root in $allow) {
-            $needle = ([string]$root).Replace("\", "/").TrimEnd("/")
-            if ($rel -eq $needle -or $rel.ToLower().StartsWith($needle.ToLower() + "/")) { $ok = $true; break }
+        foreach ($cand in $candidates) {
+            foreach ($root in $allow) {
+                $needle = ([string]$root).Replace("\", "/").TrimEnd("/")
+                if ($cand -eq $needle -or $cand.ToLower().StartsWith($needle.ToLower() + "/")) { $ok = $true; break }
+            }
+            if ($ok) { break }
         }
         if (-not $ok) { Add-Fail ("files_changed outside role allowlist (" + $row.Role + "): " + $fc) }
     }

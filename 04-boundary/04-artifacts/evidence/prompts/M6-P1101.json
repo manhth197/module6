@@ -1,0 +1,50 @@
+{
+  "prompt_id": "M6-P1101",
+  "status": "PASS",
+  "summary": "M6_2B_CODER_PLAN (CODER, plan_only). Produced 04-artifacts/impl/M6.2B/PLAN.md: the minimal, staged change set for slice M6.2B (tracking hooks + measurement-event contract ads_measurement_event with validation + append-only logging; unknown-event fail + duplicate-event handled). ENTRY VERIFICATION (read-only): M6-P1101=RUNNING (ledger row 89); dependency M6-P1100=SIGNED (row 88, real entry-gate JUDGE verdict PASS on disk, not an override); IMPLEMENTATION_TARGET_LOCKED.json=LOCKED, STAGED_ONLY, safety all false; M6-OD-011=DECIDED (GREENFIELD python 3.12, framework=''); CTR-001 ads_measurement_event=DRAFT_LOCKED (SPEC §10.1, 20 fields); CTR-016 POST /api/ads/events/track=MISSING-but-SATISFIED-for-entry (producer M6-P0711 PASS, gate M6-P0715 SIGNED, schema staged at 04-artifacts/analysis/contracts/CONTRACT_TRACK_APIS.contract.yaml; canon-flip non-blocking operator housekeeping per M6-P1100). GOVERNANCE (loud): the M6.2B entry gate BINDS four M6.2A residual defects as fix-first coder preconditions per 04-artifacts/evidence/decisions/M6-DEFER-F1F2-M6.2B.json (owner 2026-07-30) -- F1 (forgiving-seam still incomplete: ingest_event() can RAISE on a year-max event_ts with negative tz offset -> OverflowError, and on a tzinfo whose utcoffset() raises; plus validate/resolve/subject_matches/store.append are unwrapped) and F2 (consent gate fail-OPEN reachable via a ConsentSnapshot SUBCLASS that no-ops __post_init__, keeping a raw-str consent_scope that passes the seam isinstance guard and substring-matches into ALLOW in gate.evaluate). Both are armed-not-fired in M6.2A (egress capped by permits_external_send()==False, adapters were test doubles, no HTTP endpoint) and GO LIVE at M6.2B when POST /api/ads/events/track + a real ConsentReader adapter wire into the seam; the decision REQUIRES they be closed at the START of M6.2B, BEFORE the endpoint/adapter. MINOR-9 (identifier-shaped event_code verbatim in the audit sink) and O1 (session_id/correlation_id raw on export) are carried to close before durable binding. The plan encodes F1/F2/MINOR-9/O1 as §5.1 fix-first BINDING items sequenced ahead of the endpoint, each with a regression constraint (the carried-forward M6.2A 96-test suite must stay green) and a test (T5). CHANGE SET: fix-first patches to ingest.py (F1 widen ts guard to OverflowError + tzinfo-raise, wrap the remaining callees as audited denies), gate.py (F2 coerce/assert snapshot.consent_scope is frozenset[ConsentScope] at the decision point, coerce-or-deny), audit.py (MINOR-9 wrap identifier-shaped codes while keeping SMK-001 'audit rõ' for genuine codes), masking.py (O1 mask session_id/correlation_id on export only); NEW tracking layer -- tracking/base_events.py (locked VIEW_LANDING..ORDER_VERIFIED vocab) + tracking/hooks.py (client-side hook guard = layer 1 of the two-layer unknown-event check), models/measurement_event.py (CTR-001 20 fields + ingested_at, currency=VND, Zone-A frozen), store/measurement_event_store.py (ads_measurement_events staged store: Zone-A insert + UNIQUE idempotency_key dedup + forbidden-op rejection), normalize.py (accepted event -> ads_measurement_event, data_quality_status=HOLD initial, attribution/revenue left to later slices); api/track.py (framework-neutral handle_track_request over the untrusted body = layer 2 via event_registry, RULE-005 key recomputed server-side, raw_event_hash server-derived, PII-safe CTR-016 response/errors, no egress path), adapters/consent_reader.py (staged in-memory ConsentReader); migration 0002_create_ads_measurement_events.sql (up+down, PK event_id, UNIQUE idempotency_key, indexes, immutability-zone guards, never applied); tests T1-T5 making SMK-001/SMK-003 runnable end-to-end. KEY DESIGN DECISIONS (flagged): (1) NO web framework -- M6-OD-011 framework='' so the endpoint is a framework-neutral pure handler; HTTP routing/status-mapping binds at the owner integration step (like the DB + the JS tracking-SDK), avoiding a new dependency and staying testable; (2) cumulative staging -- M6.2B stages the full M6.2A tree carried forward + fix-first patches + new modules so the TESTER can run SMK-001/003 end-to-end through endpoint->seam->stores, with rollback defined per item (patched files revert to the M6.2A staged version, new files delete); (3) raw_event_hash is server-derived (sha256 over a deterministic canonicalization of the untrusted body) so the LOCKED RULE-005 5-component formula is unaltered and replay-stable (SMK-003), never trusting a client hash (RULE-H03); (4) ads_measurement_event Zone A only at M6.2B -- attribution_context empty-initial and data_quality_status=HOLD initial (fail-closed); Zone B (revenue/attribution, CTR-023/RULE-003/008) and Zone C (DQ transitions, CTR-024) belong to M6.2E/F. SCOPE: CTR-017 /conversions + conversion_events + outbox (CTR-007/008) = M6.2C; external send/Pixel/CAPI/audience sync = M6.2C/D; attribution resolver = M6.2E; dashboard = M6.2F; scale/learning = M6.2G+ -- all explicitly deferred (verified against M6.2B.md + ARCH_BASELINE + CONTRACT_TRACK_APIS which places CTR-017 at the outbox layer). Every planned item maps to a done-gate leg (L1 unknown-event-fails-both-layers / L2 duplicate-handled) and/or smoke (SMK-001, SMK-003), with rollback per item; L3/L4 smoke execution handed to TESTER M6-P1103/1104, L5/L6/L7 are process/doc legs. Staged, measure-only: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF -- no code written, no migration applied, nothing sent/scaled/published, no flag flipped, 04-artifacts/state not touched, no raw secret/PII. No self-certify; the runner EVIDENCE_GATE decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2B.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/evidence/prompts/M6-P1100.json",
+    "04-artifacts/evidence/decisions/M6-DEFER-F1F2-M6.2B.json",
+    "04-artifacts/analysis/contracts/CONTRACT_TRACK_APIS.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_EVENTS_STORAGE.contract.yaml",
+    "04-artifacts/impl/M6.2A/app/measurement/ingest.py",
+    "04-artifacts/impl/M6.2A/app/measurement/consent/gate.py",
+    "04-artifacts/impl/M6.2A/app/measurement/audit.py",
+    "04-artifacts/impl/M6.2A/app/measurement/masking.py",
+    "04-artifacts/impl/M6.2A/app/measurement/registry/validator.py",
+    "04-artifacts/impl/M6.2A/app/measurement/models/consumed.py"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2B/PLAN.md"
+  ],
+  "commands_run": [
+    "Read/Grep (read-only): PROMPT_EXECUTION_LEDGER_LOCKED.csv -> M6-P1101=RUNNING, M6-P1100=SIGNED, M6-P1102(implement)/1103/1104=TODO; slice 00-spec/slices/M6.2B.md; SMOKE_REGISTER (SMK-001/003 bound M6.2B); ARCH_BASELINE (CTR placement: CTR-001 Attribution DRAFT_LOCKED, CTR-016 Tracking, CTR-017 Outbox); M6-P1100 entry evidence (fix-first binding); M6-DEFER-F1F2-M6.2B decision (F1/F2 verbatim); CONTRACT_TRACK_APIS.contract.yaml (CTR-016 fields/errors/idempotency) + CONTRACT_MEASUREMENT_EVENTS_STORAGE.contract.yaml (CTR-001 20 fields, zones, UNIQUE key); M6.2A ingest/gate/audit/masking/validator/consumed for the fix-first targets",
+    "find (read-only): 00-spec/contracts (3 M6.2A contract yaml) + 04-artifacts/analysis/contracts (staged CTR set incl. CONTRACT_TRACK_APIS + CONTRACT_MEASUREMENT_EVENTS_STORAGE); 04-artifacts/impl/M6.2B absent -> created PLAN.md; decision files M6-DEFER-F1F2-M6.2B + M6-OD-011 + M6-OVERRIDE-M6P1000-STAGED present",
+    "NOTE: two find invocations with '2>/dev/null' were BLOCKED by role_pre_tool_guard because the '2>' redirection co-occurred with a denied-root substring (00-spec / scripts); re-ran without redirection. Plan-only prompt: no pytest run, no code executed. No write to any denied root; 04-artifacts/state untouched."
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2B/PLAN.md",
+    "00-spec/slices/M6.2B.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/evidence/prompts/M6-P1100.json",
+    "04-artifacts/evidence/decisions/M6-DEFER-F1F2-M6.2B.json",
+    "04-artifacts/analysis/contracts/CONTRACT_TRACK_APIS.contract.yaml",
+    "04-artifacts/analysis/contracts/CONTRACT_MEASUREMENT_EVENTS_STORAGE.contract.yaml",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/impl/M6.2A/app/measurement/ingest.py",
+    "04-artifacts/impl/M6.2A/app/measurement/consent/gate.py",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1101. On PASS, proceed to M6-P1102 (M6_2B_CODER_IMPLEMENT) which MUST (per the entry-gate BINDING in M6-DEFER-F1F2-M6.2B.json) close F1 + F2 FIRST -- before wiring POST /api/ads/events/track or the ConsentReader adapter -- plus MINOR-9 + O1, keeping the carried-forward M6.2A 96-test suite green, then build the tracking hooks / ads_measurement_event model+store / normalizer / framework-neutral track handler / staged migration 0002 / tests T1-T5 per 04-artifacts/impl/M6.2B/PLAN.md (target-relative paths staged under 04-artifacts/impl/M6.2B/). Then M6-P1103/M6-P1104 (TESTER) build + run SMK-001 (unknown event fails at both hook and backend layers) and SMK-003 (duplicate handled end-to-end, no double count) and record results/evidence for legs L3/L4. Governance unchanged: staged-only, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF; the CTR-016 canon-flip is non-blocking operator housekeeping; the MANDATORY M6.2G Scale-Gate re-gate (ENTRY-001/002/003) remains in force before any scale or external send."
+}

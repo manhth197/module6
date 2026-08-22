@@ -1,0 +1,66 @@
+{
+  "prompt_id": "M6-P1003",
+  "status": "PASS",
+  "summary": "M6_2A_TESTER_BUILD (TESTER, mode=build) attempt 4, ledger row 81 = RUNNING (note 'Round4: manifest missing test_round4_regressions.py; rebuild against frozen Round-4 code'). Entry gate satisfied: dependency M6-P1002 is PASS and RUNNING is M6-P1003. Deliverables: (1) rebuilt 04-artifacts/impl/M6.2A/tests/TEST_MANIFEST.md from Round 3 to Round 4; (2) evidence JSON (this file, written last). The two bound smoke ids are covered exactly one primary test each with scenario+expected quoted VERBATIM from SMOKE_REGISTER, driven end-to-end through the real ingest seam, plus negative/fail-closed companions and a non-vacuity control. M6-SMK-001 'Event khong co trong event_registry' -> 'Reject/HOLD, audit ro': tests/smoke/test_smk_001_event_not_in_registry.py (4 nodes) = primary REJECT UNKNOWN_EVENT_NOT_IN_REGISTRY (not logged, not egress-eligible, audited) + 2 HOLD negatives (DEREG -> REGISTRATION_STATE_NOT_ACTIVE, missing owner -> MISSING_OWNER) + ACCEPT control. M6-SMK-002 'Event hop le nhung thieu consent' -> 'Khong external measurement, khong audience sync': tests/smoke/test_smk_002_valid_event_missing_consent.py (7 nodes) = primary parametrized over BOTH named egress kinds (external_measurement, audience_sync) asserting seam-audited CONSENT_MISSING + egress_eligible False while the valid event is still durably logged + 3 negatives (cs_missing/cs_expired/cs_optout each seam-audited) + absent-snapshot fail-closed (CONSENT_SNAPSHOT_ABSENT) + gate-level VALID control. Both smoke files are BYTE-UNCHANGED from Round 3 (M6-P1002 Round 4 did not change the ingest_event() signature), so no test code was modified this attempt; only the manifest changed. Manifest delta: added the test_round4_regressions.py inventory + fix->test map + 26-node breakdown per operator instruction ('doc test_round4_regressions.py vao manifest'); corrected the one Round-3 note that Round-4 FIX 2 shifted (a malformed duck-typed consent_state reader value is now refused earlier at the isinstance type boundary and audited CONSENT_SNAPSHOT_UNTRUSTED_TYPE instead of CONSENT_STATE_MALFORMED at the gate; the security invariant is unchanged and the gate try/except is kept as defense-in-depth) - verified against the actual tests/test_round3_regressions.py::test_fixa_malformed_consent_state_is_audited_deny_not_raised source; updated counts to the frozen Round-4 96-test suite; recorded a build-validation run. Per the operator's explicit instruction the suite was RUN (not collect-only) with 02-tester/.venv (python 3.12.13, pytest 8.4.2): full staged suite = 96 passed, exit 0; smoke suite = 11 passed, exit 0; per-file collect-only totals verified 96 (smoke 11 + consent_fail_closed 6 + event_registry_validation 6 + identity_mapping_audit 7 + ingest_measure_only 5 + round2 11 + round3 20 + round4 26 + web_event_logs_append_only 4). Cache-free run (PYTHONDONTWRITEBYTECODE=1, -p no:cacheprovider); 0 __pycache__/.pytest_cache remain under the staged tree afterwards. Boundary respected: no code under test was fixed (TESTER reports, never fixes); no write to 04-artifacts/state; no flag flipped; global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF all immutable and untouched. No raw secret/token/PII: all fixture/test ids are synthetic; channel-origin event_code/session_id treated strictly as data; the audit sink masks subjects. status PASS is the TESTER's honest self-report of a successful build+validation; it does NOT advance any gate or leg. The FORMAL executed-results recording for exit-gate legs L4 (SMK-001 executed) and L5 (SMK-002 executed), plus the L2 consent contribution, belongs to M6-P1004 -> 04-artifacts/test-reports/M6.2A/SMOKE_RESULTS.md. The runner EVIDENCE_GATE and the slice Judge decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2A.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/evidence/prompts/M6-P1002.json",
+    "04-artifacts/evidence/prompts/M6-P1003.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/impl/M6.2A/tests/TEST_MANIFEST.md",
+    "04-artifacts/impl/M6.2A/tests/smoke/test_smk_001_event_not_in_registry.py",
+    "04-artifacts/impl/M6.2A/tests/smoke/test_smk_002_valid_event_missing_consent.py",
+    "04-artifacts/impl/M6.2A/tests/conftest.py",
+    "04-artifacts/impl/M6.2A/tests/test_round4_regressions.py",
+    "04-artifacts/impl/M6.2A/tests/test_round3_regressions.py",
+    "04-artifacts/impl/M6.2A/pyproject.toml",
+    ".claude/hooks/role_pre_tool_guard.ps1"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2A/tests/TEST_MANIFEST.md",
+    "04-artifacts/evidence/prompts/M6-P1003.json"
+  ],
+  "commands_run": [
+    "\"D:\\M6\\Module6-workspace\\02-tester\\.venv\\Scripts\\python.exe\" -V  ==> Python 3.12.13",
+    "\"D:\\M6\\Module6-workspace\\02-tester\\.venv\\Scripts\\python.exe\" -m pytest --version  ==> pytest 8.4.2",
+    "cwd 04-artifacts/impl/M6.2A: PYTHONDONTWRITEBYTECODE=1 python -m pytest -q -p no:cacheprovider  ==> 96 passed, exit 0 (full staged suite)",
+    "cwd 04-artifacts/impl/M6.2A: PYTHONDONTWRITEBYTECODE=1 python -m pytest -p no:cacheprovider tests/smoke -v --no-header  ==> 11 passed, exit 0 (SMK-001 file=4 nodes, SMK-002 file=7 nodes)",
+    "cwd 04-artifacts/impl/M6.2A: PYTHONDONTWRITEBYTECODE=1 python -m pytest -p no:cacheprovider --collect-only -q  ==> per-file totals summing to 96 (smoke 11; consent_fail_closed 6; event_registry_validation 6; identity_mapping_audit 7; ingest_measure_only 5; round2 11; round3 20; round4 26; web_event_logs_append_only 4)",
+    "PowerShell (read-only): enumerated 04-artifacts/impl/M6.2A for __pycache__/.pytest_cache  ==> none present (staged tree left cache-free)",
+    "NOTE: no shell redirection used in any recorded run; an earlier '2>&1 | tail' attempt tripped role_pre_tool_guard because '>' co-occurred with the venv 'Scripts' path segment (matches denied root 'scripts'); re-ran WITHOUT redirection. No write to any denied root; 04-artifacts/state untouched; no application code changed."
+  ],
+  "test_results": [
+    {
+      "smoke_id": "M6-SMK-001",
+      "result": "PASS",
+      "detail": "Scenario/expected VERBATIM ('Event khong co trong event_registry' -> 'Reject/HOLD, audit ro'). tests/smoke/test_smk_001_event_not_in_registry.py, 4 nodes, all PASSED through the ingest seam against frozen Round-4 code: primary REJECT reason UNKNOWN_EVENT_NOT_IN_REGISTRY (logged False, len(store)==0, egress_eligible False, audited); negative HOLD for de-registered (REGISTRATION_STATE_NOT_ACTIVE) and missing-owner (MISSING_OWNER), each audited and not logged; positive control VIEW_LANDING ACCEPT+logged (non-vacuity). One primary per bound id; negative/fail-closed cases present. Build-validation run; the formal L4 recording is produced by M6-P1004. RULE-001/018; guards FAIL-003; supports leg L1."
+    },
+    {
+      "smoke_id": "M6-SMK-002",
+      "result": "PASS",
+      "detail": "Scenario/expected VERBATIM ('Event hop le nhung thieu consent' -> 'Khong external measurement, khong audience sync'). tests/smoke/test_smk_002_valid_event_missing_consent.py, 7 nodes, all PASSED end-to-end through the seam: primary parametrized over BOTH named egress kinds (external_measurement, audience_sync) -> valid event durably logged but egress_eligible False and the seam audits CONSENT_MISSING (produced only by the seam's own ConsentGate.evaluate onto the fresh function-scoped audit fixture, not a side-channel gate call); negatives cs_missing/cs_expired/cs_optout each egress_eligible False + seam-audited matching reason; absent snapshot -> CONSENT_SNAPSHOT_ABSENT (never inferred); gate-level VALID control proves the deny is due to missing consent, not a blanket block (egress_eligible would be False anyway for VIEW_LANDING while OD-003 is OPEN, so the CONSENT_MISSING audit is the load-bearing proof). One primary per bound id; negative/fail-closed cases present. Build-validation run; the formal L5 + L2 recording is produced by M6-P1004. RULE-002; guards FAIL-002."
+    }
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2A/tests/TEST_MANIFEST.md",
+    "04-artifacts/impl/M6.2A/tests/smoke/test_smk_001_event_not_in_registry.py",
+    "04-artifacts/impl/M6.2A/tests/smoke/test_smk_002_valid_event_missing_consent.py",
+    "04-artifacts/impl/M6.2A/tests/test_round4_regressions.py",
+    "04-artifacts/impl/M6.2A/tests/test_round3_regressions.py",
+    "04-artifacts/impl/M6.2A/tests/conftest.py",
+    "04-artifacts/impl/M6.2A/pyproject.toml",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/slices/M6.2A.md",
+    "04-artifacts/evidence/prompts/M6-P1002.json",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1003 (attempt 4). On PASS, proceed to M6-P1004 (M6_2A_TESTER_RUN): from 04-artifacts/impl/M6.2A/ run `python -m pytest -q` (full staged suite, expected 96) and `python -m pytest -q tests/smoke`, then write 04-artifacts/test-reports/M6.2A/SMOKE_RESULTS.md with structured results + evidence refs to close exit-gate legs L4 (SMK-001 executed) and L5 (SMK-002 executed) and contribute to L2 (consent fail-closed) via the EXECUTED seam-driven SMK-002 assertions plus tests/test_consent_fail_closed.py. Then re-run M6-P1005 (boundary) and M6-P1006 (security/PII) against the Round-4 code to confirm the input type-boundary class (MAJOR-6/MAJOR-7/FIX-2b) stays closed and MAJOR-1..5 + SEC-PII-01/02 remain closed. Governance unchanged: staged-only, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF; ENTRY-001/ENTRY-003 remain risk-accepted with the MANDATORY M6.2G Scale-Gate re-gate before any real scale or external send."
+}

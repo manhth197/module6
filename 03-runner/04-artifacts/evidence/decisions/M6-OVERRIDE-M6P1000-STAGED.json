@@ -1,0 +1,22 @@
+{
+  "decision_id": "M6-OVERRIDE-M6P1000-STAGED",
+  "type": "OWNER_OVERRIDE",
+  "decided_at": "2026-07-29",
+  "decided_by": "Nguyen Duc Manh (owner)",
+  "target_gate": "M6-P1000 (M6.2A entry-gate judge)",
+  "judge_verdict_unchanged": "BLOCKED — see 04-artifacts/evidence/judge/M6-P1000_JUDGE_FINAL_SIGN_OFF.json (NOT modified)",
+  "ledger_status_set": "SKIPPED (owner override) — NOT PASS/SIGNED",
+  "decision": "Owner overrides the BLOCKED M6-P1000 entry gate to OPEN slice M6.2A for STAGED implementation only, while the upstream M3 + Core fixes are completed later. This is explicitly NOT a judge PASS.",
+  "risk_accepted": [
+    "M6-ENTRY-001 (M3/Commerce): PARTIAL — fail-open recall + QuoteSnapshot + runtime-proof-not-yet-in-repo (see M6-ENTRY-001/_OWNER_RISK_ACCEPTANCE_M3_GAPS.md)",
+    "M6-ENTRY-003 (Core event_registry): 2 PARTIAL + 3 GAP — channel/data_sensitivity/external_send_policy (see M6-ENTRY-003/_OWNER_RISK_ACCEPTANCE_CORE_GAPS.md)"
+  ],
+  "conditions": [
+    "global_gateway_state stays BLOCKED and production_flag stays OFF (mechanically enforced: override is refused unless locked)",
+    "all M6.2A implementation stays staged under 04-artifacts/impl/; nothing real ships",
+    "MANDATORY re-gate at M6.2G Scale Gate: M6-ENTRY-001/002/003 are re-checked before ANY scale or external send",
+    "fixes must land before scale: CORE_EVENT_REGISTRY_PATCH.md (Toan) + M3_SELLABLE_GATE_FAILOPEN_PATCH.md (Phuc), both red-teamed"
+  ],
+  "reversible": "Yes — when M3 + Core are PROVEN, re-run M6-P1000 on the fixed evidence to replace SKIPPED with a real SIGNED.",
+  "signoff": "Owner command 2026-07-29: proceed into M6.2A staged, keep the lock tight, fix upstream later."
+}

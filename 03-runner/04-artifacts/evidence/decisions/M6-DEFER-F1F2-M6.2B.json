@@ -1,0 +1,31 @@
+{
+  "decision_id": "M6-DEFER-F1F2-M6.2B",
+  "type": "OWNER_DECISION_DEFERRAL",
+  "decided_at": "2026-07-30",
+  "decided_by": "Nguyen Duc Manh (owner)",
+  "context": "Boundary M6-P1005 (attempt 3, on frozen Round-4 code) found two REAL residual MAJORs. Both were independently re-executed by the advisor on the real staged code (not taken on the boundary's word). Both are armed-not-fired in M6.2A: no in-scope fail gate (M6-FAIL-002/003) trips, substance verifier CLEAN, egress capped by permits_external_send()==False, adapters are test doubles, and there is no HTTP endpoint. They go LIVE at M6.2B (real ConsentReader adapter + POST /api/ads/events/track body) and when M6-OD-003 later unlocks egress.",
+  "residuals": [
+    {
+      "id": "F1",
+      "title": "Forgiving-seam contract still incomplete: ingest_event() can still RAISE",
+      "proof": "advisor probe: event_ts = year-max datetime with NEGATIVE tz offset -> OverflowError escapes ingest_event (audit lost); a tzinfo whose utcoffset() raises -> RuntimeError escapes. normalize_ts's catch tuple is (ValueError, AttributeError, TypeError) only; the validate/resolve/subject_matches/store.append callee-raise paths are also unwrapped.",
+      "impact_at_m6.2b": "A hostile/edge event_ts in the HTTP body causes a 500 with NO audit record, breaking the seam's own 'rejected/held is audited, never silently lost' contract (violates SMK-001 audit-clarity).",
+      "required_fix": "Widen the seam's ts-normalization guard to catch OverflowError and any tzinfo-raised exception (broaden to `except Exception` around normalize_ts, or catch OverflowError + wrap the astimezone), and wrap the remaining external-callee calls (validate/resolve/subject_matches/store.append) so each becomes an AUDITED DENY, never a raise."
+    },
+    {
+      "id": "F2",
+      "title": "Consent gate fail-open reachable via a ConsentSnapshot SUBCLASS that skips __post_init__",
+      "proof": "advisor probe: a ConsentSnapshot subclass overriding __post_init__ to a no-op keeps consent_scope as a raw str; isinstance(evil, ConsentSnapshot) is True so it passes the seam FIX-2 isinstance guard and reaches gate.evaluate, where `scope not in <raw str>` does SUBSTRING matching -> evaluate() returns True (fail-open) for a scope string the snapshot does not actually grant. Through the seam today egress stays False (permits_external_send()==False) so it does not trip FAIL-002 yet, but the reader-attested id IS written to the append-only log with a wrong consent decision.",
+      "impact_at_m6.2b": "Once a real ConsentReader adapter can return a subclass (or OD-003 unlocks egress), a consent DENY is read as a GRANT at the money/PII decision point (FAIL-002).",
+      "required_fix": "Harden the DECISION POINT itself, not just the seam: in gate.evaluate assert/validate that snapshot.consent_scope is a frozenset[ConsentScope] (coerce-or-deny), so the gate is correct regardless of what type the seam hands it. This is the gate-level half of the original MAJOR-7 fix recommendation that was not implemented in Round 4."
+    }
+  ],
+  "decision": "Advance slice M6.2A (mark M6-P1005 PASS on its clean in-scope verdict) and DEFER F1+F2 to M6.2B as BINDING entry constraints. They must be fixed at the START of M6.2B (before the HTTP endpoint or any real adapter is wired), because M6.2B is where they become reachable.",
+  "binding": [
+    "The M6.2B entry gate (M6-P1100) and the M6.2B coder (M6-P1102) MUST treat F1+F2 as fix-first preconditions; the advisor will carry them verbatim into the M6-P1100 entry brief with the exact fixes above.",
+    "MACHINE-BINDING TODO (P2 canon batch): add this decision file path to M6-P1100 RequiredInputs via the generator so the gate hard-fails until it is read; and add a DECISION_REGISTER row. Not done now to avoid desyncing role snapshots mid-run."
+  ],
+  "reachability_today": "NONE in M6.2A: not reachable via test doubles, no HTTP endpoint, egress capped. Verified: M6-P1005 tripped 0 in-scope fail gates; substance verifier CLEAN.",
+  "governance": "global_gateway_state stays BLOCKED, production_flag stays OFF, external_send stays OFF. This deferral does not touch any flag and does not weaken the M6.2A verdict; it records two known-real MAJORs and pins them to the slice where they go live.",
+  "reversible": "Yes — closing F1+F2 at the M6.2B start (the ~3-line decision-point fixes) discharges this deferral."
+}

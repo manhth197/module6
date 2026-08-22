@@ -6,4 +6,13 @@
 #
 # Layer 2 - role-specific packages (GATED):
 # TESTER: test framework/tooling mirroring the coder stack lands HERE under the same gate as 01-coder (M6-OD-011 + operator + changelog).
-# -- intentionally no packages below this line --
+#
+# GATE SATISFIED 2026-07-29 - mirrors 01-coder/requirements.txt exactly:
+#   owner decision  : M6-OD-011 (DECIDED 2026-07-23) -> stack test_command "pytest -q"
+#   manifest        : 04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json (stack.test_command)
+#   changelog row   : 00-spec/registers/SCHEMA_CHANGELOG.md row 14
+#   applied by      : OPERATOR via setup\New-M6RoleVenvs.ps1 (existing 3.12 venvs kept)
+# Same pin as 01-coder: the smoke run recorded in test_results MUST come from
+# THIS venv (.venv\Scripts\python.exe -m pytest -q), never a system interpreter.
+pytest==8.4.2
+# -- no packages below this line without the gate above --

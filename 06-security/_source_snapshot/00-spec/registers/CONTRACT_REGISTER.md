@@ -3,7 +3,10 @@
 One row per canonical output/consumed contract. HONEST statuses only:
 
 - `DRAFT_LOCKED` — a field-level schema exists in the owner document and is
-  reproduced in `00-spec/SPEC.md`.
+  reproduced in `00-spec/SPEC.md`, OR (for a consumed/owned shape the doc names
+  without fields) an approved schema is reproduced in an
+  `00-spec/contracts/*.contract.yaml` cited in this row's Source — e.g.
+  CTR-003/004/005/006, applied via M6-P0715 (SCHEMA_CHANGELOG rows 9–12).
 - `MISSING / OWNER_DECISION_REQUIRED` — the document names the object but gives
   no field-level schema. A CONTRACT_HARMONIZATION prompt (listed in the last
   column) MUST produce the schema before the slice in "Needed before" may pass

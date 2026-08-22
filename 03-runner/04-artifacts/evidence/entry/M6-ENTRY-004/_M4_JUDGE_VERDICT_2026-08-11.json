@@ -1,0 +1,37 @@
+{
+  "record_type": "INDEPENDENT_M4_JUDGE_VERDICT",
+  "entry_id": "M6-ENTRY-004 (M4 half)",
+  "judged_at": "2026-08-11",
+  "judged_against_commit": "97cc82bc",
+  "method": "Fresh evidence-only independent judge + 2 adversaries (4-eyes), each verifying against real code at 97cc82bc. This completes the M4-half 'Judge' role that was PENDING; the M4 Tester already recorded attempt-5 PASS. Advisory input for the operator M6-P1600 re-gate — not the gate itself.",
+  "verdict_overall": "ACCEPTED_PARTIAL",
+  "per_assertion": {
+    "ASSERT-001_no_public_final_price": "PROVEN (code level) — ResponseChannelSurfaceResolver.classify/classifyChannelCode default unknown/blank/null -> PUBLIC_COMMENT (exact-token, no contains()); M4AdvisorTurnService:419-420 resolves from RAW pair before default substitution; PUBLIC/LIVE surface -> NoFinalPriceWithoutQuoteSnapshotGuard blocks PUBLIC_SURFACE_REQUIRES_PRIVATE_HANDOFF, finalPriceDisplayed=false. Private allowlist = exactly the 14 owner-approved OWN-014 pairs. Adversary A could NOT produce a public-final-price path (refuted=false).",
+    "ASSERT-002_no_pii_leak": "PARTIAL — enforcement seam proven (PIIExposureGuard fires on public/null, blocks phone/email/address/PSID incl glued-PSID). TWO limits: (1) disclosed regex ceiling (label-less street+number, bare dd/mm, non-VN addresses not detected; blocks not masks); (2) NEW UNDISCLOSED DEFECT found by adversary + Tech-Lead-verified: field `safetyBoundary` is delivered to the customer but is NOT in the PII-guard scan.",
+    "ASSERT-003_no_spam": "PROVEN (code level, structural) — 0/20 outbound/scheduler/async trigger patterns in M4 tree; HttpClient only in the 2 Gemini LLM adapters; GatewayChannelPortImpl blocked on every path; frozen by structural tests. Adversary B rechecked, holds. (Actual send-path anti-spam is M5 ASSERT-006, separate.)"
+  },
+  "new_defect_found_by_adversary_verified": {
+    "id": "M4-PII-SAFETYBOUNDARY-UNSCANNED",
+    "severity": "LOW-MEDIUM (real guard-coverage gap; mitigated: safetyBoundary is admin-authored catalog content, downstream public rendering EXTERNAL_NOT_VERIFIED, production OFF)",
+    "finding": "recommendationText() (M4AdvisorTurnService.java:1050-1059) joins 5 fields for PIIExposureGuard (productPublicName, productEffectivenessSummary, heroIngredients, recommendationReason, suitableContext) and OMITS safetyBoundary. M4AdvisorTurnResponse.java:143,171 delivers recommendation.safetyBoundary() verbatim to the customer on any surface incl. PUBLIC. So any phone/email/address/PSID in safetyBoundary reaches a public surface unscanned by the PII guard.",
+    "smoking_gun": "The sibling guard InternalDataLeakGuard.java:47 DOES include nullToEmpty(recommendation.safetyBoundary()) in its scanned join (tag CUSTOMER_FACING_OUTPUT) — the codebase already treats safetyBoundary as customer-facing output requiring a leak scan; the PII path forgot it. Tech-Lead independently verified all four code points at 97cc82bc.",
+    "not_disclosed": "The evidence file m4-no-pii-leak.md presents the 5-field join as proof of PII coverage and never mentions safetyBoundary — this is NOT the honestly-disclosed regex ceiling.",
+    "fix": "Add nullToEmpty(recommendation.safetyBoundary()) to recommendationText()'s join (mirror InternalDataLeakGuard:47) + a PII test asserting a phone/PSID in safetyBoundary is blocked on a public surface."
+  },
+  "fail_open_found_in_price_surface": false,
+  "residuals_disclosed_by_evidence": [
+    "Regex-bounded PII detection (documented ceiling).",
+    "No @SpringBootTest/HTTP-level test in M4 tree — proven at service+guard-chain seam only.",
+    "channelSurface/channelCode still untyped String (typing deferred to API-002).",
+    "3 trace-only null->PRIVATE heuristic copies (RecommendationPreflightRuntimePipeline:141 etc.) — do NOT reach the price/PII decision today; frozen by structural test; fix before any future consumer branches on DecisionEnvelope.surface.",
+    "Production/egress OFF, gateway stubbed-blocked -> code-level verdict, not runtime-observed; CI disabled (FND-005)."
+  ],
+  "conditions": [
+    "Fix M4-PII-SAFETYBOUNDARY-UNSCANNED (add safetyBoundary to the PII scan) OR owner-risk-accept it in writing with production OFF; correct m4-no-pii-leak.md to disclose it either way.",
+    "Cite ASSERT-002 as satisfied for the enumerated classes and OPEN beyond them — never as 'no customer PII can leak'.",
+    "M4 owner (Tai) sign-off pending (Judge now done; Tester attempt-5 PASS; Owner pending).",
+    "JOINT M6-ENTRY-004 gate stays PARTIAL/BLOCKED: BOTH halves required; M5 half is PARTIAL (ASSERT-004/005/006 EXTERNAL_NOT_VERIFIED). M4 having no sender does not substitute for M5's rate/dedup/allowlist.",
+    "Confirm definitive M4 evidence commit SHA + justify the 4 skipped tests."
+  ],
+  "signoff": "M4 JUDGE (independent, 4-eyes) 2026-08-11 @97cc82bc: ACCEPTED_PARTIAL. ASSERT-001 PROVEN (no public-final-price path; adversary could not break it), ASSERT-003 PROVEN (no sender/scheduler by construction), ASSERT-002 PARTIAL with one Tech-Lead-verified undisclosed defect (safetyBoundary delivered unscanned by PIIExposureGuard). No fail-open in price/surface routing. This upgrades the M4 half from PENDING_INDEPENDENT_JUDGE to JUDGED (ACCEPTED_PARTIAL), symmetric with the M5 half. Joint ENTRY-004 remains PARTIAL. Pending: fix/disclose the safetyBoundary gap + M4 owner (Tai) sign-off."
+}

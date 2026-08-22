@@ -61,6 +61,17 @@ function Test-M6DepsPassed($rows, $row, [ref]$missing) {
         elseif ($depStatus -eq "SKIPPED" -and ([string]$byId[$d].Note) -notmatch '^SKIP_APPROVED:\S+') {
             $bad += ($d + " (SKIPPED_WITHOUT_SKIP_APPROVED_NOTE)")
         }
+        # [pack audit 2026-07-29 | findings SLI-01/XC-02 | SCHEMA_CHANGELOG row 15]
+        # Gate-time counterpart of the JUDGE_GATE break-glass. Without this, the
+        # set-time guard in Set-PromptStatusLocked is bypassable by hand-editing the
+        # ledger, and the BLOCKED/OFF precondition is never re-checked after the
+        # instant of the skip. Same helper both sides => the two can never drift.
+        elseif ($depStatus -eq "SKIPPED" -and [string]$byId[$d].GateLevel -eq 'JUDGE_GATE') {
+            $ovReason = ""
+            if (-not (Test-M6OwnerOverride $d ([string]$byId[$d].Note) ([ref]$ovReason))) {
+                $bad += ($d + " (JUDGE_GATE skip not backed by a valid owner override: " + $ovReason + ")")
+            }
+        }
     }
     $missing.Value = $bad
     return ($bad.Count -eq 0)
@@ -87,6 +98,53 @@ function Get-M6RoleAllowlist() {
         }
     }
     return $map
+}
+
+function Test-M6OwnerOverride([string]$promptId, [string]$note, [ref]$reason) {
+    # SINGLE SOURCE OF TRUTH for the JUDGE_GATE owner break-glass (SCHEMA_CHANGELOG
+    # rows 13 + 15). Called at SET time (Set-PromptStatusLocked) AND at GATE time
+    # (Test-M6DepsPassed) so a hand-edited ledger row cannot inherit an override
+    # the owner never granted for that gate.
+    #
+    # An override is valid ONLY when ALL of the following hold:
+    #   1. the note has the form SKIP_APPROVED:OWNER_OVERRIDE:<decision-ref>[;...]
+    #   2. 04-artifacts/evidence/decisions/<decision-ref>.json EXISTS and PARSES
+    #   3. that decision has type = OWNER_OVERRIDE
+    #   4. its target_gate NAMES THIS PromptId  (scope: one gate, not all of them)
+    #   5. global_gateway_state = BLOCKED and production_flag = OFF (staged only)
+    # The judge verdict file is never consulted or altered: an override records an
+    # owner-accepted gap, never a PASS.
+    $reason.Value = ""
+    $m = [regex]::Match([string]$note, '^SKIP_APPROVED:OWNER_OVERRIDE:([^;\s]+)')
+    if (-not $m.Success) {
+        $reason.Value = "note is not of the form SKIP_APPROVED:OWNER_OVERRIDE:<decision-ref>"
+        return $false
+    }
+    $ref = $m.Groups[1].Value
+    $refPath = Join-Path $script:PackRoot ("04-artifacts\evidence\decisions\" + $ref + ".json")
+    if (-not (Test-Path -LiteralPath $refPath)) {
+        $reason.Value = ("owner-decision file not found: 04-artifacts/evidence/decisions/" + $ref + ".json")
+        return $false
+    }
+    $dec = $null
+    try { $dec = Get-Content -Raw -Encoding UTF8 -LiteralPath $refPath | ConvertFrom-Json }
+    catch { $reason.Value = ("owner-decision file does not parse: " + $ref + ".json"); return $false }
+    if ([string]$dec.type -ne 'OWNER_OVERRIDE') {
+        $reason.Value = ("owner-decision " + $ref + " has type '" + [string]$dec.type + "', expected OWNER_OVERRIDE")
+        return $false
+    }
+    if (([string]$dec.target_gate) -notmatch [regex]::Escape($promptId)) {
+        $reason.Value = ("owner-decision " + $ref + " does not name " + $promptId + " in target_gate (it names '" + [string]$dec.target_gate + "') - an override is scoped to ONE gate")
+        return $false
+    }
+    $st = $null
+    try { $st = Get-Content -Raw -Encoding UTF8 -LiteralPath $script:StatePath | ConvertFrom-Json }
+    catch { $reason.Value = "CURRENT_STATE_LOCKED.json does not parse (fail-closed)"; return $false }
+    if ([string]$st.global_gateway_state -ne 'BLOCKED' -or [string]$st.production_flag -ne 'OFF') {
+        $reason.Value = "an owner override is only permitted while global_gateway_state=BLOCKED and production_flag=OFF (staged builds only)"
+        return $false
+    }
+    return $true
 }
 
 function Test-M6SecretScan([string]$path, [ref]$findings) {

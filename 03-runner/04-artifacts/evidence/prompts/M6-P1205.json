@@ -1,0 +1,63 @@
+{
+  "prompt_id": "M6-P1205",
+  "status": "PASS",
+  "summary": "M6_2C_BOUNDARY_ADVERSARY (analysis_only) attempt 1, against the FROZEN staged M6.2C outbox/consent-egress pipeline. ENTRY GATE verified: ledger row 103 M6-P1205=RUNNING; dependency M6-P1204=PASS (full suite 171, SMK-002 4/4, SMK-016 4/4); M6.2C entry judge M6-P1200 SIGNED, coder M6-P1201/1202 + tester M6-P1203/1204 PASS; posture immutable (BLOCKED/OFF/OFF) confirmed at runtime. This is the first slice with a real egress surface (outbox + two dispatcher workers), so the consent gate is now the load-bearing FAIL-002 control. METHOD: one read-only executed harness (04-boundary/work/attacks/m6_2c_attacks.py) driving the real send path -- the conversions endpoint, the enqueue seams, BOTH dispatcher workers, the Transport port (StagedBlockedTransport + injected succeeding/failing doubles), the two-checkpoint consent gate (permits_send), and the bounded-retry mechanic; pinned launcher Python 3.12.10, -B byte-clean (0 __pycache__; 04-artifacts/impl/M6.2C untracked, no diff); 38 recorded outcomes (DEFENDED=28, OPEN-non-gate=5, controls=3, notes=2). Coverage widened by a 5-agent adversarial-ideation pass; every BREACH/UNCERTAIN vector was then EXECUTED (no unexecuted breach recorded), which surfaced two new consent fail-open residuals (lying set-subclass scope; borrowed-consent audience ADD). VERDICT: NO BLOCKER; M6-FAIL-002 (consent violation) is NOT tripped. No non-consented item ever reaches the transport: every non-consented measurement item is SEND_BLOCKED_CONSENT -> DEAD_LETTER with the transport NEVER called (MISSING/EXPIRED/OPT_OUT/absent/scope-not-granted/lapsed-at-send/F2-subclass); every non-consented audience ADD is SYNC_BLOCKED_CONSENT, and the enqueue makes an opt-out / measurement-only-consent member a REMOVE never an ADD; consent is re-validated at send (RULE-002 checkpoint-2: a snapshot VALID at enqueue but revoked before dispatch is CONSENT_LAPSED_AT_SEND_TIME); data_quality is fail-closed (staged HOLD blocks even valid consent); the F2 gate hardening is load-bearing and denies a raw-string-scope subclass (CONSENT_SCOPE_UNTRUSTED_TYPE). RULE-004 (no direct external send) holds: the conversions endpoint holds NO Transport (ConversionDeps has no transport field; 0 send-primitive code names in conversions.py/enqueue.py); a non-consented conversion is CREATED + enqueued as an INTERNAL QUEUED row, never externally sent; forcing config.EXTERNAL_SEND=ON keeps StagedBlockedTransport.deliver a hardcoded raise; the only senders are the two dispatcher workers. SMK-016 retry/dead-letter is bounded: failing transport max_retries=3 -> RETRY(1)->RETRY(2)->DEAD_LETTER(3) with error_log trace + next_retry_at (no infinite retry), dead-letter not reprocessed, ExternalSendBlocked -> held QUEUED (not lost, retry_count not incremented), consent-block a distinct terminal (attempts==0). Dedup/fanout: OFFLINE only for ORDER_VERIFIED; UNIQUE dedup_key; conversion replay DUPLICATE (no re-enqueue). No overreach: revenue only from ORDER_VERIFIED; SegmentReader read-only, membership read for sync only (no trigger, RULE-012/FAIL-005); posture intact; 0 network/db primitives. OPEN residuals (all armed-not-fired; none trips M6-FAIL-002; for CODER/M6-P1206): F-A [MINOR] the dispatchers (measurement_dispatcher.py:76-87, audience_dispatcher.py:67-77) and the audience enqueue (enqueue.py:124-128) wrap reader.get but NOT permits_send / evaluate / current_state, so a hostile consent reader (current_state raises, or returns a duck lacking consent_state) escapes run_once, aborting the drain batch (robustness + lost-audit + drain-DoS; no send -> not FAIL-002); fix: wrap them fail-closed. F-B [MINOR, NEW] a set-SUBCLASS consent_scope with a lying __contains__ (empty backing -> vacuous all()) defeats the F2 guard (gate.py:56-68 validates container type + element types but the grant scope-not-in-scopes at gate.py:68 trusts __contains__) -> permits_send True -> SENT (executed with an injected transport); armed-not-fired (staged transport blocks; needs a compromised consent adapter -- a real ConsentSnapshot coerces to a plain frozenset); fix: use scope in frozenset(snapshot.consent_scope). F-C [MINOR, NEW] enqueue_audience_sync (enqueue.py:122-129) never binds member.member_key to snap.subject_ref, so a mispointed CRM membership -> a member ADDed on ANOTHER subject's VALID consent (borrowed consent); the measurement path binds subject (M6.2A MAJOR-2) but the audience path does not; armed-not-fired (staged transport; needs a mispointed consumed membership); fix: bind member_key to snap.subject_ref before ADD. Observations: O-1 a duck with genuine VALID+in-scope consent is not a bypass; O-2 outbox rows carry consent_snapshot_id + hashed dedup_key + masked member_key (PII checks -> M6-P1206); O-3 EXTERNAL_SEND_OFF held rows re-drain each run (by design until M6.2D); O-4 a NaN/Inf revenue_value on ORDER_VERIFIED is accepted (DQ gap -> M6.2F/M6-P1206). GOVERNANCE: analysis_only -- no application code, migration, state ledger, or flag written; no external call; BLOCKED/OFF/OFF unchanged; no self-certification. status PASS is the adversary's honest self-report (fail_gate_tripped=false); the runner EVIDENCE_GATE and the slice Judge (M6-P1209) decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2C.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1204.json",
+    "04-artifacts/test-reports/M6.2C/SMOKE_RESULTS.md",
+    "04-artifacts/impl/M6.2C/app/api/conversions.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/enqueue.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/measurement_dispatcher.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/audience_dispatcher.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/transport.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/outbox_store.py",
+    "04-artifacts/impl/M6.2C/app/measurement/consent/gate.py",
+    "04-artifacts/impl/M6.2C/app/config.py",
+    "04-artifacts/impl/M6.2C/app/measurement/models/measurement_outbox.py",
+    "04-artifacts/impl/M6.2C/app/measurement/models/audience_outbox.py",
+    "04-artifacts/impl/M6.2C/app/measurement/models/conversion_event.py",
+    "04-artifacts/impl/M6.2C/app/measurement/models/segments.py",
+    "04-artifacts/impl/M6.2C/app/measurement/adapters/segment_reader.py",
+    "04-artifacts/impl/M6.2C/app/measurement/store/conversion_event_store.py",
+    "04-artifacts/impl/M6.2C/tests/conftest.py"
+  ],
+  "files_changed": [
+    "04-artifacts/boundary-reports/M6.2C_boundary.md",
+    "04-artifacts/evidence/prompts/M6-P1205.json",
+    "04-boundary/work/attacks/m6_2c_attacks.py"
+  ],
+  "commands_run": [
+    "py -3.12 --version -> Python 3.12.10 (pinned launcher; matches IMPLEMENTATION_TARGET_LOCKED 3.12 pin)",
+    "PYTHONDONTWRITEBYTECODE=1 py -3.12 -B work/attacks/m6_2c_attacks.py -> 38 recorded outcomes: DEFENDED=28, OPEN_NONGATE=5, CONTROL=3, NOTE=2; IN-SCOPE FAIL-GATE BREACHES (M6-FAIL-002)=NONE",
+    "git -C Module6-workspace status --porcelain -- 04-artifacts/impl/M6.2C -> '?? 04-artifacts/impl/M6.2C/' (untracked, no diff); 0 __pycache__/.pytest_cache under 04-artifacts/impl/M6.2C after the run",
+    "NOTE: analysis_only. No application code, migration, state ledger, or flag written; no external/network call; no shell redirection used (role guard blocks a redirection co-occurring with a venv 'Scripts' path segment). 5-agent adversarial-ideation workflow run to widen novel-vector coverage; every BREACH/UNCERTAIN vector was executed in the harness before being recorded."
+  ],
+  "evidence_refs": [
+    "04-artifacts/boundary-reports/M6.2C_boundary.md",
+    "04-boundary/work/attacks/m6_2c_attacks.py",
+    "04-artifacts/impl/M6.2C/app/api/conversions.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/enqueue.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/measurement_dispatcher.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/audience_dispatcher.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/transport.py",
+    "04-artifacts/impl/M6.2C/app/measurement/outbox/outbox_store.py",
+    "04-artifacts/impl/M6.2C/app/measurement/consent/gate.py",
+    "04-artifacts/impl/M6.2C/app/measurement/models/measurement_outbox.py",
+    "04-artifacts/impl/M6.2C/app/measurement/models/audience_outbox.py",
+    "04-artifacts/impl/M6.2C/app/measurement/adapters/segment_reader.py",
+    "04-artifacts/impl/M6.2C/app/config.py",
+    "04-artifacts/impl/M6.2C/tests/conftest.py",
+    "04-artifacts/test-reports/M6.2C/SMOKE_RESULTS.md",
+    "04-artifacts/evidence/prompts/M6-P1204.json",
+    "00-spec/slices/M6.2C.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1205. M6-FAIL-002 (consent violation) is NOT tripped, so this evidence is PASS-eligible; the boundary report is 04-artifacts/boundary-reports/M6.2C_boundary.md. On PASS, proceed to M6-P1206 (M6_2C_SECURITY_REVIEW), which owns the PII-in-outbox-row/key checks (O-2), the masked-on-export claim (O1), and the non-finite-revenue DQ gap (O-4). Before M6.2D wires a real transport (M6-OD-003 hash + M6-OD-004 connector), the CODER should close three armed-not-fired residuals: F-A (wrap permits_send/evaluate/dq_status fail-closed so a hostile consent adapter cannot abort run_once), F-B (complete F2 with scope in frozenset(snapshot.consent_scope) so a lying set-subclass cannot grant an un-held scope), and F-C (bind member_key to the consent snapshot subject in the audience path so a mispointed membership cannot ADD on borrowed consent). Governance unchanged: staged-only, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF; the MANDATORY M6.2G Scale-Gate re-gate remains in force before any real scale or external send."
+}

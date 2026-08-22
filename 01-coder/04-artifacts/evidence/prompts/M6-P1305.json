@@ -1,0 +1,60 @@
+{
+  "prompt_id": "M6-P1305",
+  "status": "PASS",
+  "summary": "M6_2D_BOUNDARY_ADVERSARY (analysis_only) attempt 1, against the FROZEN staged M6.2D platform send-discipline layer (hash policy, cross-source dedup, offline gating). ENTRY GATE verified: ledger row 113 M6-P1305=RUNNING; dependency M6-P1304=PASS (full suite 201, SMK-003 4/4, SMK-017 12/12); M6.2D entry judge M6-P1300 SIGNED, coder M6-P1301/1302 + tester M6-P1303/1304 PASS; posture immutable (BLOCKED/OFF/OFF, HASH_POLICY_RATIFIED=False) confirmed at runtime. METHOD: one read-only executed harness (04-boundary/work/attacks/m6_2d_attacks.py) driving the real path -- hash policy (to_public_safe/hash_identity), payload builder (build_platform_payload/platform_event_id), StagedPlatformTransport + PlatformResultLog, the consent dispatchers, and the conversions endpoint end-to-end; pinned launcher Python 3.12.10, -B byte-clean (0 __pycache__; 04-artifacts/impl/M6.2D untracked, no diff); 27 recorded outcomes (DEFENDED=20, OPEN-non-gate=3, notes=4). PII-shaped probes constructed programmatically + never echoed. Coverage widened by a 5-agent adversarial-ideation pass; every BREACH/UNCERTAIN vector executed (no unexecuted breach recorded); all five agents independently confirmed the measurement-path borrowed-consent. VERDICT: NO BLOCKER; none of the three in-scope fail gates is tripped. FAIL-008 (raw PII): the hash policy is doubly fail-closed -- 3 PII shapes (phone/email/raw-id) as customer_or_guest_key are HASHED (h_ prefix, raw absent); forcing HASH_POLICY_RATIFIED=True still hashes (empty _RAW_ALLOWED_FIELDS); the PlatformResultLog stores only platform/event_id/event_name/dedup_key/result (NO user_data, no raw value); the payload has only {platform, event_name=registry-code, event_id=hash, user_data=hashed}; hash deterministic + one-way; 0 network/db primitives. FAIL-001 (revenue/offline): OFFLINE only after ORDER_VERIFIED gated TWICE (enqueue fan-out + StagedPlatformTransport OfflineNotVerified); revenue only from ORDER_VERIFIED (REVENUE_NOT_VERIFIED on others); no revenue field in the payload; cross-source dedup via the SHARED platform_event_id=hash(source_event_id+event_code) (Pixel/CAPI/Offline of one conversion share one event_id -> no platform double count; distinct sources distinct). FAIL-002 (consent) + fix-first: F-A CLOSED (permits_send wrapped in both dispatchers -> current_state-raises on a 4-item batch -> all DEAD_LETTER, 0 payloads, no crash/abort), F-B CLOSED (lying set-subclass consent_scope -> gate.evaluate False via frozenset materialization), F-C CLOSED (audience member on another subject's consent -> REMOVE via subject_ref==member_key); a genuinely non-consented conversion (cs_missing/optout) -> SEND_BLOCKED_CONSENT -> DEAD_LETTER, NO payload/result-log record (consent runs before the payload build). OPEN residuals (all armed-not-fired; none trips an in-scope gate; for CODER/M6-P1306): F-D [MINOR, the coder-flagged sec.4.3 gap, CONFIRMED OPEN] the measurement path never binds the conversion's customer_or_guest_key to the consent snapshot's subject_ref -- the conversions endpoint pairs both straight from the untrusted body (conversions.py:82-84,122-123) and the dispatcher permits_send checks only the snapshot subject (measurement_dispatcher.py:76-92) -- so a conversion for customer X citing subject Y's VALID consent builds + logs a payload on BORROWED consent (executed: customer=victim + consent_snapshot_id=another subject's VALID consent -> CREATED, 2 result-log records). The audience F-C fix was NOT applied to the measurement path; REACHABLE from the untrusted conversions body (more reachable than audience F-C); armed-not-fired only because StagedPlatformTransport blocks the real send; fix: bind customer_or_guest_key to snap.subject_ref (mirror F-C) fix-first at M6.2E as the coder committed. F-E [MINOR, latent] platform_event_id (payload.py:21) joins source_event_id+event_code with a raw pipe and does NOT escape (unlike enqueue._hash_key) -> non-injective (the M6.2A MAJOR-5 class); NOT reachable via the endpoint (event_code registry-constrained); a collision would be an under-count not FAIL-001; fix: escape/canonicalize like _hash_key. F-F [MINOR, latent] the F-A fix wrapped permits_send but getattr(snap,'subject_ref',None) at measurement_dispatcher.py:82 runs before that try/except and only swallows AttributeError -> a snapshot whose subject_ref property raises RuntimeError crashes run_once (residual F-A nick); no send; needs a hostile consent adapter; fix: wrap line 82. Observations: O-1 the identity hash is UNSALTED sha256 (Meta CAPI matching standard; the result log stores no user_data) -> M6-OD-003/M6-P1306; O-2 platform_event_id excludes customer -> same source_event_id+event_code different customer collides (under-count DQ, needs reused source_event_id); O-3 forcing EXTERNAL_SEND=ON marks WOULD_SEND but no connector exists (M6-OD-004) so nothing transmits; O-4 held items re-drain each run_once appending unbounded BLOCKED result-log records (staged-only, PII-safe). GOVERNANCE: analysis_only -- no application code, migration, state ledger, or flag written; no external call; BLOCKED/OFF/OFF + HASH_POLICY_RATIFIED=False unchanged; no self-certification. status PASS is the adversary's honest self-report (fail_gate_tripped=false); the runner EVIDENCE_GATE and the slice Judge (M6-P1309) decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2D.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1304.json",
+    "04-artifacts/test-reports/M6.2D/SMOKE_RESULTS.md",
+    "04-artifacts/impl/M6.2D/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2D/app/measurement/integration/hash_policy.py",
+    "04-artifacts/impl/M6.2D/app/measurement/integration/payload.py",
+    "04-artifacts/impl/M6.2D/app/measurement/integration/platform_transport.py",
+    "04-artifacts/impl/M6.2D/app/measurement/integration/result_log.py",
+    "04-artifacts/impl/M6.2D/app/measurement/consent/gate.py",
+    "04-artifacts/impl/M6.2D/app/measurement/outbox/measurement_dispatcher.py",
+    "04-artifacts/impl/M6.2D/app/measurement/outbox/audience_dispatcher.py",
+    "04-artifacts/impl/M6.2D/app/measurement/outbox/enqueue.py",
+    "04-artifacts/impl/M6.2D/app/api/conversions.py",
+    "04-artifacts/impl/M6.2D/app/config.py",
+    "04-artifacts/impl/M6.2D/tests/conftest.py"
+  ],
+  "files_changed": [
+    "04-artifacts/boundary-reports/M6.2D_boundary.md",
+    "04-artifacts/evidence/prompts/M6-P1305.json",
+    "04-boundary/work/attacks/m6_2d_attacks.py"
+  ],
+  "commands_run": [
+    "py -3.12 --version -> Python 3.12.10 (pinned launcher; matches IMPLEMENTATION_TARGET_LOCKED 3.12 pin)",
+    "PYTHONDONTWRITEBYTECODE=1 py -3.12 -B work/attacks/m6_2d_attacks.py -> 27 recorded outcomes: DEFENDED=20, OPEN_NONGATE=3, NOTE=4; IN-SCOPE FAIL-GATE BREACHES (FAIL-001/002/008)=NONE",
+    "git -C Module6-workspace status --porcelain -- 04-artifacts/impl/M6.2D -> '?? 04-artifacts/impl/M6.2D/' (untracked, no diff); 0 __pycache__/.pytest_cache under 04-artifacts/impl/M6.2D after the run",
+    "NOTE: analysis_only. No application code, migration, state ledger, or flag written; no external/network call; no shell redirection used (role guard blocks a redirection co-occurring with a venv 'Scripts' path segment). PII-shaped probes are runtime-assembled and never echoed. 5-agent adversarial-ideation workflow run; every BREACH/UNCERTAIN vector executed in the harness before being recorded."
+  ],
+  "evidence_refs": [
+    "04-artifacts/boundary-reports/M6.2D_boundary.md",
+    "04-boundary/work/attacks/m6_2d_attacks.py",
+    "04-artifacts/impl/M6.2D/app/measurement/integration/hash_policy.py",
+    "04-artifacts/impl/M6.2D/app/measurement/integration/payload.py",
+    "04-artifacts/impl/M6.2D/app/measurement/integration/platform_transport.py",
+    "04-artifacts/impl/M6.2D/app/measurement/integration/result_log.py",
+    "04-artifacts/impl/M6.2D/app/measurement/consent/gate.py",
+    "04-artifacts/impl/M6.2D/app/measurement/outbox/measurement_dispatcher.py",
+    "04-artifacts/impl/M6.2D/app/measurement/outbox/audience_dispatcher.py",
+    "04-artifacts/impl/M6.2D/app/measurement/outbox/enqueue.py",
+    "04-artifacts/impl/M6.2D/app/api/conversions.py",
+    "04-artifacts/impl/M6.2D/app/config.py",
+    "04-artifacts/impl/M6.2D/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2D/tests/conftest.py",
+    "04-artifacts/test-reports/M6.2D/SMOKE_RESULTS.md",
+    "04-artifacts/evidence/prompts/M6-P1304.json",
+    "00-spec/slices/M6.2D.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1305. None of the three in-scope fail gates (FAIL-001/002/008) is tripped, so this evidence is PASS-eligible; the boundary report is 04-artifacts/boundary-reports/M6.2D_boundary.md. On PASS, proceed to M6-P1306 (M6_2D_SECURITY_REVIEW), which owns the hash-policy privacy review (O-1 unsalted sha256, the M6-OD-003 ratified field list) and the PII-in-internal-store checks. Before external_send can flip (M6.2E+ / the M6.2G Scale-Gate re-gate), the CODER must close F-D (bind customer_or_guest_key to the consent snapshot subject in the measurement path, mirroring F-C -- the coder committed to this fix-first at M6.2E); and should close the two latent residuals F-E (escape platform_event_id like _hash_key) and F-F (wrap the getattr(subject_ref) at measurement_dispatcher.py:82). Governance unchanged: staged-only, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF; M6-OD-003 (hash policy) + M6-OD-004 (connector) remain hard forward gates and the MANDATORY M6.2G Scale-Gate re-gate remains in force before any real scale or external send."
+}

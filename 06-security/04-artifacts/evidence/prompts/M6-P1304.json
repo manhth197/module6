@@ -1,0 +1,55 @@
+{
+  "prompt_id": "M6-P1304",
+  "status": "PASS",
+  "summary": "M6_2D_TESTER_RUN (TESTER, mode=test/run) attempt 1, ledger row 112 = RUNNING. Entry gate satisfied: dependency M6-P1303 = PASS and M6-P1304 = RUNNING. Executed the slice M6.2D smoke suite with the pinned tester venv (D:\\M6\\Module6-workspace\\02-tester\\.venv\\Scripts\\python.exe; Python 3.12.13, pytest 8.4.2) from 04-artifacts/impl/M6.2D/, cache-free (PYTHONDONTWRITEBYTECODE=1, -p no:cacheprovider), no shell redirection. RESULTS (all green, exit 0): the two bound smoke files = 16 passed (M6-SMK-003 4/4, M6-SMK-017 12/12); full staged suite = 201 passed, 0 failed, 0 error, 0 skipped (in-process pytest_runtest_logreport tally COUNTS={passed:201,failed:0,skipped:0,error:0}, pytest.main RC=0 -- necessary because in this harness pytest's terminal summary line bypasses stdout capture on a long run; cross-checked by the M6-P1303 --collect-only per-file sum = 201 = carried-forward 185 + the 2 new smoke files 16); L1/L2 supporting-leg regressions = 10 passed (tests/test_platform_dedup_event_id.py 4/4, tests/test_hash_policy_no_raw_pii.py 3/3, tests/test_offline_after_order_verified.py 2/2, tests/test_staged_no_real_send.py 1/1). M6-SMK-003 'Duplicate Pixel/CAPI/Offline' -> 'Dedup, khong double count' PASS: primary drives one VIEW_LANDING conversion -> endpoint fan-out PIXEL+CAPI -> dispatch via the staged platform transport -> PlatformResultLog has 2 records (PIXEL, CAPI) sharing ONE platform event_id (event_id=hash(source_event_id+event_code) -> platform-side dedup, no double count, FAIL-001), outbox keeps 2 rows with distinct internal dedup_key; negatives: Offline arm (ORDER_VERIFIED -> PIXEL/CAPI/OFFLINE share the same event_id) and endpoint replay (identical conversion -> DUPLICATE, no re-enqueue, outbox stays 2); control: distinct source events -> distinct deterministic event_ids. M6-SMK-017 (proposed HARDENING, EXECUTED not waived) 'External payload (CAPI/Offline) built from an event containing raw PII' -> 'Hash policy applied per M6-OD-003; no raw phone/email/user-id in the outbound payload or platform result log' PASS: primary end-to-end (conversion carrying a raw-PII identity through the endpoint + staged transport -> platform result log carries NO raw PII, built payload hashes every identity field, user_data values h_-prefixed, raw absent, field hashed not dropped); negatives: 3 PII shapes (email/phone/user-id) x 3 platforms (PIXEL/CAPI/OFFLINE) = 9 nodes each hashed-not-raw, plus fail-closed check (HASH_POLICY_RATIFIED False, to_public_safe hashes every field while M6-OD-003 OPEN); control: hash transforms (out != in), deterministic, distinct identities -> distinct hashes. Done-gate leg 2 (no PII tho) proves the MECHANISM; the ratified raw-field list stays a forward gate on M6-OD-003. PII-SAFETY: the raw-PII markers are assembled at runtime in the test source and are NOT reproduced in SMOKE_RESULTS.md or this evidence (parametrized node ids that carry those literal values are cited with the value replaced by a shape label); no literal PII/secret/token in any artifact. No failures occurred; nothing was patched (TESTER reports, never fixes). Boundary respected: no application code changed, no migration, no real external/platform call (StagedPlatformTransport builds+logs then blocks, external_send=OFF; no connector M6-OD-004), no order/revenue/CRM/scale action; 04-artifacts/state untouched; global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF immutable and unchanged. No raw secret/token/PII: identity hashed in payloads, masked on export (O1), dedup keys hashed, result log PII-safe; markers synthetic + runtime-assembled. STAGED tree left byte-clean (0 __pycache__/.pytest_cache after the run). status PASS is the TESTER's honest result record; it does NOT self-certify gate/leg closure -- the runner EVIDENCE_GATE and the slice Judge decide. Exit-gate smoke legs L3 (SMK-003 executed 4/4) and L4 (SMK-017 executed 12/12, proposed hardening not waived) are closed with recorded evidence; L1 (no double count) and L2 (no PII tho -- MECHANISM proven; ratified field list conditionally blocked on M6-OD-003) are supported by the executed regression suites within the 201.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/impl/M6.2D/tests/TEST_MANIFEST.md",
+    "04-artifacts/evidence/prompts/M6-P1303.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/test-reports/M6.2D/SMOKE_RESULTS.md",
+    "04-artifacts/evidence/prompts/M6-P1304.json"
+  ],
+  "commands_run": [
+    "cwd 04-artifacts/impl/M6.2D: PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts= -v -p no:cacheprovider tests/smoke/test_smk_003_platform_dedup.py tests/smoke/test_smk_017_hash_policy_no_raw_pii.py  ==> 16 passed in 0.07s, exit 0 (header confirms Python 3.12.13, pytest 8.4.2); SMK-003 4 nodes, SMK-017 12 nodes",
+    "cwd 04-artifacts/impl/M6.2D: PYTHONDONTWRITEBYTECODE=1 python -c '<pytest_runtest_logreport plugin>' pytest.main(['-p','no:cacheprovider','-q'])  ==> COUNTS={'passed':201,'failed':0,'skipped':0,'error':0} RC=0 (authoritative full-suite tally = 201 passed)",
+    "cwd 04-artifacts/impl/M6.2D: PYTHONDONTWRITEBYTECODE=1 python -m pytest -q -p no:cacheprovider tests/test_platform_dedup_event_id.py tests/test_hash_policy_no_raw_pii.py tests/test_offline_after_order_verified.py tests/test_staged_no_real_send.py  ==> 10 passed, exit 0 (L1/L2 supporting legs; -q used so no PII-shaped param labels are surfaced)",
+    "NOTE: no shell redirection in any recorded run; per the established lesson a '>'/'2>&1' co-occurring with the venv 'Scripts' path segment trips role_pre_tool_guard (matches denied root 'scripts'), so all runs avoid redirection. No write to any denied root; 04-artifacts/state untouched; no application code changed. Raw-PII markers are runtime-assembled and NOT written to any evidence/report artifact."
+  ],
+  "test_results": [
+    {
+      "smoke_id": "M6-SMK-003",
+      "result": "PASS",
+      "detail": "EXECUTED 4/4 PASSED, exit 0 (tests/smoke/test_smk_003_platform_dedup.py). Scenario/expected VERBATIM ('Duplicate Pixel/CAPI/Offline' -> 'Dedup, khong double count'). Primary: one VIEW_LANDING conversion -> endpoint fan-out PIXEL+CAPI -> dispatch via staged platform transport -> PlatformResultLog has 2 records (PIXEL, CAPI) sharing ONE platform event_id (event_id=hash(source_event_id+event_code) -> platform-side dedup, no double count), outbox keeps 2 rows with distinct internal dedup_key. Negatives: Offline arm (ORDER_VERIFIED -> PIXEL/CAPI/OFFLINE all share the same event_id); endpoint replay (identical conversion -> DUPLICATE, no re-enqueue, outbox stays 2). Control: distinct source events -> distinct deterministic event_ids (discrimination). Corroborated by tests/test_platform_dedup_event_id.py 4/4 and tests/test_offline_after_order_verified.py 2/2. Correlation (synthetic): event_code in {VIEW_LANDING,ORDER_VERIFIED}, source_event_id in {evt_src_1,evt_ov,evt_1,evt_2}, customer_or_guest_key=guest_mapped_ok (masked), consent cs_valid, platforms {PIXEL,CAPI,OFFLINE}, shared event_id mev_ (hashed), internal dedup_key hashed. Closes exit-gate leg L3; supports L1. RULE-005/003; guards FAIL-001. No failure; nothing patched."
+    },
+    {
+      "smoke_id": "M6-SMK-017",
+      "result": "PASS",
+      "detail": "EXECUTED 12/12 PASSED, exit 0 (tests/smoke/test_smk_017_hash_policy_no_raw_pii.py). Proposed HARDENING smoke, EXECUTED not waived (done-gate leg 4). Scenario/expected VERBATIM ('External payload (CAPI/Offline) built from an event containing raw PII' -> 'Hash policy applied per M6-OD-003; no raw phone/email/user-id in the outbound payload or platform result log'). Primary (end-to-end): a conversion carrying a raw-PII identity through the endpoint + staged transport -> the platform result log carries NO raw PII, and the built payload hashes every identity field (user_data values start with h_; raw value absent; field hashed not dropped). Negatives: parametrized 3 PII shapes (email/phone/user-id) x 3 platforms (PIXEL/CAPI/OFFLINE) = 9 nodes each hashed-not-raw; fail-closed check (HASH_POLICY_RATIFIED is False, to_public_safe hashes every field while M6-OD-003 OPEN). Control: hash transforms (output != input), deterministic, distinct identities -> distinct hashes. Corroborated by tests/test_hash_policy_no_raw_pii.py 3/3. Done-gate leg 2 proves the MECHANISM; the ratified raw-field list stays conditionally blocked on M6-OD-003 (forward gate). Correlation (synthetic): source_event_id in {evt_pii,evt_pii_shapes}, customer_or_guest_key = raw-PII-shaped markers (assembled at runtime; NOT reproduced), payload user_data all h_-hashed, result log PII-safe. Closes exit-gate leg L4; supports L2. RULE-014; guards FAIL-008. No failure; nothing patched."
+    }
+  ],
+  "evidence_refs": [
+    "04-artifacts/test-reports/M6.2D/SMOKE_RESULTS.md",
+    "04-artifacts/impl/M6.2D/tests/smoke/test_smk_003_platform_dedup.py",
+    "04-artifacts/impl/M6.2D/tests/smoke/test_smk_017_hash_policy_no_raw_pii.py",
+    "04-artifacts/impl/M6.2D/tests/test_platform_dedup_event_id.py",
+    "04-artifacts/impl/M6.2D/tests/test_hash_policy_no_raw_pii.py",
+    "04-artifacts/impl/M6.2D/tests/test_offline_after_order_verified.py",
+    "04-artifacts/impl/M6.2D/tests/test_staged_no_real_send.py",
+    "04-artifacts/impl/M6.2D/tests/TEST_MANIFEST.md",
+    "04-artifacts/impl/M6.2D/tests/conftest.py",
+    "04-artifacts/evidence/prompts/M6-P1303.json",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/slices/M6.2D.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1304. On PASS, proceed to M6-P1305 (M6_2D_BOUNDARY_ADVERSARY) against the M6.2D send-discipline layer (shared platform event_id dedup, fail-closed hash policy, offline-after-ORDER_VERIFIED, staged no-real-send), which MUST also confirm F-A/F-B/F-C closure and review the M6-P1302 FLAGGED measurement-path symmetric borrowed-consent observation (IMPLEMENTATION_NOTES sec.4.3, armed-not-fired while external_send=OFF), then M6-P1306 (M6_2D_SECURITY_REVIEW) for PII/hash policy + M6-OD-003 scope, then M6-P1307 evidence-collect, M6-P1308 docs, M6-P1309 slice-gate Judge. Governance unchanged: staged-only, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF; M6-OD-003 (hash policy ratified field list -- leg 2 forward gate) + M6-OD-004 (connector) remain hard forward gates before any real send; the MANDATORY M6.2G Scale-Gate re-gate remains in force before any real scale or external send."
+}

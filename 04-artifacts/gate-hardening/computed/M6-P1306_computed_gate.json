@@ -1,0 +1,21 @@
+{
+  "checked_at": "2026-07-30T08:53:08Z",
+  "claimed_fail_gate_tripped": false,
+  "classification": "standard",
+  "computed_fail_gate_tripped": true,
+  "computed_status": "FAIL",
+  "evidence_present": true,
+  "evidence_sha256": {
+    "04-artifacts/evidence/prompts/M6-P1306.json": "5686dbdd97ff2d59b220c2e9be50bbf51f9e6b28453345778b5415bf5bcb6972"
+  },
+  "failures": [
+    "computed fail gate: open_blockers non-empty (1 item(s))"
+  ],
+  "integrity_violations": [
+    "CLAIMED_VS_COMPUTED_MISMATCH: fail_gate_tripped=false but recomputed verdict trips (M6-FAIL-009 gate bypass)"
+  ],
+  "mode": "gate",
+  "prompt_id": "M6-P1306",
+  "rules_version": "M6-SGV-1.0",
+  "warnings": []
+}

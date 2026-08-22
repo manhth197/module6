@@ -1,0 +1,62 @@
+{
+  "prompt_id": "M6-P1504",
+  "status": "PASS",
+  "summary": "M6_2F_TESTER_RUN (mode=test). Entry gate verified in the state ledger before any work: M6-P1503 PASS (required predecessor), M6-P1504 RUNNING (this prompt, order 130). Executed the slice M6.2F smoke suite with the pinned pack venv (python 3.12.13 / pytest 8.4.2 / pluggy 1.6.0), cache-free (PYTHONDONTWRITEBYTECODE=1, -p no:cacheprovider), NO shell redirection (the role guard blocks a >/2> co-occurring with the venv Scripts path). RESULTS: the five bound smoke files ran 18 passed / 0 failed, exit 0 (SMK-004 3/3, SMK-005 4/4, SMK-006 4/4, SMK-010 3/3, SMK-015 4/4); the full staged suite ran 273 passed / 0 failed / 0 skipped / 0 error, RC 0 (in-process pytest_runtest_logreport tally, empty failure list — the harness does not reliably capture pytest's long terminal summary; the tally agrees with the M6-P1503 collect-only total of 273). Every bound smoke id PASSED: SMK-004 quote is not revenue and yields no ROAS (0.0 with spend, None without) + DQ FAIL on a quote carrying revenue; SMK-005 ORDER_CREATED not counted as Verified Revenue + draft materializes no revenue + DQ FAIL on draft-as-revenue + verified-order control; SMK-006 (M6.2F dashboard-render leg) full-source verified order updates ROAS 2.5 / CPA 100000 / AOV 250000 with fail-closed absent/unmapped spend and a two-order update case; SMK-010 the Data Mart / dashboard deps / view expose no write/CRM/scale/trigger surface and reading mutates nothing (RULE-012/FAIL-005); SMK-015 revenue verified-only by construction + DQ Verified-Revenue FAIL on quote/draft-as-revenue + a discriminating verified control. ACCEPTANCE CHECKS met: (1) commands_run non-empty (2 commands); (2) test_results has one entry per bound smoke id (5); (3) failures reported not fixed — there were 0 failures, and no code under test was patched (TESTER executes and reports only). Supporting M6.2F dashboard/DQ leg tests (test_kpi_formulas_verbatim 4, test_dashboard_verified_only_revenue 1, test_dashboard_rejects_unverified_as_revenue 2, test_data_mart_support_view_only 2, test_quote_not_revenue 1, test_order_draft_not_verified 1, test_data_quality_checker 5) and the carried M6.2A-E tree (239) all ran green inside the 273. Recorded SMOKE_RESULTS.md (per-smoke PASS tables with node-level detail, exact commands, correlation-id note, boundary observations, exit-gate legs L1-L6). GOVERNANCE POSTURE UNCHANGED AND IMMUTABLE: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, DASHBOARD_ALERT_THRESHOLDS_DEFINED=False (M6-OD-002 OPEN), HASH_POLICY_RATIFIED=False, SCALE_MODEL_RATIFIED=False (M6-OD-005 OPEN). No application code changed, no migration applied, no external call, no order-state/pricing/CRM-send/commission/scale/flag-flip, no write to 04-artifacts/state/. All ids synthetic; correlation ids reaching a dashboard metric sample_evidence_ref are masked on export (e.g. ame:verified;corr=cor***me); no raw secret/PII anywhere. status=PASS is an honest TESTER self-report of the executed run; it does NOT self-certify gate advancement — the runner EVIDENCE_GATE and the slice Judge (M6-P1509) decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/impl/M6.2F/tests/TEST_MANIFEST.md",
+    "04-artifacts/evidence/prompts/M6-P1503.json",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/slices/M6.2F.md"
+  ],
+  "files_changed": [
+    "04-artifacts/test-reports/M6.2F/SMOKE_RESULTS.md"
+  ],
+  "commands_run": [
+    "02-tester/.venv/Scripts/python.exe -m pytest -v tests/smoke/test_smk_004_quote_not_revenue.py tests/smoke/test_smk_005_order_not_verified_not_revenue.py tests/smoke/test_smk_006_dashboard_roas_update.py tests/smoke/test_smk_010_data_mart_support_view_only.py tests/smoke/test_smk_015_dashboard_quote_draft_not_revenue.py -p no:cacheprovider  (from 04-artifacts/impl/M6.2F; PYTHONDONTWRITEBYTECODE=1; RESULT: 18 passed in 1.59s; EXIT 0)",
+    "02-tester/.venv/Scripts/python.exe -c \"<pytest_runtest_logreport tally + pytest.main(['-q','-p','no:cacheprovider'])>\"  (from 04-artifacts/impl/M6.2F; PYTHONDONTWRITEBYTECODE=1; RESULT: COUNTS={'passed':273,'failed':0,'skipped':0,'error':0} RC=0; FAILS=[])"
+  ],
+  "test_results": [
+    {
+      "smoke_id": "M6-SMK-004",
+      "result": "PASS",
+      "detail": "tests/smoke/test_smk_004_quote_not_revenue.py 3/3 passed. Primary: QUOTE_SENT + mapped spend -> Revenue Verified 0.0, ROAS 0.0, AOV None, quote funnel-counted. Negatives: no-spend ROAS fail-closed None; DQ Verified-Revenue FAIL (overall FAIL) on a quote carrying revenue (RULE-003/FAIL-001). Scenario/expected verbatim."
+    },
+    {
+      "smoke_id": "M6-SMK-005",
+      "result": "PASS",
+      "detail": "tests/smoke/test_smk_005_order_not_verified_not_revenue.py 4/4 passed. Primary: ORDER_CREATED -> Revenue Verified 0.0, Verified Rate 0.0 trace 'ORDER_VERIFIED=0 / ORDER_CREATED=1'. Negatives: draft conversion materializes no revenue/order_code; DQ FAIL on a draft carrying revenue. Control: a verified order IS counted (non-vacuous)."
+    },
+    {
+      "smoke_id": "M6-SMK-006",
+      "result": "PASS",
+      "detail": "tests/smoke/test_smk_006_dashboard_roas_update.py 4/4 passed (M6.2F dashboard-render leg). Primary: full-source verified order -> ROAS 2.5, CPA 100000, AOV 250000, evidence-first, overall PASS. Negatives: absent-spend and unmapped-spend fail-closed None. Update: two verified orders -> CPA 75000, AOV 150000, ROAS 2.0. (Carried M6.2E attribution smoke also green in the full suite.)"
+    },
+    {
+      "smoke_id": "M6-SMK-010",
+      "result": "PASS",
+      "detail": "tests/smoke/test_smk_010_data_mart_support_view_only.py 3/3 passed. Primary: mart public surface subset of the read-only aggregate allow-list, no write/CRM/scale/trigger/send/publish verb (RULE-012/FAIL-005). Deps hold only {mart}; view has no trigger handle. Negative: reading the dashboard twice does not mutate the store."
+    },
+    {
+      "smoke_id": "M6-SMK-015",
+      "result": "PASS",
+      "detail": "tests/smoke/test_smk_015_dashboard_quote_draft_not_revenue.py 4/4 passed. Primary: verified order + quote + draft -> Revenue Verified counts only the verified order (200000), overall PASS. DQ Verified-Revenue FAIL on quote-as-revenue and on draft-as-revenue. Control: a genuine ORDER_VERIFIED PASSES the gate (discriminating)."
+    }
+  ],
+  "evidence_refs": [
+    "04-artifacts/test-reports/M6.2F/SMOKE_RESULTS.md",
+    "04-artifacts/impl/M6.2F/tests/TEST_MANIFEST.md",
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_004_quote_not_revenue.py",
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_005_order_not_verified_not_revenue.py",
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_006_dashboard_roas_update.py",
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_010_data_mart_support_view_only.py",
+    "04-artifacts/impl/M6.2F/tests/smoke/test_smk_015_dashboard_quote_draft_not_revenue.py",
+    "04-artifacts/evidence/prompts/M6-P1503.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1504. On PASS, proceed to M6-P1505 (M6_2F_BOUNDARY_ADVERSARY) — verify the dashboard/DQ layer keeps the module boundary (verified-only revenue, support-view-only Data Mart, no trigger/CRM/scale/pricing/order-state) — then M6-P1506 (M6_2F_SECURITY_REVIEW) for PII/secret discipline on traces and evidence, M6-P1507 (evidence collect), M6-P1508 (docs), and the slice gate judge M6-P1509. Governance flags stay BLOCKED/OFF/OFF; M6-OD-002 (alert thresholds) and M6-OD-005 (scale model) remain OPEN forward gates before any threshold or scale evidence."
+}

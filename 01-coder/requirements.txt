@@ -6,4 +6,14 @@
 #
 # Layer 2 - role-specific packages (GATED):
 # CODER: implementation-stack packages land HERE (web framework, DB driver, platform SDKs) ONLY after owner decision M6-OD-011 resolves the target repo/stack AND the harmonization gate passes. Applied by the OPERATOR with a SCHEMA_CHANGELOG row - never by the agent.
-# -- intentionally no packages below this line --
+#
+# GATE SATISFIED 2026-07-29 for the test runner only:
+#   owner decision  : M6-OD-011 (DECIDED 2026-07-23) -> stack test_command "pytest -q"
+#   manifest        : 04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json (stack.test_command)
+#   changelog row   : 00-spec/registers/SCHEMA_CHANGELOG.md row 14
+#   applied by      : OPERATOR via setup\New-M6RoleVenvs.ps1 (existing 3.12 venvs kept)
+# Pinned so slice test evidence is reproducible inside the role venv and never
+# silently falls back to a system interpreter. Runtime/framework/DB packages are
+# still NOT approved - they need their own decision + changelog row.
+pytest==8.4.2
+# -- no packages below this line without the gate above --

@@ -1,0 +1,67 @@
+{
+  "prompt_id": "M6-P1103",
+  "status": "PASS",
+  "summary": "M6_2B_TESTER_BUILD (TESTER, mode=build) attempt 1, ledger row 91 = RUNNING. Entry gate satisfied: dependency M6-P1102 = PASS, M6-P1103 = RUNNING, and the M6.2B entry-gate judge M6-P1100 = SIGNED. Built the two bound M6.2B smoke ids as dedicated smoke files driven end-to-end through the M6.2B tracking pipeline (client hook app.measurement.tracking.hooks.TrackingHook + backend endpoint app.api.track.handle_track_request over the web_event_logs and ads_measurement_events append-only stores), reusing the coder's conftest fixtures (track_deps, make_track_body, store, measurement_store, audit) and patterns from tests/test_track_unknown_event.py / tests/test_track_idempotency_dedup.py. DELIVERABLES: (1) NEW tests/smoke/test_smk_001_track_unknown_event.py (6 nodes) and tests/smoke/test_smk_003_duplicate_dedup.py (4 nodes); (2) rebuilt tests/TEST_MANIFEST.md from the carried-forward M6.2A content into the M6.2B manifest (smoke->test binding, verbatim scenarios, supporting/regression inventory, exit-gate leg map, build-validation record); (3) evidence JSON (this file, written last). M6-SMK-001 'Event khong co trong event_registry' -> 'Reject/HOLD, audit ro' (VERBATIM): primary posts an unknown event_code to the endpoint -> status REJECTED, error_code UNKNOWN_EVENT, seam audits UNKNOWN_EVENT_NOT_IN_REGISTRY (audit ro), 0 rows in either store; negatives cover BOTH independent layers required by the M6.2B done-gate leg 1 (frontend hook refuses unknown + non-str fail-closed, audited HOOK_UNKNOWN_EVENT; backend independence via CLICK_CTA which passes the client hook but is not ACTIVE in the registry double; DEREG_SAMPLE HOLD arm audited REGISTRATION_STATE_NOT_ACTIVE); control VIEW_LANDING ACCEPTED end-to-end (one row each). M6-SMK-003 'Duplicate Pixel/CAPI/Offline' -> 'Dedup, khong double count' (VERBATIM): primary replays an identical track request -> first ACCEPTED, replay DUPLICATE (idempotent_replay, same event_id), exactly one row in each append-only store (no double count) via the server-derived LOCKED RULE-005 idempotency key; negatives: replay with a different correlation_id still dedups (key excludes correlation_id), repeated replays never double count; control: a distinct event (different page_id -> different key) is NOT deduped (two rows each). Scope note recorded in the manifest: the full cross-source Pixel/CAPI/Offline dedup by content binds again at M6.2D; M6.2B proves exact-replay dedup on the track endpoint. BUILD-VALIDATION (per the M6.2A operator precedent, ran not collect-only) with the pinned tester venv (Python 3.12.13, pytest 8.4.2) from 04-artifacts/impl/M6.2B/, cache-free (PYTHONDONTWRITEBYTECODE=1, -p no:cacheprovider), no shell redirection: the two new smoke files = 10 passed exit 0; full staged suite = 139 passed / 0 failed (in-process pytest_runtest_logreport tally {passed:139,failed:0,skipped:0,error:0}, pytest.main RC=0; the terminal summary line bypasses this harness's stdout capture on a long run, hence the programmatic tally, cross-checked by the --collect-only per-file sum = 139 = carried-forward 96 + coder M6.2B 33 + these new smokes 10). 0 __pycache__/.pytest_cache remain under the staged tree. Boundary respected: no code under test was fixed (TESTER reports, never fixes); no application code/migration/external call; 04-artifacts/state untouched; no egress/audience-sync/dashboard (out of scope); global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF immutable and unchanged. No raw secret/token/PII: all fixture/session/correlation ids are synthetic; session_id/correlation_id masked by the endpoint on export; channel-origin event_code/session_id/payload treated strictly as data. status PASS is the TESTER's honest self-report of a successful build+validation; it does NOT advance any gate or leg. The formal executed-results recording for the exit-gate smoke legs (L3 SMK-001, L4 SMK-003) belongs to M6-P1104 -> 04-artifacts/test-reports/M6.2B/SMOKE_RESULTS.md. The runner EVIDENCE_GATE and the slice Judge decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2B.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/evidence/prompts/M6-P1102.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/impl/M6.2B/app/api/track.py",
+    "04-artifacts/impl/M6.2B/app/measurement/tracking/hooks.py",
+    "04-artifacts/impl/M6.2B/app/measurement/tracking/base_events.py",
+    "04-artifacts/impl/M6.2B/app/measurement/store/measurement_event_store.py",
+    "04-artifacts/impl/M6.2B/tests/conftest.py",
+    "04-artifacts/impl/M6.2B/tests/test_track_unknown_event.py",
+    "04-artifacts/impl/M6.2B/tests/test_track_idempotency_dedup.py",
+    "04-artifacts/impl/M6.2B/tests/TEST_MANIFEST.md"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2B/tests/smoke/test_smk_001_track_unknown_event.py",
+    "04-artifacts/impl/M6.2B/tests/smoke/test_smk_003_duplicate_dedup.py",
+    "04-artifacts/impl/M6.2B/tests/TEST_MANIFEST.md",
+    "04-artifacts/evidence/prompts/M6-P1103.json"
+  ],
+  "commands_run": [
+    "cwd 04-artifacts/impl/M6.2B: PYTHONDONTWRITEBYTECODE=1 python -m pytest -o addopts= -v -p no:cacheprovider tests/smoke/test_smk_001_track_unknown_event.py tests/smoke/test_smk_003_duplicate_dedup.py  ==> 10 passed in 0.07s, exit 0 (header confirms Python 3.12.13, pytest 8.4.2); SMK-001 file 6 nodes, SMK-003 file 4 nodes",
+    "cwd 04-artifacts/impl/M6.2B: PYTHONDONTWRITEBYTECODE=1 python -c '<pytest_runtest_logreport plugin>' pytest.main(['-p','no:cacheprovider','-q'])  ==> COUNTS={'passed':139,'failed':0,'skipped':0,'error':0} RC=0 (authoritative full-suite tally)",
+    "cwd 04-artifacts/impl/M6.2B: PYTHONDONTWRITEBYTECODE=1 python -m pytest --collect-only -q -p no:cacheprovider  ==> per-file totals summing to 139 (new smokes: test_smk_001_track_unknown_event=6, test_smk_003_duplicate_dedup=4; coder M6.2B=33; carried-forward M6.2A=96)",
+    "PowerShell (read-only): enumerated 04-artifacts/impl/M6.2B for __pycache__/.pytest_cache  ==> none present (staged tree cache-free)",
+    "NOTE: no shell redirection in any recorded run; per the M6.2A lesson a '>'/'2>&1' co-occurring with the venv 'Scripts' path segment trips role_pre_tool_guard (matches denied root 'scripts'), so all runs avoid redirection. No write to any denied root; 04-artifacts/state untouched; no application code changed."
+  ],
+  "test_results": [
+    {
+      "smoke_id": "M6-SMK-001",
+      "result": "PASS",
+      "detail": "BUILT + build-validated 6/6 PASSED, exit 0 (tests/smoke/test_smk_001_track_unknown_event.py). Scenario/expected VERBATIM ('Event khong co trong event_registry' -> 'Reject/HOLD, audit ro'). Primary (backend layer): unknown event_code posted to handle_track_request -> status REJECTED, error_code UNKNOWN_EVENT, seam audits UNKNOWN_EVENT_NOT_IN_REGISTRY, len(store)==0 and len(measurement_store)==0. Negatives prove the M6.2B done-gate leg-1 BOTH-layer requirement: frontend hook refuses an unknown code and a non-str code fail-closed (audited HOOK_UNKNOWN_EVENT); backend layer is independent of the hook (CLICK_CTA passes the client allow-list but is rejected by the registry gate); DEREG_SAMPLE is the HOLD arm (REJECTED, audited REGISTRATION_STATE_NOT_ACTIVE, not logged). Control: VIEW_LANDING ACCEPTED end-to-end, one row each (non-vacuity). One primary per bound id; negatives present; existing patterns reused. Formal L3 recording is M6-P1104. RULE-001/018; guards FAIL-003."
+    },
+    {
+      "smoke_id": "M6-SMK-003",
+      "result": "PASS",
+      "detail": "BUILT + build-validated 4/4 PASSED, exit 0 (tests/smoke/test_smk_003_duplicate_dedup.py). Scenario/expected VERBATIM ('Duplicate Pixel/CAPI/Offline' -> 'Dedup, khong double count'). Primary: an identical track request replayed -> first ACCEPTED (idempotent_replay False), replay DUPLICATE (idempotent_replay True) with the SAME event_id, and exactly one row in each append-only store (web_event_logs + ads_measurement_events) -> no double count, via the endpoint's server-derived LOCKED RULE-005 idempotency key. Negatives: replay with a different correlation_id still dedups (key excludes correlation_id); repeated replays never double count. Control: a distinct event (different page_id -> different key) is NOT deduped (two rows each), proving dedup discriminates. Scope note: cross-source Pixel/CAPI/Offline dedup binds again at M6.2D; M6.2B proves exact-replay dedup. One primary per bound id; negatives present; existing patterns reused. Formal L4 recording is M6-P1104. RULE-005/007."
+    }
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2B/tests/smoke/test_smk_001_track_unknown_event.py",
+    "04-artifacts/impl/M6.2B/tests/smoke/test_smk_003_duplicate_dedup.py",
+    "04-artifacts/impl/M6.2B/tests/TEST_MANIFEST.md",
+    "04-artifacts/impl/M6.2B/tests/conftest.py",
+    "04-artifacts/impl/M6.2B/app/api/track.py",
+    "04-artifacts/impl/M6.2B/app/measurement/tracking/hooks.py",
+    "04-artifacts/impl/M6.2B/app/measurement/tracking/base_events.py",
+    "04-artifacts/impl/M6.2B/app/measurement/store/measurement_event_store.py",
+    "04-artifacts/impl/M6.2B/tests/test_track_unknown_event.py",
+    "04-artifacts/impl/M6.2B/tests/test_track_idempotency_dedup.py",
+    "04-artifacts/evidence/prompts/M6-P1102.json",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/slices/M6.2B.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1103. On PASS, proceed to M6-P1104 (M6_2B_TESTER_RUN): from 04-artifacts/impl/M6.2B/ run `python -m pytest -q` (full staged suite, expected 139) and the two bound smoke files, then write 04-artifacts/test-reports/M6.2B/SMOKE_RESULTS.md with structured per-smoke results + evidence refs to close exit-gate legs L3 (SMK-001 executed) and L4 (SMK-003 executed) and support L1/L2. Then M6-P1105 (boundary adversary) and M6-P1106 (security/PII) against the M6.2B tracking pipeline. Governance unchanged: staged-only, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF; the MANDATORY M6.2G Scale-Gate re-gate remains in force before any real scale or external send."
+}

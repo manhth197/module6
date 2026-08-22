@@ -1,0 +1,40 @@
+{
+  "prompt_id": "M6-P1008",
+  "status": "PASS",
+  "summary": "M6_2A_DOCS (SLICE_M6.2A, analysis_only). Entry gate OK: ledger row 86 M6-P1008=RUNNING; dependency M6-P1007 (evidence collect)=PASS; role=ANALYST_ARCHITECT; posture immutable (global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF). Produced the slice documentation at 04-artifacts/analysis/slices/M6_2A_RUNBOOK.md: (1) RUNBOOK operate/verify/rollback, (2) decision + changelog deltas produced by the slice, (3) handoff note to M6.2B + forward gates, (4) pointers for the slice-gate Judge. FAIL-CLOSED HONESTY (the load-bearing property of this doc): the runbook self-certifies NOTHING and advances no gate (RULE-015); it does NOT claim the slice PASSED, does NOT claim exit-gate legs L1/L2/L3 are 'closed' (they are 'supported at the staged level' — the tester M6-P1004 withheld closure), and frames the entry correctly as an OWNER OVERRIDE (M6-OVERRIDE-M6P1000-STAGED, 2026-07-29) with the M6-P1000 entry-gate Judge verdict = BLOCKED (unmodified), NOT a Judge PASS. CONTENT: §1 what the slice built (fail-closed measure-only substrate; M6 owns ONLY web_event_logs CTR-004, other 3 shapes CONSUMED read-only; staged under 04-artifacts/impl/M6.2A/); §2 operate (python -m app prints staged posture exit 0; ingest_event seam is the entry M6.2B wires into POST /api/ads/events/track; egress bolted, permits_external_send() hard-returns False while M6-OD-003 OPEN); §3 verify (python -m pytest -q => 96 passed/0 failed; SMK-001 4/4, SMK-002 7/7, consent matrix 6/6, append-only+dedup, identity audit 7/7, seam property tests 350+957 combos, enabling-flag sweep none; explicit note that verify does NOT assert leg closure); §4 ROLLBACK for EVERY change group (baseline/config, consumed models, owned row, helpers, 3 decision paths, log substrate, ingest seam, R2/3/4 hardening, staged migration, tests) — baseline rollback non-destructive (delete staged tree), append-only caveat (after a real apply revert=down-DDL DROP TABLE not row-delete), consumed tables never mutated by M6; §5 decision deltas (M6-OD-011 DECIDED 2026-07-23 GREENFIELD; M6-OD-003 re-scoped NOT-in-scope-for-M6.2A hard forward gate before M6.2C/D; M6-OD-012 OPEN; owner override recorded; ENTRY-001/003 risk-accepted not closed); §6 changelog delta (NO SCHEMA_CHANGELOG row required — no schema change beyond harmonized rows 9-33; realizes CTR-004 as staged code + un-applied DDL; hardening tokens are implementation-internal audit vocabulary, empty-schema-diff recorded per discipline); §7 handoff to M6.2B — MUST-FIX boundary residuals F1 (audit-integrity, throwing adapters escape 0-audit)/F2 (ConsentSnapshot subclass bypasses isinstance)/O2 (naive event_ts drops row, owner-visible DQ)+MINOR-6..9, security SEC-PII-01/02+O1, hard forward gates M6-OD-003 before M6.2C/D + MANDATORY M6.2G Scale-Gate re-gate (CORE_EVENT_REGISTRY_PATCH + M3_SELLABLE_GATE_FAILOPEN_PATCH must land); §8 Judge pointers. ACCEPTANCE CHECKS MET: (1) runbook includes rollback for every change (§4 covers every change group + append-only down-DDL caveat + PLAN §5-10 ref); (2) changelog deltas recorded (§6). VERIFICATION (1 independent read-only analysis-only honesty+completeness agent, hermetic): checked rollback-per-change, changelog-delta-present, NO-overclaim (no PASS/closure/self-cert; entry=owner-override not Judge-PASS), FAITHFUL carry-forward of index B2-B6, factual accuracy (96 passed / SMK 4-4+7-7 / app exit 0 / permits_external_send False / M6 owns only web_event_logs) => VERDICT CLEAN, 0 findings. GOVERNANCE: analysis_only respected; 04-artifacts/state not touched; no application code / migration / flag change / external call; no self-certification (the runner EVIDENCE_GATE and slice-gate Judge M6-P1009 decide closure). No raw secret/token/PII: all subject ids referenced as field names or masked tokens, none raw. The DOCS task itself has no open blocker (runbook written, verified CLEAN, both acceptance checks met); the SLICE-level open items (F1/F2/O2, ENTRY-001/003, OD-003) are documented in the runbook §5-§8 for the slice-gate Judge, which is the correct place for them — not this prompt's open_blockers. Honest self-report; runner gate decides.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2A.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1007.json",
+    "04-artifacts/evidence/prompts/M6_2A_EVIDENCE_INDEX.md",
+    "04-artifacts/impl/M6.2A/PLAN.md",
+    "04-artifacts/impl/M6.2A/IMPLEMENTATION_NOTES.md"
+  ],
+  "files_changed": [
+    "04-artifacts/analysis/slices/M6_2A_RUNBOOK.md",
+    "04-artifacts/evidence/prompts/M6-P1008.json"
+  ],
+  "commands_run": [
+    "Read (read-only): entry gate — ledger rows 77-87 (M6-P1008=RUNNING, dependency M6-P1007=PASS; M6-P1000=SKIPPED owner override; M6-P1001..1006=PASS); slice spec M6.2A.md (8 exit-gate checks, in/out scope, rules/fail-gates/smokes); M6-P1007.json + M6_2A_EVIDENCE_INDEX.md (consolidated exit-gate map + carry-forwards B1-B6); PLAN.md (staged change set + §5-10 rollback per item); IMPLEMENTATION_NOTES.md (Rounds 1-4 hardening, all verified-run: 28->49->70->96 tests)",
+    "Write (allowed root 04-artifacts/analysis/): 04-artifacts/analysis/slices/M6_2A_RUNBOOK.md — operate/verify/rollback + decision/changelog deltas + handoff + Judge pointers",
+    "1 independent verification agent (general-purpose, analysis_only, read-only, hermetic): honesty+completeness lens (rollback-per-change / changelog-delta / no-overclaim / faithful-carry-forward-B2-B6 / factual-accuracy) vs slice spec + evidence index + PLAN => VERDICT CLEAN 0 findings; NO web fetch; NO project data sent externally"
+  ],
+  "evidence_refs": [
+    "04-artifacts/analysis/slices/M6_2A_RUNBOOK.md",
+    "00-spec/slices/M6.2A.md",
+    "04-artifacts/evidence/prompts/M6-P1007.json",
+    "04-artifacts/evidence/prompts/M6_2A_EVIDENCE_INDEX.md",
+    "04-artifacts/impl/M6.2A/PLAN.md",
+    "04-artifacts/impl/M6.2A/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/test-reports/M6.2A/SMOKE_RESULTS.md",
+    "04-artifacts/boundary-reports/M6.2A_boundary.md",
+    "04-artifacts/security-reports/M6.2A_security.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1008 (scripts-win/Check-PromptGateLocked.ps1). On PASS, paste M6-P1009 (M6_2A_SLICE_GATE_JUDGE, order 85, JUDGE role m6-judge, requires_judge=true) — run in a FRESH judge session per the pack's judge protocol. M6-P1009 renders the slice M6.2A verdict STRICTLY from the evidence files (this runbook + the evidence index are descriptive, not verdicts), and must weigh: (a) entry opened by OWNER OVERRIDE with M6-P1000 Judge verdict BLOCKED + risk-accepted ENTRY-001/003; (b) exit-gate legs L1/L2/L3 'supported (staged), not closed' — the tester withheld closure over boundary residuals F1 (audit-integrity) / F2 (consent subclass bypass); (c) forward items SEC-PII-01 / O1 (before durable binding), O2 (owner-visible DQ under-count), M6-OD-003 (hard gate before M6.2C/D external send); (d) the MANDATORY M6.2G Scale-Gate re-gate. M6-P1008 is the last non-judge prompt in slice M6.2A; exit-gate items 6 (all prompts have evidence JSON) and 7 (slice-gate Judge PASS) close only once M6-P1008 evidence exists and M6-P1009 signs PASS. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF remain in force."
+}

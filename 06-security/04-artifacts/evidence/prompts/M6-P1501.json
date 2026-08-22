@@ -1,0 +1,46 @@
+{
+  "prompt_id": "M6-P1501",
+  "status": "PASS",
+  "summary": "M6_2F_CODER_PLAN (plan_only, EVIDENCE_GATE). Produced 04-artifacts/impl/M6.2F/PLAN.md: a minimal, target-relative change set for slice M6.2F (KPI Dashboard doc-14/CTR-015 + Data Quality Gate doc-15/CTR-012/CTR-024 with metric-level source trace; data mart stays a SUPPORT VIEW), each item mapped to a done-gate leg + smoke id, with rollback per item. NO code/migration/flag this prompt. Entry verified on source: ledger M6-P1501=RUNNING, dependency M6-P1500=SIGNED (entry judge PASS) + M6.2E slice gate M6-P1409=SIGNED; IMPLEMENTATION_TARGET_LOCKED.json status=LOCKED / STAGED_ONLY / safety all false, M6-OD-011 DECIDED; CTR-015=DRAFT_LOCKED (14 formulas verbatim in MONITORING_REGISTER, thresholds=M6-OD-002 OUT), CTR-012/018/024=MISSING-but-harmonized-for-entry (producers M6-P0708/M6-P0712/M6-P0713 PASS, gate M6-P0715 SIGNED). PLAN grounded on the LOCKED content read this prompt: the 14 KPI metrics reproduced VERBATIM (Ads Spend, Revenue Verified=SUM(verified_revenue) ORDER_VERIFIED-only, ROAS, CPA, AOV, Boxes/Order, Comment/Inbox/Quote/Order/Verified Rate, COD Fail Rate, CRM Revenue, Diamond Revenue) and the 8 doc-15 Data Quality Gate items VERBATIM (Event Registry / Consent / Dedup / Identity / Attribution / Verified Revenue / Suppression / Dashboard) with worst-status roll-up (FAIL>HOLD>PASS) and PASS/HOLD/FAIL-only output. LOAD-BEARING invariants encoded in the plan: (1) verified-only revenue -- every revenue-bearing metric reads ONLY the set-once Zone-B revenue_value M6.2E populates on the ORDER_VERIFIED path; quote/order-draft/payment-waiting contribute zero revenue and no ROAS (RULE-003, FAIL-001, SMK-004/005/015; the M6.2F done gate); (2) data mart is a SUPPORT VIEW ONLY -- DataMart/dashboard expose only read/aggregate methods, deliberately no CRM/pricing/Diamond/scale/trigger surface (RULE-012, FAIL-005, SMK-010). Change set: new dashboard layer (data_mart.py support view, kpi_metrics.py 14 verbatim formulas, models.py MetricResult with source_trace+sample_evidence, api/dashboard.py CTR-018 read-only handler), new quality layer (data_quality_check.py CTR-012 8-item model, data_quality_checker.py CTR-024 worker outputs PASS/HOLD/FAIL only), a carried-forward patch adding an audited Zone-C set_data_quality_status() to measurement_event_store.py (the ONLY DQ-status writer; Zone-A write-once + Zone-B materialize() set-once untouched), staged migrations 0007 (ads_data_quality_check) + 0008 (read-only dashboard support view), a small config constant (DQ_STATUS_ORDER; NO thresholds -- M6-OD-002 OUT), and tests T1-T7 mapped to SMK-004/005/006/010/015 (TESTER executes, RULE-015). Consumed staged inputs (Ads Spend with campaign mapping, boxes, COD, funnel event counts, suppression flag) are read-only -- M6 measures, never computes/writes them; absent input is fail-closed. OUT OF SCOPE per slice: alert thresholds (M6-OD-002), scale decisions (M6.2G), learning, real send. M6-OD-008 (PAYMENT_COMPLETED) blocks only the revenue edge-handling leg, not this slice's RULE-003-fixed verified-only definition. Posture BLOCKED/OFF/OFF/HASH_POLICY_RATIFIED=False/SCALE_MODEL_RATIFIED=False unchanged; no self-certification of the ledger; module boundary intact; no raw secrets/PII.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2F.md",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/evidence/prompts/M6-P1500.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/registers/MONITORING_REGISTER.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/SPEC.md#13-19",
+    "04-artifacts/impl/M6.2E/app/measurement/models/measurement_event.py",
+    "04-artifacts/impl/M6.2E/app/measurement/store/measurement_event_store.py"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2F/PLAN.md"
+  ],
+  "commands_run": [
+    "Read (read-only): CLAUDE_CONTEXT_BRIEF, IMPLEMENTATION_TARGET_LOCKED.json (LOCKED/STAGED_ONLY, M6-OD-011 DECIDED), slice M6.2F, ARCH_BASELINE (nine-layer; Dashboard/Gate layers), M6-P1500 entry evidence (PASS), MONITORING_REGISTER (14 KPI formulas + 8 DQ gate items verbatim), SPEC 13/15/16/17/19",
+    "Grep (read-only): ledger -> M6-P1501=RUNNING, M6-P1500=SIGNED, M6-P1409=SIGNED; CONTRACT_REGISTER -> CTR-015 DRAFT_LOCKED(formulas)/CTR-012/018/024 MISSING+harmonized; RULES_LOCKED -> RULE-003/012/015/017; FAIL_GATE_REGISTER -> FAIL-001/005; SMOKE_REGISTER -> SMK-004/005/006/010/015",
+    "Glob/ls (read-only): confirmed M6.2E tree present (store/models/attribution/logs); DataQualityStatus enum in models/measurement_event.py; store has insert+materialize, no Zone-C transition yet (added by M6.2F)",
+    "Write: 04-artifacts/impl/M6.2F/PLAN.md (plan-only; no code, no migration, nothing sent/scaled/triggered)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2F/PLAN.md",
+    "00-spec/slices/M6.2F.md",
+    "00-spec/registers/MONITORING_REGISTER.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/evidence/prompts/M6-P1500.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1501; on PASS proceed to M6-P1502 (M6_2F_CODER_IMPLEMENT) which carries the M6.2E tree forward into 04-artifacts/impl/M6.2F/ (keep the 223-test suite green) and builds the change set per PLAN.md: the Dashboard layer (DataMart support view; the 14 CTR-015 metrics with formulas verbatim, revenue metrics verified-only; MetricResult with source_trace + sample_evidence; CTR-018 read-only GET /api/admin/ads/dashboard) and the Quality layer (CTR-012 ads_data_quality_check 8-item model; CTR-024 data_quality_checker worker outputting PASS/HOLD/FAIL only) + the audited Zone-C set_data_quality_status() store patch + staged migrations 0007/0008 + config constant + tests T1-T7. The load-bearing done-gate is verified-only revenue (RULE-003, FAIL-001; SMK-004/005/015) and data-mart-support-view-only (RULE-012, FAIL-005; SMK-010). Then M6-P1503/M6-P1504 (TESTER) execute + record SMK-004/005/006/010/015; the M6.2F exit gate M6-P1509 checks the dashboard-verified-only-revenue leg. OUT OF SCOPE (do not build): alert thresholds (M6-OD-002), scale/Scale-Gate (M6.2G), learning, real send. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, HASH_POLICY_RATIFIED=False, SCALE_MODEL_RATIFIED=False and the mandatory M6.2G re-gate remain in force; M6-OD-005 before scale evidence; M6-OD-003/004 before real send. Nothing here authorizes scale or external send."
+}

@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-07-30T14:49:13Z",
+  "claimed_fail_gate_tripped": false,
+  "classification": "test",
+  "computed_fail_gate_tripped": false,
+  "computed_status": "CLEAN",
+  "evidence_present": true,
+  "evidence_sha256": {
+    "04-artifacts/evidence/prompts/M6-P1404.json": "aa27054d544a13ee770c76a3471beb35075ff0d250935acc75d20adc7b7371f8"
+  },
+  "failures": [],
+  "integrity_violations": [],
+  "mode": "gate",
+  "prompt_id": "M6-P1404",
+  "rules_version": "M6-SGV-1.0",
+  "warnings": []
+}

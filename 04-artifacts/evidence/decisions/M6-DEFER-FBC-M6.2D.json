@@ -1,0 +1,24 @@
+{
+  "decision_id": "M6-DEFER-FBC-M6.2D",
+  "type": "OWNER_CONSENT_BINDING_RECORD",
+  "decided_at": "2026-08-07",
+  "decided_by": "Nguyen Duc Manh (owner)",
+  "owner_confirmation": "CONFIRMED by owner (Nguyen Duc Manh) 2026-08-07 via operator channel; advisor finalized as scribe per the standing sign-on-behalf delegation. Substance = the M6.2E exit-judge (M6-P1409) findings: consent fail-opens F-A..F-F all closed, code-verified + adversary-confirmed.",
+  "context": "The consent fail-open class (borrowed-consent / subject-binding) recurs on the money/PII path: F-A/F-B/F-C (entry-gate + audience/CRM consent bind, M6.2D), F-D (measurement /conversions borrowed-consent, M6.2E), plus F-E (platform_event_id injective escape) and F-F (safe_subject_ref type-safety). The M6-P1309 judge flagged, and the M6.2E exit judge M6-P1409 re-escalated, that a standalone decision file binding this chain and wiring it into the M6.2G Scale-Gate (M6-P1600) RequiredInputs was never filed, even though the substance was closed in-slice.",
+  "decision": "Owner records that the consent fail-open binding is CLOSED and carried forward to the Scale Gate. This is explicitly NOT a deferral of an open decision (unlike M6-DEFER-OD003): every fail-open is fixed AND adversary-verified. The file exists to make the cross-slice consent binding an explicit, on-disk RequiredInput for M6-P1600, so a real external send can never be enabled while any consent fail-open is open.",
+  "closed_items": [
+    "F-A/F-B/F-C — entry-gate + audience/CRM consent bind CLOSED at M6.2D (per M6-OVERRIDE-M6P1309-STAGED conditions; F-B verified in code gate.py:73 `scope not in frozenset(snapshot.consent_scope)`).",
+    "F-D — measurement-path borrowed consent CLOSED at M6.2E: app/api/conversions.py:89-108 mandatorily resolves the cited consent snapshot and rejects fail-closed unless safe_subject_ref(snap)==customer_or_guest_key; a missing/None consent_reader is treated as a WIRING ERROR (reject), never an opt-out. Both adversaries (M6-P1405, M6-P1406) executed the actual borrowed-consent attack and confirmed REJECTED. Round 1 was honestly self-BLOCKED by the coder; Round 2 owner-authorized (BRIEF_M6-P1402_ROUND2) closed it WITHOUT loosening any assertion (SMK-017 stays green).",
+    "F-E — platform_event_id injective escape CLOSED at M6.2E.",
+    "F-F — safe_subject_ref (type(x) is str) CLOSED at M6.2E; a hostile str-subclass or raising __class__ cannot crash the subject compare."
+  ],
+  "binding": [
+    "No real external send or scale may be enabled while ANY consent fail-open (F-A..F-F) is open. All are currently CLOSED (code-verified, adversary-confirmed).",
+    "This file is a RequiredInput of the M6.2G Scale Gate (M6-P1600); the gate re-checks the consent binding before any scale / external send.",
+    "Carry-forward residual O-3 (a carried M6.2A ingest raw-subject compare not routed via safe_subject_ref — armed-not-fired while external_send=OFF) must be routed through safe_subject_ref in a hardening pass before any real send; tracked here, not a present leak."
+  ],
+  "governance": "global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, HASH_POLICY_RATIFIED=False, SCALE_MODEL_RATIFIED=False — all untouched. Nothing sends.",
+  "references": ["M6-OVERRIDE-M6P1309-STAGED.json", "M6-DEFER-OD003-M6.2D.json", "M6-P1409_JUDGE_FINAL_SIGN_OFF.json", "M6-P1405.json", "M6-P1406.json"],
+  "reversible": "N/A — this records closed fixes, not an open deferral. If any consent fail-open regresses, this binding requires re-closing it before the Scale Gate can pass.",
+  "wiring_note": "The one remaining canon step (add this file to M6-P1600 inputs_expected in 00-spec/prompts/0136_...) is an operator/generator edit — advisor cannot write 00-spec. The M6-P1600 judge already globs the decisions dir, so filing here is what it checks."
+}
