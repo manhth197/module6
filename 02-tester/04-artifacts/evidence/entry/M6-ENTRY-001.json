@@ -89,7 +89,7 @@
     "authorized_by": "Nguyen Duc Manh, Tech Lead / PM dieu phoi — KHONG phai Commerce/Module 3 owner",
     "authorized_at": "2026-07-22",
     "re_extracted_by": "Nguyen Duc Manh (Tech Lead) 2026-08-11 — bo sung runtime proof + re-verify @a3aad246. Grade nang len theo bang chung that, KHONG tu cham PASS.",
-    "commerce_m3_owner_confirmation": "PENDING — Commerce/M3 owner (Phuc / gh PhucApu) da CHAY test va cung cap XML+sha, nhung CHUA ky xac nhan owner tung claim. Chu ky nay KHONG thay owner-sign cua M3.",
+    "commerce_m3_owner_confirmation": "CONFIRMED 2026-08-26 — Commerce/M3 owner Phuc da CHAY test + cung cap XML+sha (hash-verified) VA ky owner: 'xac nhan ENTRY-001 dung'. Ket hop re-judge doc lap PROVEN => ENTRY-001 owner-complete + PROVEN. Dieu kien truoc scale that giu nguyen (khong chan grade).",
     "owner_risk_acceptance": "Xem _OWNER_RISK_ACCEPTANCE_M3_GAPS.md. Sau re-extract: 2 blocker goc (runtime + fail-open recall) DA DONG; QuoteSnapshot reclassify; con residual real-VNPAY-e2e + cosmetic + Golden-Hour-chua-reverify.",
     "attestation": "Tech Lead xac nhan: dossier trich verbatim tu code M3 @a3aad246 (+ static @f90152d2), runtime XML hash-verified doc lap, khong bia, PII-safe. Grade ASSERT-001/004 = PROVEN, ASSERT-002/003 = PARTIAL — dung theo bang chung, KHONG thoi.",
     "note": "Chu ky != PASS tu phong; verdict thuoc phien re-judge doc lap + Judge tuoi M6-P1600. Don M3 owner la Phuc -> day la submission Tech-Lead + gap ghi ro, CHUA phai owner-complete."

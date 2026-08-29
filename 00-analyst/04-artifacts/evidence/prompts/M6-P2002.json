@@ -1,0 +1,63 @@
+{
+  "prompt_id": "M6-P2002",
+  "status": "PASS",
+  "summary": "M6_2K_CODER_IMPLEMENT (implement, EVIDENCE_GATE). Implemented PLAN.md (M6-P2001) STAGED under 04-artifacts/impl/M6.2K/: the FINAL build slice -- the evidence/ assembly package that re-runs the full P0 smoke matrix (SMK-001..018; TESTER executes) and assembles the doc §22 evidence plan (10 categories) into an OWNER sign-off package with an honest gap/blocker list. Carried the M6.2J tree forward byte-identical (baseline measured 425 passed, rc 0 BEFORE any patch -- parity with M6.2J exact, both 425; all 18 smokes present in the carried suite). Final suite: 451 passed, rc 0 (425 carried + 26 new), counts via subprocess; no skips. Posture immutable & untouched: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, all scale/hash/learning flags False, live_migrations=false; NO migration applied/added, nothing external called, NO ROAS Pass / Scale Ready declared, NO self-certification, no flag flipped. EVIDENCE PACKAGE (app/measurement/evidence/): smoke_registry.py = the canonical 18 smoke ids + scenario/expected (doc §21 verbatim -- SMK-017 restored verbatim to '(CAPI/Offline)...platform result log' per the review) + owner/proposed status + test_smk_<nnn>_*.py bindings (proposed = executed OR owner-waived); categories.py = the 10 doc §22 categories + mandatory-content requirement keys (English gloss; category-1 keeps the screenshot_api_db_record proof-form to match the slice exit-gate); models.py = frozen SmokeResult/CategoryStatus/GapBlocker/EvidencePack, Readiness enum has NO PASS/READY member (only OWNER_REVIEW_REQUIRED / NOT_READY), to_public masks correlation_id/evidence_id (RULE-014/H02); gap_blockers.py = the canonical STANDING_GAP_BLOCKERS (8: M6-P1000 + M6-P1309 BLOCKED, the M6.2G/H/I/J forward conditions, M6-OD-011/012); pack_assembler.py = EvidencePackAssembler.assemble -> EvidencePack: a category is COMPLETE only when ALL its mandatory content is present (else INCOMPLETE, fail-closed FAIL-007); a SmokeResult per registered smoke (un-provided => un-run); WAIVER SCOPE ENFORCED (a waiver counts ONLY for a proposed smoke; an owner-smoke waiver is STRIPPED and stays un-run -- the review MAJOR fix); ALWAYS merges STANDING_GAP_BLOCKERS (disclosed, never dropped) + INCOMPLETE_CATEGORY + UNRUN_SMOKE gaps; readiness per the ONE rule (PLAN §4.4: NOT_READY iff any category INCOMPLETE OR any smoke un-recorded, else OWNER_REVIEW_REQUIRED -- the standing blockers are disclosed but do NOT gate readiness, production stays BLOCKED regardless); records the READ-ONLY posture snapshot (MappingProxyType); NO pass/ready/certify/sign_off/enable/flag-flip method (RULE-015; doc §23). Six test files (T1-T6) + conftest fixtures map exit leg L1 (evidence pack ready): 10 categories fail-closed, 18-smoke registry complete, gap/blocker list always carries the 8 standing blockers (but they do not force NOT_READY), pack never declares Pass/Ready and reaches OWNER_REVIEW_REQUIRED only when complete, posture immutable + PII-safe, carried 18-smoke suite present + collectable. Every change-set item maps to leg L1 and carries a rollback step (new files -> delete; no carried-forward file patched). Sole in-scope rule RULE-015 + sole fail gate FAIL-007 cited by ID. NO new migration (RULE-018) and NO new config flag. RAN AN ADVERSARIAL SELF-REVIEW (ultracode; 7 agents, 3 dimensions, each finding re-verified by an independent skeptic RUNNING the code): the no-self-cert/no-Pass-Ready/scope/schema dimension came back CLEAN (no Pass/Ready method, readiness tops at OWNER_REVIEW_REQUIRED, no new table, assembly-only); FOUR CONFIRMED findings FIXED -- (MAJOR, a genuine fail-open) the owner-waiver escape hatch was unscoped: SmokeResult.recorded honored waived=True for ANY smoke, so a MANDATORY owner smoke could be waived un-run, bypassing the fail-closed readiness gate and vanishing from the gap list (FAIL-007 defeated for the 15 mandatory smokes) -> FIXED by enforcing waiver scope in the assembler (a non-proposed smoke's waiver is stripped -> stays un-run -> UNRUN_SMOKE gap + NOT_READY), plus a REGRESSION; (NIT) the recorded posture snapshot was a mutable dict on a frozen dataclass (could be tampered in-memory) -> wrapped in MappingProxyType (read-only), plus a REGRESSION; (NIT) SMK-017 scenario/expected dropped '(CAPI/Offline)' + 'platform' vs SMOKE_REGISTER -> restored verbatim. No plan-deltas. STATUS is coder SELF-REPORTED (not a gate/judge sign-off, RULE-015); the runner gate + JUDGE decide, and the M6.2K exit gate M6-P2009 checks the legs (evidence pack ready: full P0 re-run with correlation_id+evidence_id, all 10 §22 categories with mandatory content, owner package + honest gap/blocker list; every-prompt evidence; rollback). This slice NEVER declares ROAS Pass / Scale Ready / flips a flag (owner-only, doc §23); production/gateway/external_send stay immutably OFF through M6.2K and into PR/PILOT; M6-P1000 + M6-P1309 verdicts stay BLOCKED (not converted) and appear IN the pack; module boundary intact; no raw secrets or unmasked PII.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2K.md",
+    "04-artifacts/impl/M6.2K/PLAN.md",
+    "04-artifacts/evidence/prompts/M6-P2001.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/impl/M6.2K/app/config.py",
+    "04-artifacts/impl/M6.2K/tests/conftest.py"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/__init__.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/smoke_registry.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/categories.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/models.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/gap_blockers.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/pack_assembler.py",
+    "04-artifacts/impl/M6.2K/tests/conftest.py",
+    "04-artifacts/impl/M6.2K/tests/test_evidence_ten_categories_mandatory_content.py",
+    "04-artifacts/impl/M6.2K/tests/test_smoke_registry_complete_18.py",
+    "04-artifacts/impl/M6.2K/tests/test_gap_blocker_list_carries_standing_blockers.py",
+    "04-artifacts/impl/M6.2K/tests/test_pack_never_declares_pass_or_ready.py",
+    "04-artifacts/impl/M6.2K/tests/test_pack_posture_immutable_and_pii_safe.py",
+    "04-artifacts/impl/M6.2K/tests/test_full_p0_matrix_runs_green.py",
+    "04-artifacts/impl/M6.2K/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2K/ (whole M6.2J tree carried forward byte-identical; caches excluded; no carried-forward file patched)"
+  ],
+  "commands_run": [
+    "python csv read: ledger -> M6-P2002=RUNNING, M6-P2001=PASS (dependency resolved)",
+    "python shutil.copytree M6.2J -> M6.2K (carry-forward; PLAN.md/IMPLEMENTATION_NOTES.md/caches excluded)",
+    "python -m pytest (carried baseline): 425 passed, rc 0 BEFORE any patch; collect parity M6.2J==M6.2K==425 (all 18 smokes present)",
+    "Wrote evidence/ package (smoke_registry, categories, models, gap_blockers, pack_assembler) + conftest fixtures + 6 test files (T1-T6)",
+    "python -m pytest: 449 passed, rc 0 (425 carried + 24 new)",
+    "Workflow m6-2k-impl-adversarial-review (7 agents, 3 dimensions, each finding re-verified by RUNNING the code): no-self-cert/scope/schema CLEAN; 4 CONFIRMED -> (MAJOR) owner-waiver scope unenforced, (NIT) mutable posture dict, (NIT) SMK-017 not verbatim -> all FIXED",
+    "Edit: pack_assembler.py enforce waiver scope (strip owner-smoke waiver) + MappingProxyType posture; models.py recorded docstring; smoke_registry.py SMK-017 verbatim; added 2 regression tests",
+    "python -m pytest: 451 passed, rc 0 (425 carried + 26 new)",
+    "python shutil.rmtree __pycache__/.pytest_cache/*.pyc (24 removed; no compiled artifacts staged)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2K/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2K/PLAN.md",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/smoke_registry.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/categories.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/models.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/gap_blockers.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/pack_assembler.py",
+    "04-artifacts/impl/M6.2K/tests/test_evidence_ten_categories_mandatory_content.py",
+    "04-artifacts/impl/M6.2K/tests/test_pack_never_declares_pass_or_ready.py",
+    "04-artifacts/impl/M6.2K/tests/test_gap_blocker_list_carries_standing_blockers.py",
+    "04-artifacts/impl/M6.2K/tests/test_pack_posture_immutable_and_pii_safe.py",
+    "04-artifacts/impl/M6.2K/tests/test_smoke_registry_complete_18.py"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P2002 (status self-reported PASS; the gate + JUDGE decide -- coder does not self-certify). The evidence/ package is complete and green (451 tests): the P0 smoke registry (18), the 10 doc §22 categories, the standing gap/blocker list (8), and the fail-closed no-self-cert assembler -- NO Pass/Ready / NO self-cert / NO flag-flip method (RULE-015; doc §23), fail-closed on missing evidence (FAIL-007), readiness tops out at OWNER_REVIEW_REQUIRED per the ONE rule (§4.4), waiver scope enforced (proposed-only), posture read-only. No new table/migration/CTR-beyond-025/config flag (RULE-018); no carried-forward file patched. Proceed to M6-P2003 (M6_2K_TESTER_BUILD) to author the full-P0-matrix re-run harness + the owner-review-package fixtures, then M6-P2004 (TESTER_RUN) to EXECUTE all 18 smokes and record a correlation_id + evidence_id per smoke under 04-artifacts/test-reports/M6.2K/; the PM (M6-P2007) completes the owner review package across all 10 §22 categories; the exit gate M6-P2009 checks the legs. OUT OF SCOPE (owner-only, doc §23): flipping any gate/flag; declaring ROAS Pass or Scale Ready. The pack's honest gap/blocker list MUST continue to carry the standing BLOCKED verdicts (M6-P1000/M6-P1309) + the M6.2G/H/I/J before-real-scale/send/auto-publish/CRM-send/surfacing forward conditions + M6-OD-011/012. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF and all posture flags remain in force through M6.2K and into PR/PILOT (production flag verified STILL OFF at owner sign-off); M6-P1000 + M6-P1309 verdicts remain BLOCKED (not converted). Nothing here authorizes scale, external send, auto-publish, CRM send, or a readiness/Pass declaration."
+}

@@ -1,0 +1,52 @@
+{
+  "prompt_id": "M6-P1803",
+  "status": "PASS",
+  "summary": "M6_2I_TESTER_BUILD (mode=build, 'do not yet run'). Entry gate verified in the state ledger before any work: M6-P1800 SIGNED, M6-P1801 PASS, M6-P1802 PASS (required predecessor), M6-P1803 RUNNING (this prompt, order 159). Authored exactly two official smoke files, one per bound smoke id (M6-SMK-004, M6-SMK-013), each carrying the SMOKE_REGISTER scenario AND expected result VERBATIM (Vietnamese diacritics intact) in its docstring, driving the M6.2I Phase-2 Golden Hour funnel: the read-only GoldenHourFunnel projection (per-session stage counts, doc §14 funnel rates, self-enforcing verified-only revenue, live/comment/messenger FunnelTrace with psid masked). Both ids are RE-BOUND in M6.2I (SMK-004 was M6.2F, SMK-013 was M6.2E), so each new file is the slice-appropriate FUNNEL leg coexisting with the carried dashboard/attribution smoke (same coexistence pattern as SMK-006 across M6.2E/F and SMK-003 across M6.2B/D). Reused the shared conftest funnel fixtures (make_golden_hour_funnel, make_measurement_event, make_verified_row, make_dashboard_deps, measurement_store) and mirrored the coder's reference leg tests. SMK-004 (4 nodes): primary -> a QUOTE_SENT is a funnel stage (MESSENGER_TO_QUOTE=1, Quote Rate numerator=1) but verified_revenue 0.0 (RULE-003/FAIL-001); negatives: ORDER_CREATED is a stage but 0 revenue; a QUOTE_SENT row force-materialized with a revenue_value still reports 0 (self-enforcing choke ANDs event_code==ORDER_VERIFIED with revenue); 'khong ROAS' cross-check -> funnel 0 revenue AND the M6.2F dashboard (same store) Revenue Verified 0 + ROAS None. SMK-013 (4 nodes): primary -> the funnel threads live_session_id + comment_id + messenger_thread_id from the materialized attribution_context; negatives: psid masked on export (raw never in export); a partial chain traces comment_id and leaves messenger_thread_id None; control -> a session with no live source traces neither, session key still threaded. ACCEPTANCE CHECKS met: (1) one test per bound smoke id, scenario verbatim; (2) negative/fail-closed cases present in both files; (3) existing coder test patterns reused (test_quote_in_funnel_not_revenue.py, test_live_chain_trace_in_funnel.py) plus conftest fixtures. BUILD VALIDATION was collect-only (imports/collects, NO assertions executed) per the prompt, cache-free, no shell redirection: the two new files collect clean (per-file nodes 4,4 = 8 new) EXIT 0; the full staged suite collects to 386 (= 378 carried M6.2I baseline [351 carried M6.2H tree + 27 coder M6.2I funnel leg tests] + 8 new) EXIT 0, total via an in-process pytest_collection_finish tally (harness clips a long terminal summary). A read-only adversarial static-verification workflow (3 agents: one verifier per smoke file tracing EVERY assertion through the frozen implementation with cited source lines + a completeness critic) returned all-CLEAN, 0 errors: all 19 assertions (SMK-004 9, SMK-013 10) predicted PASS at run time, scenario/expected verbatim confirmed, PII-clean (psid marker assembled at runtime) and boundary-clean on both files, and the critic confirmed both ids covered with one verbatim primary + negatives, no self-certification, no state write. TEST_MANIFEST.md rebuilt for M6.2I (binding table, per-smoke verbatim sections, fixtures, boundary, exit-gate legs L1-L3, execution plan for M6-P1804). GOVERNANCE POSTURE UNCHANGED AND IMMUTABLE: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, SCALE_MODEL_RATIFIED=False, SCALE_EXECUTION_ENABLED=False, HASH_POLICY_RATIFIED=False, LEARNING_AUTOPUBLISH_ENABLED=False. No application code changed, no migration applied, no external call, no live session operated, nothing sent/scaled/published, no order-state/pricing/CRM-send/commission, no Core override, no flag flipped, no write to 04-artifacts/state/. The funnel is measure-only (RULE-013/018). All ids synthetic; psid masked on export, marker runtime-assembled; no raw secret/PII. status=PASS is an honest TESTER self-report of a completed, collect-validated, statically-verified BUILD; it does NOT execute the smokes and does NOT advance any gate. Formal execution is M6-P1804; the runner EVIDENCE_GATE and the slice Judge (M6-P1809) decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/slices/M6.2I.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/impl/M6.2I/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2I/tests/conftest.py",
+    "04-artifacts/impl/M6.2I/app/measurement/funnel/funnel.py",
+    "04-artifacts/impl/M6.2I/app/measurement/funnel/flow.py",
+    "04-artifacts/impl/M6.2I/app/measurement/funnel/models.py",
+    "04-artifacts/impl/M6.2I/tests/test_quote_in_funnel_not_revenue.py",
+    "04-artifacts/impl/M6.2I/tests/test_live_chain_trace_in_funnel.py"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2I/tests/smoke/test_smk_004_quote_in_golden_hour_funnel_not_revenue.py",
+    "04-artifacts/impl/M6.2I/tests/smoke/test_smk_013_funnel_live_chain_trace.py",
+    "04-artifacts/impl/M6.2I/tests/TEST_MANIFEST.md"
+  ],
+  "commands_run": [
+    "02-tester/.venv/Scripts/python.exe -m pytest tests/smoke/test_smk_004_quote_in_golden_hour_funnel_not_revenue.py tests/smoke/test_smk_013_funnel_live_chain_trace.py --collect-only -q -p no:cacheprovider  (from 04-artifacts/impl/M6.2I; PYTHONDONTWRITEBYTECODE=1; per-file nodes 4,4; EXIT=0; NO assertions executed)",
+    "02-tester/.venv/Scripts/python.exe -c \"<in-process pytest_collection_finish tally: len(session.items)>\" --collect-only -q -p no:cacheprovider  (from 04-artifacts/impl/M6.2I; COLLECTED_TOTAL=386; pytest RC=0)"
+  ],
+  "test_results": [
+    {
+      "smoke_id": "M6-SMK-004",
+      "result": "PASS",
+      "detail": "Built tests/smoke/test_smk_004_quote_in_golden_hour_funnel_not_revenue.py (4 nodes) — scenario 'Quote được tạo nhưng chưa order' / expected 'Không revenue, không ROAS' verbatim (Golden Hour funnel leg). Primary: QUOTE_SENT measured as a funnel stage (MESSENGER_TO_QUOTE=1, Quote Rate numerator=1) but verified_revenue 0.0. Negatives: ORDER_CREATED is a stage but 0 revenue; a quote force-carrying a revenue_value is still 0 (self-enforcing RULE-003); no ROAS cross-check vs the M6.2F dashboard (Revenue Verified 0, ROAS None). BUILD ONLY: collect-clean (EXIT 0) + adversarial static verification CLEAN (all 9 assertions predicted PASS); NOT executed — execution recorded by M6-P1804."
+    },
+    {
+      "smoke_id": "M6-SMK-013",
+      "result": "PASS",
+      "detail": "Built tests/smoke/test_smk_013_funnel_live_chain_trace.py (4 nodes) — scenario 'Live/Comment/Messenger chain' / expected 'Trace được live_session_id, comment_id, messenger_thread_id' verbatim (Golden Hour funnel leg). Primary: the funnel threads all three ids from the materialized attribution_context. Negatives: psid masked on export (raw never in export); a partial chain traces comment_id, leaves messenger_thread_id None. Control: no live source -> neither traced, session key still threaded. psid marker runtime-assembled (no literal PII). BUILD ONLY: collect-clean + static verification CLEAN (all 10 assertions predicted PASS); NOT executed — M6-P1804 executes."
+    }
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2I/tests/smoke/test_smk_004_quote_in_golden_hour_funnel_not_revenue.py",
+    "04-artifacts/impl/M6.2I/tests/smoke/test_smk_013_funnel_live_chain_trace.py",
+    "04-artifacts/impl/M6.2I/tests/TEST_MANIFEST.md",
+    "04-artifacts/impl/M6.2I/tests/conftest.py",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/slices/M6.2I.md",
+    "04-artifacts/evidence/prompts/M6-P1802.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1803. On PASS, proceed to M6-P1804 (M6_2I_TESTER_RUN): execute the full staged suite (expected 386 passed) and the two bound smokes tests/smoke/test_smk_004_quote_in_golden_hour_funnel_not_revenue.py and test_smk_013_funnel_live_chain_trace.py (expected 8 passed), and record structured results + evidence refs into 04-artifacts/test-reports/M6.2I/SMOKE_RESULTS.md for exit-gate legs L2-L3. Then M6-P1805 (boundary adversary) and M6-P1806 (security/PII) review the funnel layer; the slice gate judge is M6-P1809. Governance flags stay BLOCKED/OFF/OFF; the funnel is measure-only and no forward gate is flipped."
+}

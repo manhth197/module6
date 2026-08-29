@@ -1,0 +1,18 @@
+{
+  "record_type": "INDEPENDENT_ENTRY003_JUDGE_VERDICT",
+  "entry_id": "M6-ENTRY-003",
+  "judged_at": "2026-08-27",
+  "judged_against": "ginsengfood-business-platform origin/dev commit 0f59a940e0969243da4e926072d462d6f9ffef72",
+  "method": "Fresh evidence-only independent judge + 2 adversaries (4-eyes) at 0f59a940. Artifacts hash-verified by Tech-Lead: validator XML sha256 6668dc7f..., governance XML sha256 4f44d850... (both recomputed, matched Phuc's report).",
+  "verdict": "PROVEN",
+  "summary": "Fail-closed event governance is genuine at code level. V190 adds external_send_policy (DEFAULT BLOCKED) + data_sensitivity (DEFAULT SENSITIVE) + attribution_channel, with 3 CHECK incl chk_event_registry_sensitive_never_send (one-way: SENSITIVE can never be ALLOWED). V191 elevates EXACTLY the 11 owner-approved non-PII codes to INTERNAL and touches no send policy (all rows stay BLOCKED). JPA entity mirrors the same fail-closed defaults. requireExternalSendAllowed throws for unregistered / SENSITIVE / non-ALLOWED. Green Testcontainers evidence (full Flyway V1..V191 on Postgres 17): INTERNAL==11 exact set, 0 SENSITIVE-ALLOWED, all BLOCKED, CHECK rejects opening ORDER_VERIFIED; + 11 validator unit tests every branch.",
+  "adversary_failopen": "refuted=TRUE — could not make a SENSITIVE event sendable, find a NULL/unclassified policy, or find a wrong allow branch. Fail-closed holds at 3 layers (DB CHECK + migration keeps all BLOCKED + Java defaults). No production Java sets ALLOWED (only test code).",
+  "adversary_classification": "refuted=FALSE (attack FAILS) — the 11-code INTERNAL set is exactly correct: IN-list cannot exceed 11, no PII/GUEST/CUSTOMER/LEAD/payment/auth event mis-set. Only debatable (INVENTORY_ALLOCATED/RELEASED carry order_id) is pseudonymous + external_send BLOCKED anyway. Classification stands.",
+  "residuals_non_blocking": [
+    "ENFORCE not wired to a live egress path: requireExternalSendAllowed has no production caller and no HTTP/Meta/CAPI egress client exists (EventPublisherServiceImpl = 'No production outbox'). EXPECTED at M6.2G (production OFF, evidence/design-only slice) — defense-in-depth residual, not a hole. When a real egress path is built later it MUST route through this gate.",
+    "attribution_channel NULL for the ~84 SENSITIVE events (label only, does not gate egress). If ENTRY-003 'channel per event' read strictly, channel coverage is partial.",
+    "'owner per event' carried by pre-existing domain/event_group columns, not a new field.",
+    "Doc nit: ExternalSendPolicy.java javadoc cites migration V207 (PhucApu number) but the real constraint is V190 (dev) — stale reference, no behavioral impact. Trivial follow-up for Phuc."
+  ],
+  "signoff": "ENTRY-003 PROVEN at 0f59a940 (pushed origin/dev). Fail-closed governance genuine + adversarially confirmed; classification = exactly the 11 owner-approved codes. Only substantive residual = enforce-not-yet-wired (correct M6.2G posture, production OFF). This upgrades ENTRY-003 from '2 PARTIAL + 3 GAP' (M6-P1000) to PROVEN, as input to the operator's M6-P1600 re-gate. External_send BLOCKED for ALL events; any future Meta/CAPI egress must go through the fail-closed gate + M6's hash+consent path (OD-003/004)."
+}

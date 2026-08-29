@@ -1,0 +1,60 @@
+{
+  "prompt_id": "M6-P2009",
+  "status": "PASS",
+  "summary": "M6_2K_SLICE_GATE_JUDGE (JUDGE, gate_review, fresh session, evidence-only). Verdict PASS (STAGED) for the slice M6.2K exit gate -- the FINAL build slice: full P0 smoke matrix re-run + the doc-22 owner sign-off evidence package (proves READINESS FOR OWNER REVIEW only; production/scale stays BLOCKED regardless). Full reasoning in 04-artifacts/evidence/judge/M6-P2009_JUDGE_FINAL_SIGN_OFF.json. Entry: ledger M6-P2009=RUNNING, dependency M6-P2008=PASS; band M6-P2000=SIGNED + M6-P2001..2008 all PASS (single attempt, no SKIPPED/BLOCKED); posture BLOCKED/OFF/OFF + all scale/learning flags False + live_migrations=false unchanged and NOT flipped; nothing declares ROAS Pass / Scale Ready (owner-only doc-23). In-scope fail gate M6-FAIL-007 (No evidence -- PASS/readiness without audit/evidence/smoke); rule M6-RULE-015 (never self-certify). EXIT-GATE LEGS all 22 held: L1 EVIDENCE PACK READY -- verified IN CODE the pack cannot overstate readiness (pack_assembler.py + gap_blockers.py): Readiness enum has NO Pass/Ready member ({OWNER_REVIEW_REQUIRED, NOT_READY}); _readiness fail-closed (NOT_READY iff any of 10 doc-22 categories incomplete OR any of 18 smokes un-recorded, else OWNER_REVIEW_REQUIRED); owner-smoke waiver STRIPPED (only PROPOSED 016/017/018 waivable); the 8 STANDING_GAP_BLOCKERS ALWAYS merged = M6-P1000 + M6-P1309 (BLOCKED judge verdicts) + M6.2G-SCALE (ENTRY-001/003 + four M6-P1600 attestation true-ups + ENTRY-004 M5 DEBT-1..4 + P4 re-gate + ACCESS-1/F-SCALE-* + OD-002/003/004/005) + M6.2H-LEARN (OD-006/007, F-LEARN-*) + M6.2I-FUNNEL (F-FUNNEL-4, F-SEC-2I-2) + M6.2J-GROWTH (F-GROWTH-1/3, F-SEC-2J-*) + M6-OD-011 + M6-OD-012 (exactly the honest gap list I required at M6-P2000 entry); no pass/certify/flip verb; posture read-only MappingProxyType; EvidencePack frozen; no config write. All 10 categories assembled with mandatory content; PM package (M6-P2007) reached OWNER_REVIEW_REQUIRED never Pass. L2-16 SMK-001..015 PASS 4/4 with recorded correlation_id+evidence_id (masked). L17-19 proposed SMK-016/017/018 PASS 4/4 (EXECUTED not waived). Full suite 523 rc 0; 18 evidence legs 72/72; coder T1-T6 green. L20 all 9 band JSONs present/valid/PASS/fail_gate=false/open_blockers=[]/scan CLEAN (234 files). L21 this sign-off PASS. L22 rollback documented (RUNBOOK sec.4 + NOTES sec.6; M6.2K added ZERO migrations -- diff vs M6.2J byte-identical, RULE-018; no patched carried file; evidence package + tests roll back by deletion). FAIL-007 NOT TRIPPED -- structurally fail-closed + honest; adversarial refute (boundary 43 vectors + independent re-derivation) could not emit a Pass readiness, drop a standing blocker, flip a flag, or fail a leg from any reachable path. Boundary 'No BLOCKER, 0 FAIL-007 breach'; security 'PASS, 0 raw PII/secret, No BLOCKER, OD-003 N/A + disclosed OPEN'. RESIDUALS (armed-not-fired, trusted-input-only [no channel-origin text into the assembler] or code-exec-only; none lets the pack overstate readiness): F-EVID-1/F-SEC-2K-2 (recorded/complete from truthiness not validated shape -> pin spec.smoke_id + non-blank status/ids + validate ref shape), F-EVID-3 (no readiness<->standing-blocker cross-check; code-exec rebind -> assert 8 STANDING_BLOCKER_IDS positive floor), F-SEC-2K-1/F-EVID-4 (status exported unmasked -> enum/mask; M6-OD-012 family), X3 robustness, D4 module-global. GOVERNANCE (unchanged): M6-P1000 + M6-P1309 verdicts stay BLOCKED (not converted) and are DISCLOSED verbatim in the pack -- the point of this readiness slice; the pack surfaces every carried forward condition (M6.2G/H/I/J + OD-011/012/003) as OPEN, papers over nothing. WHY PASS: all 22 legs hold staged; FAIL-007 structurally impossible to trip (verified in code + executed + re-derived); no unresolved BLOCKER; every residual armed-not-fired behind trusted-input/code-exec/no-channel posture. This completes the M6 build-pack slice sequence M6.2A..M6.2K STAGED, production BLOCKED/OFF, with an honest owner readiness package. No self-certification; no application code/migration/flag change; module boundary intact (measures/assembles evidence only -- never certifies own success / declares ROAS Pass/Scale Ready / flips a flag); no raw secrets/PII.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2K.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P2000.json",
+    "04-artifacts/evidence/prompts/M6-P2001.json",
+    "04-artifacts/evidence/prompts/M6-P2002.json",
+    "04-artifacts/evidence/prompts/M6-P2003.json",
+    "04-artifacts/evidence/prompts/M6-P2004.json",
+    "04-artifacts/evidence/prompts/M6-P2005.json",
+    "04-artifacts/evidence/prompts/M6-P2006.json",
+    "04-artifacts/evidence/prompts/M6-P2007.json",
+    "04-artifacts/evidence/prompts/M6-P2008.json",
+    "04-artifacts/boundary-reports/M6.2K_boundary.md",
+    "04-artifacts/security-reports/M6.2K_security.md",
+    "04-artifacts/test-reports/M6.2K/SMOKE_RESULTS.md",
+    "04-artifacts/analysis/slices/M6_2K_RUNBOOK.md",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/pack_assembler.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/gap_blockers.py"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/judge/M6-P2009_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/prompts/M6-P2009.json"
+  ],
+  "commands_run": [
+    "Read (read-only): CLAUDE_CONTEXT_BRIEF, slice M6.2K spec, FAIL_GATE_REGISTER (FAIL-007), boundary + security + smoke-results + RUNBOOK, and the load-bearing evidence code pack_assembler.py + gap_blockers.py (Readiness has no Pass member; _readiness fail-closed; owner-waiver stripped; 8 standing blockers always merged incl M6-P1000/M6-P1309 -- confirmed in code)",
+    "Read (read-only): PROMPT_EXECUTION_LEDGER_LOCKED.csv M6.2K band -> M6-P2009=RUNNING, M6-P2008=PASS, M6-P2000=SIGNED, M6-P2001..2008=PASS; M6-P3000 (PR_PILOT) TODO",
+    "Workflow (read-only, 3 agents): leg-20 band-evidence cleanliness (all 9 clean, independent parse + PII sweep zero) + legs 2-19 smokes & leg-22 rollback (18 smokes PASS 72 nodes, 016/017/018 executed; diff vs M6.2J byte-identical -> zero migrations) + adversarial FAIL-007 refuter (refuted=false; independently re-derived no-Pass-member / fail-closed readiness / owner-waiver-strip / 8-standing-blockers-always-merged / no-flip-verb / read-only-posture; residuals trusted-input/code-exec-only)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/judge/M6-P2009_JUDGE_FINAL_SIGN_OFF.json",
+    "00-spec/slices/M6.2K.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "04-artifacts/evidence/prompts/M6-P2000.json",
+    "04-artifacts/evidence/prompts/M6-P2001.json",
+    "04-artifacts/evidence/prompts/M6-P2002.json",
+    "04-artifacts/evidence/prompts/M6-P2003.json",
+    "04-artifacts/evidence/prompts/M6-P2004.json",
+    "04-artifacts/evidence/prompts/M6-P2005.json",
+    "04-artifacts/evidence/prompts/M6-P2006.json",
+    "04-artifacts/evidence/prompts/M6-P2007.json",
+    "04-artifacts/evidence/prompts/M6-P2008.json",
+    "04-artifacts/boundary-reports/M6.2K_boundary.md",
+    "04-artifacts/security-reports/M6.2K_security.md",
+    "04-artifacts/test-reports/M6.2K/SMOKE_RESULTS.md",
+    "04-artifacts/analysis/slices/M6_2K_RUNBOOK.md",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/pack_assembler.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/gap_blockers.py",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine JUDGE_GATE for M6-P2009; on this PASS the slice M6.2K exit gate closes STAGED and the M6 build-pack slice sequence M6.2A..M6.2K is COMPLETE. The sequence proceeds to M6-P3000 (PR_PILOT E2E_CHAIN_REVIEW) and then owner sign-off / PR/PILOT -- where the OWNER reviews the assembled evidence package + the honest gap/blocker list and decides. CRITICAL for PR/PILOT: the production flag must be verified STILL OFF at owner sign-off; the readiness package tops out at OWNER_REVIEW_REQUIRED and DECLARES NO ROAS Pass / Scale Ready (owner-only, doc-23). The owner-decided HARD GATES before any real scale / external send / auto-publish / CRM send / surfacing are exactly the 8 standing blockers the pack discloses: (1) M6-P1000 + (2) M6-P1309 remain BLOCKED judge verdicts (not converted); (3) M6.2G-SCALE -- ENTRY-001/003 real-scale conditions + the four M6-P1600 attestation true-ups + ENTRY-004 M5 DEBT-1..4 + the adversarial P4 re-gate + scale ACCESS-1/F-SCALE-* + M6-OD-002/003/004/005; (4) M6.2H-LEARN -- M6-OD-006 (safe range) + M6-OD-007 (content fill) + F-LEARN-*; (5) M6.2I-FUNNEL -- F-FUNNEL-4 single-subject trace bind before surfacing + F-SEC-2I-2; (6) M6.2J-GROWTH -- F-GROWTH-1 CRM subject-bind + F-GROWTH-3 verified_rows ORDER_VERIFIED choke + F-SEC-2J-*; (7) M6-OD-011 admin authN/authZ; (8) M6-OD-012 PII masking scope. CODER hardening (non-blocking, on the evidence assembler): F-EVID-1/F-SEC-2K-2 (pin each row to spec.smoke_id + require non-blank status/correlation_id/evidence_id; validate the category ref shape), F-EVID-3 (assert the 8 STANDING_BLOCKER_IDS as a positive floor), F-SEC-2K-1/F-EVID-4 (enum-constrain or mask SmokeResult.status), X3 (coerce/validate inputs to fail-closed rather than crash). global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, HASH_POLICY_RATIFIED=False, SCALE_MODEL_RATIFIED=False, SCALE_EXECUTION_ENABLED=False, LEARNING_AUTOPUBLISH_ENABLED=False, live_migrations=false remain in force. Nothing here authorizes scale, external send, auto-publish, CRM send, a readiness/Pass declaration, or any flag flip."
+}

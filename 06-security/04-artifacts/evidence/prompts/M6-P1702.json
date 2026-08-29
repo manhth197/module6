@@ -1,0 +1,62 @@
+{
+  "prompt_id": "M6-P1702",
+  "status": "PASS",
+  "summary": "M6_2H_CODER_IMPLEMENT (implement, EVIDENCE_GATE). Built the ADS Strategy Libraries + learning-engine skeleton (Seed->Run->Learn->Review->Publish, doc §17) STAGED under 04-artifacts/impl/M6.2H/ per PLAN.md (M6-P1701), FRAMEWORK-ONLY, carrying the M6.2G tree forward byte-identical (baseline 313 tests green BEFORE any patch). Final suite: 345 passed, rc 0 (313 carried + 32 new), counts via subprocess. Posture immutable & untouched: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, SCALE_MODEL_RATIFIED=False, SCALE_EXECUTION_ENABLED=False, HASH_POLICY_RATIFIED=False, LEARNING_AUTOPUBLISH_ENABLED=False, LEARNING_CONTENT_FILL_ENABLED=False, LEARNING_SAFE_RANGE_RATIFIED=False, live_migrations=false; no migration applied, nothing external called, NOTHING auto-published / no content generated / no origin strategy fabricated, no flag flipped. LEARNING LAYER: libraries.py = the six libraries (Persona/Behavior/Keyword/Negative-Keyword/Creative-Hook/Landing-CTA) with locked doc §17 purpose + CANONICAL_SEED_SOURCES per kind; StrategyLibraryStore.seed() REJECTS a missing/non-canonical seed source AND rejects any machine-generated content while LEARNING_CONTENT_FILL_ENABLED=False (framework-only) -- the machine NEVER fabricates origin strategy (RULE-011, LEX-006 the doc FORBIDDEN cell); mapping.py = the SKU->Persona->Behavior->Keyword->Creative-Hook->Landing->CTA->Event->Verified-Revenue chain, anchored to a sellable SKU (LEX-005), read-only refs never writing Core policy (RULE-013/018); candidate.py = inert AdsLearningCandidate (CTR-014) + LearningCandidateKind + TargetDim (5 Learn dims) + ReviewState + SafeRangeStatus + OwnerReviewDecision, is_publish_authorized requires APPROVED AND safe-range WITHIN -> always False in staged posture (safe range UNKNOWN, M6-OD-006); review_queue.py inert append-only; learning_engine.py = the 5-stage skeleton -- seed() canonical-only, run() records SKU-anchored mapping (nothing runs), learn() PRECONDITION (canonical seed MUST exist else refuse; consumes ONLY DQ-passed verified signals, RULE-011) scoring the 5 dims, review() (candidate -> queue; not-WITHIN -> HOLD, SMK-011), record_review_decision() (explicit owner approve/reject/hold, machine-safe audit), and DELIBERATELY NO publish/auto-publish method (guarded_publish_blocked() True); api/learning_candidates.py = CTR-020 POST /api/admin/ads/learning-candidates + owner-review handler (LearningDeps holds only the inert engine + audit -- no publisher/Transport; untrusted body = DATA, conditions server-side; owner decision requires all of actor/reason/audit/evidence, RULE-015). Staged migrations 0011 (six libraries + mapping; seed_source NOT NULL, content NULL while OD-007) + 0012 (ads_learning_candidate inert, no trigger), config three chokes (LEARNING_AUTOPUBLISH_ENABLED/CONTENT_FILL_ENABLED/SAFE_RANGE_RATIFIED=False), tests T1-T6 mapped to SMK-011 (TESTER executes, RULE-015). RAN AN ADVERSARIAL SELF-REVIEW (ultracode; 3 agents, read-only, each dimension driven against the actual code): ALL THREE dimensions came back CLEAN with ZERO findings (no-publish/no-fabricated-origin; learn-precondition-and-review; fail-closed/untrusted/PII). I proactively applied the recurring failure modes from the M6.2E/F/G reviews: the record_review_decision audit detail is machine-safe (no untrusted free-text reason/audit_ref -- the M6.2G finding), fail-closed defaults everywhere (safe range UNKNOWN, no-seed -> Learn refuses, non-usable signals excluded), no untrusted-body injection (state server-side), and no publish/execute method on any surface. No plan-deltas. STATUS is coder SELF-REPORTED (not a gate/judge sign-off, RULE-015); the runner gate + JUDGE decide, and the M6.2H exit gate M6-P1709 checks the three legs (seed framework pass; no auto-publish; learning-input precondition). No self-certification of the ledger; module boundary intact (no M4 consult content, no M5 public reply, no auto-publish, no commission); no raw secrets or unmasked PII in code/notes/evidence; FAIL-006 not tripped (framework never auto-publishes).",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2H.md",
+    "04-artifacts/impl/M6.2H/PLAN.md",
+    "04-artifacts/evidence/prompts/M6-P1701.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/impl/M6.2H/app/config.py",
+    "04-artifacts/impl/M6.2H/app/measurement/quality/data_quality_check.py",
+    "04-artifacts/impl/M6.2H/tests/conftest.py"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2H/app/measurement/learning/__init__.py",
+    "04-artifacts/impl/M6.2H/app/measurement/learning/libraries.py",
+    "04-artifacts/impl/M6.2H/app/measurement/learning/mapping.py",
+    "04-artifacts/impl/M6.2H/app/measurement/learning/candidate.py",
+    "04-artifacts/impl/M6.2H/app/measurement/learning/review_queue.py",
+    "04-artifacts/impl/M6.2H/app/measurement/learning/learning_engine.py",
+    "04-artifacts/impl/M6.2H/app/api/learning_candidates.py",
+    "04-artifacts/impl/M6.2H/app/config.py",
+    "04-artifacts/impl/M6.2H/migrations/0011_create_ads_strategy_libraries.sql",
+    "04-artifacts/impl/M6.2H/migrations/0012_create_ads_learning_candidate.sql",
+    "04-artifacts/impl/M6.2H/tests/conftest.py",
+    "04-artifacts/impl/M6.2H/tests/test_libraries_seed_from_canon_only.py",
+    "04-artifacts/impl/M6.2H/tests/test_content_fill_halts_at_framework.py",
+    "04-artifacts/impl/M6.2H/tests/test_candidate_outside_safe_range_holds.py",
+    "04-artifacts/impl/M6.2H/tests/test_no_auto_publish_review_queue_only.py",
+    "04-artifacts/impl/M6.2H/tests/test_learn_precondition_seed_and_dq.py",
+    "04-artifacts/impl/M6.2H/tests/test_mapping_chain_anchored_to_sku.py",
+    "04-artifacts/impl/M6.2H/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2H/ (whole M6.2G tree carried forward byte-identical; caches excluded)"
+  ],
+  "commands_run": [
+    "python shutil.copytree M6.2G -> M6.2H (carry-forward; PLAN.md/IMPLEMENTATION_NOTES.md/caches excluded)",
+    "python -m pytest -q (carried baseline): 313 collected, rc 0 (all pass) BEFORE any patch",
+    "python -m pytest -q (after learning layer + tests): 345 collected, rc 0",
+    "Workflow m6-2h-adversarial-review (read-only, 3 agents): all 3 dimensions (no-publish/no-fabricated-origin; learn-precondition; fail-closed/untrusted/PII) CLEAN, 0 findings",
+    "python -m pytest --collect-only -q: 345 total; no skips/xfails",
+    "python shutil.rmtree __pycache__/.pytest_cache/*.pyc (no compiled artifacts staged)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2H/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2H/PLAN.md",
+    "04-artifacts/impl/M6.2H/app/measurement/learning/libraries.py",
+    "04-artifacts/impl/M6.2H/app/measurement/learning/learning_engine.py",
+    "04-artifacts/impl/M6.2H/app/measurement/learning/candidate.py",
+    "04-artifacts/impl/M6.2H/app/api/learning_candidates.py",
+    "04-artifacts/impl/M6.2H/migrations/0011_create_ads_strategy_libraries.sql",
+    "04-artifacts/impl/M6.2H/migrations/0012_create_ads_learning_candidate.sql",
+    "04-artifacts/impl/M6.2H/tests/test_candidate_outside_safe_range_holds.py",
+    "04-artifacts/impl/M6.2H/tests/test_no_auto_publish_review_queue_only.py",
+    "04-artifacts/impl/M6.2H/tests/test_learn_precondition_seed_and_dq.py"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1702 (status self-reported PASS; the gate + JUDGE decide -- coder does not self-certify). The framework-only learning layer is complete and green (345 tests); the two module-critical invariants (machine never fabricates origin strategy RULE-011/LEX-006; no auto-publish FAIL-006) and the Learn precondition (RULE-011) held CLEAN under a 3-dimension adversarial review with zero findings. Proceed to M6-P1703/M6-P1704 (TESTER) to EXECUTE + record SMK-011 (learning candidate outside safe range -> hold review, no publish); the M6.2H exit gate M6-P1709 checks the three legs (seed framework pass; no auto-publish/review-queue; learning-input precondition). OUT OF SCOPE (do not build): auto-publish outside safe range, generating public ad copy/origin content while the lexicon/claim table is MISSING (M6-OD-007), real ad run/scale/Core-policy override, commission. HARD FORWARD GATES: M6-OD-007 (content fill) before any real seed content; M6-OD-006 (safe range) before any guarded publish; the M6.2G before-real-scale/send/auto-publish forward conditions (4 attestation true-ups, ENTRY-001/003 real-scale conditions, M5 DEBT-1..4, OD-002/003/004/005) remain in force. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, SCALE_MODEL_RATIFIED=False, SCALE_EXECUTION_ENABLED=False, HASH_POLICY_RATIFIED=False, LEARNING_AUTOPUBLISH_ENABLED=False, LEARNING_CONTENT_FILL_ENABLED=False, LEARNING_SAFE_RANGE_RATIFIED=False, live_migrations=false remain in force; M6-P1000 + M6-P1309 verdicts stay BLOCKED (not converted). Nothing here authorizes scale, external send, or auto-publish."
+}

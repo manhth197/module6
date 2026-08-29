@@ -1,0 +1,58 @@
+{
+  "prompt_id": "M6-P1909",
+  "status": "PASS",
+  "summary": "M6_2J_SLICE_GATE_JUDGE (JUDGE, gate_review, fresh session, evidence-only). Verdict PASS (STAGED) for the slice M6.2J exit gate -- the Phase-3 growth-machine MEASUREMENT (doc 9: CRM repeat/reorder revenue, dormant/reactivation eligibility, Diamond referral attribution + commission-ready revenue, growth KPIs; Data Mart stays a support view). Production stays BLOCKED regardless; full reasoning in 04-artifacts/evidence/judge/M6-P1909_JUDGE_FINAL_SIGN_OFF.json. Entry: ledger M6-P1909=RUNNING, dependency M6-P1908=PASS; band M6-P1900=SIGNED + M6-P1901..1908 all PASS (single attempt, no SKIPPED/BLOCKED); posture BLOCKED/OFF/OFF + all scale/learning flags False + live_migrations=false unchanged and NOT flipped. In-scope fail gates M6-FAIL-002 (consent) + M6-FAIL-004 (Core override/commission) + M6-FAIL-005 (Data Mart abuse). EXIT-GATE LEGS all 8 held: L1 CRM revenue verified (crm.py counts a verified row only when consumed CRM-eligibility AND suppression flags strictly is True AND consent VALID for CRM scope; opt-out/expired/wrong-scope excluded fail-closed; CRM_REORDER_SENT/click/chat never revenue; no send surface) + SMK-008. L2 Diamond revenue verified + commission MEASURED-not-computed -- verified IN CODE (diamond.py: diamond_revenue sums verified referral rows; commission_ready_revenue is a REVENUE subset gated by a consumed Finance flag, fail-closed 0, <= diamond_revenue; NO commission amount/rate/payout method; buyer masked in to_public; RULE-019 Finance owns) + SMK-014. L3 SMK-008 4/4; L4 SMK-010 3/3 (Data Mart + builder no trigger verb; report data-only -- FAIL-005 held); L5 SMK-014 4/4. Full suite 425 rc 0. L6 all 9 band JSONs present/valid/PASS/fail_gate=false/open_blockers=[]/scan CLEAN (204 files). L7 this sign-off PASS. L8 rollback documented (RUNBOOK sec.4 + NOTES sec.6; M6.2J added ZERO migrations -- diff vs M6.2I byte-identical, RULE-018; no patched carried file; growth package + tests roll back by deletion). ALL IN-SCOPE FAIL GATES NOT TRIPPED: FAIL-002 (CRM+reactivation consent-fail-closed; consent gate hardened vs type-confusion), FAIL-004 (no commission computed; token sweep 0 override defs; RULE-019), FAIL-005 (Data Mart + builder no trigger/write verb). Boundary 'No BLOCKER, none of FAIL-002/004/005 tripped'; security 'PASS, 0 raw PII/secret, No BLOCKER, OD-003 N/A'. LOAD-BEARING RESIDUALS (armed-not-fired, NOT channel-reachable, but higher-priority -- consent checkpoint / Finance-facing figure / known-pattern-not-applied; recorded prominently, fix-first): F-GROWTH-1/F-SEC-2J-1 (borrowed consent -- _crm_gate_passes validates consent by order_code but never binds snapshot.subject_ref to the row's buyer; consent_by_order is a CONSUMED map [CrmConsumed test-only, no API wiring] so not channel-reachable; M6.2E F-D enforces this exact bind + the Diamond path reads customer_id, only the CRM growth gate omits it -> FIX-FIRST mirror M6.2E F-D). F-GROWTH-3 (RULE-003 cross-slice consistency regression -- reads.verified_rows keys off revenue_value not event_code==ORDER_VERIFIED; confirmed NOT reachable: the only writer store.materialize raises unless verified=True+order_code and the materializer sets verified only when conversion.event_code==ORDER_VERIFIED, so every reachable revenue row is ORDER_VERIFIED-derived; mispair test-only; FAIL-001 out-of-scope; reaches a Finance-facing commission-ready figure -> FIX-FIRST adopt the M6.2I self-enforcing choke). WHY NOT BLOCKED: neither trips an in-scope gate (F-GROWTH-1 not channel-reachable so FAIL-002 false; F-GROWTH-3 is out-of-scope FAIL-001 and not reachable), neither fails a done-gate leg (shipped CRM+Diamond paths pass SMK-008/014; verified_rows returns ORDER_VERIFIED rows in the reachable path), no live wired consumer (grep app/api/** for growth = only a docstring; standalone library, aggregate KPIs only). OTHER RESIDUALS (armed-not-fired, forward): F-GROWTH-2/F-SEC-2J-3 (ungated crm_revenue twin naming), F-GROWTH-4/F-SEC-2J-4 (approval-rate reads review_state only), F-GROWTH-5 (builder duck-types collaborators), F-SEC-2J-2/N-1 (raw buyer_ref attribute, masked only in to_public -> M6-OD-012), ACCESS (growth-surfacing authN/authZ at M6-OD-011). GOVERNANCE (unchanged): M6-P1000 + M6-P1309 verdicts stay BLOCKED (not converted); M6.2G scale + M6.2H learning + M6.2I funnel forward conditions remain hard gates before real scale/send/auto-publish/CRM-send/surfacing. WHY PASS: all 8 legs hold staged; FAIL-002/004/005 not tripped (consent-fail-closed + no-commission + Data-Mart-support-view, executed + independently re-derived); no unresolved BLOCKER; every residual incl. F-GROWTH-1/3 armed-not-fired behind no-wired-consumer/consumed-map/store-discipline/immutable-OFF, firmly forward-bound. No self-certification; no application code/migration/flag change; module boundary intact (measures only -- no CRM send, no member-rights, no commission computation, no Core/Diamond/CRM override, no Data-Mart-trigger, no pricing/order-state); no raw secrets/PII.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2J.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1900.json",
+    "04-artifacts/evidence/prompts/M6-P1901.json",
+    "04-artifacts/evidence/prompts/M6-P1902.json",
+    "04-artifacts/evidence/prompts/M6-P1903.json",
+    "04-artifacts/evidence/prompts/M6-P1904.json",
+    "04-artifacts/evidence/prompts/M6-P1905.json",
+    "04-artifacts/evidence/prompts/M6-P1906.json",
+    "04-artifacts/evidence/prompts/M6-P1907.json",
+    "04-artifacts/evidence/prompts/M6-P1908.json",
+    "04-artifacts/boundary-reports/M6.2J_boundary.md",
+    "04-artifacts/security-reports/M6.2J_security.md",
+    "04-artifacts/test-reports/M6.2J/SMOKE_RESULTS.md",
+    "04-artifacts/analysis/slices/M6_2J_RUNBOOK.md",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/diamond.py"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/judge/M6-P1909_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/prompts/M6-P1909.json"
+  ],
+  "commands_run": [
+    "Read (read-only): CLAUDE_CONTEXT_BRIEF, slice M6.2J spec, FAIL_GATE_REGISTER (FAIL-002/004/005), boundary + security + smoke-results + RUNBOOK, and the load-bearing growth code diamond.py (no commission method; commission-ready is a consumed-flag-gated revenue subset; verified-only; buyer masked -- confirmed in code)",
+    "Read (read-only): PROMPT_EXECUTION_LEDGER_LOCKED.csv M6.2J band -> M6-P1909=RUNNING, M6-P1908=PASS, M6-P1900=SIGNED, M6-P1901..1908=PASS",
+    "Workflow (read-only, 3 agents): leg-6 band-evidence cleanliness (all 9 clean, independent parse + PII sweep zero) + legs 3-5 smokes & leg-8 rollback (SMK-008 4/4, SMK-010 3/3, SMK-014 4/4; RUNBOOK+NOTES; diff vs M6.2I byte-identical -> zero migrations) + adversarial exit-blocker refuter (refuted=false; independently re-derived CRM consent gate / no-commission diamond / Data-Mart-no-trigger / reactivation-fail-closed; verified F-GROWTH-3 not reachable via store.materialize discipline; F-GROWTH-1 consumed-map not channel-reachable; grep app/api/** for growth = only a docstring)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/judge/M6-P1909_JUDGE_FINAL_SIGN_OFF.json",
+    "00-spec/slices/M6.2J.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "04-artifacts/evidence/prompts/M6-P1900.json",
+    "04-artifacts/evidence/prompts/M6-P1901.json",
+    "04-artifacts/evidence/prompts/M6-P1902.json",
+    "04-artifacts/evidence/prompts/M6-P1903.json",
+    "04-artifacts/evidence/prompts/M6-P1904.json",
+    "04-artifacts/evidence/prompts/M6-P1905.json",
+    "04-artifacts/evidence/prompts/M6-P1906.json",
+    "04-artifacts/evidence/prompts/M6-P1907.json",
+    "04-artifacts/evidence/prompts/M6-P1908.json",
+    "04-artifacts/boundary-reports/M6.2J_boundary.md",
+    "04-artifacts/security-reports/M6.2J_security.md",
+    "04-artifacts/test-reports/M6.2J/SMOKE_RESULTS.md",
+    "04-artifacts/analysis/slices/M6_2J_RUNBOOK.md",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/diamond.py",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine JUDGE_GATE for M6-P1909; on this PASS the slice M6.2J exit gate closes STAGED and the sequence proceeds to slice M6.2K (Smoke & Evidence -- the pack-wide smoke consolidation + evidence pass) then PR/PILOT (owner sign-off, production flag verified STILL OFF). HARD FORWARD GATES before ANY real scale / external send / auto-publish / CRM send / growth-surfacing (none blocks this measurement exit): CODER close F-GROWTH-1/F-SEC-2J-1 (in _crm_gate_passes, bind snapshot.subject_ref to the verified row's buyer -- customer_id/guest_id -- before counting, mirroring the M6.2E F-D fix; add the explicit bind on the reactivation path too), F-GROWTH-3 (AND event_code=='ORDER_VERIFIED' with revenue presence in reads.verified_rows, adopting the M6.2I self-enforcing choke so the Finance-facing commission-ready figure cannot be fed a mispaired row), F-SEC-2J-2/N-1 (make buyer_ref masking non-optional at the identity boundary -- store masked or gate raw access), F-GROWTH-2/F-SEC-2J-3 (rename/gate the ungated DataMart.crm_revenue twin), F-GROWTH-4/F-SEC-2J-4 (count the approval-rate KPI by the audited OwnerReviewDecision / is_publish_authorized), F-GROWTH-5 (guard GrowthReportBuilder.build collaborators with an isinstance/Protocol assertion). OWNER / M6-OD-011 binding: authenticate/authorize the admin caller + apply the buyer_ref masking discipline when the growth report is surfaced via the dashboard endpoint; M6-OD-012 (masking scope). Carried from M6.2G/M6.2H/M6.2I: the four M6-P1600 attestation true-ups, ENTRY-001/003 real-scale conditions, ENTRY-004 M5 DEBT-1..4 + the adversarial P4 re-gate, the scale-gate ACCESS-1/F-SCALE-*, M6-OD-002/003/004/005, the M6.2H learning conditions (OD-006/OD-007, F-LEARN-*), and the M6.2I funnel conditions (F-FUNNEL-4 single-subject trace bind before surfacing, F-SEC-2I-2). global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF and all posture flags remain in force; M6-P1000 + M6-P1309 verdicts remain BLOCKED (not converted). Nothing here authorizes scale, external send, auto-publish, CRM send, or commission computation."
+}

@@ -1,0 +1,54 @@
+{
+  "prompt_id": "M6-P2005",
+  "status": "PASS",
+  "summary": "M6_2K_BOUNDARY_ADVERSARY (mode=analysis_only). Attacked the FINAL slice M6.2K 'Smoke & Evidence Pack' — the full-P0-matrix re-run + doc §22 owner sign-off package assembler. In-scope fail gate M6-FAIL-007 ('No evidence' = calling PASS without audit/evidence/smoke); in-scope rule M6-RULE-015 (executors write evidence, never certify their own success). ENTRY GATE verified in the state ledger before any work: M6-P2005=RUNNING (row 183, order 181), dependency M6-P2004=PASS (TESTER_RUN: full staged suite 523 passed/0 failed RC0; the 18 evidence legs 72/72), M6-P2003=PASS, entry-gate judge M6-P2000=SIGNED chaining to M6.2J slice-gate judge M6-P1909=SIGNED; IMPLEMENTATION_TARGET_LOCKED.json LOCKED, staged-only. METHOD: a byte-clean EXECUTED harness (PYTHONDONTWRITEBYTECODE=1 py -3.12 -B, Python 3.12.10) drives the REAL staged EvidencePackAssembler + carried subsystems (consent gate, growth CRM/Diamond, attribution materializer, measurement store, DataMart) — every claimed breach is executed before it is recorded; plus a 6-agent adversarial-ideation workflow (58 vectors) + a completeness critic (18 more), each re-executed here. RESULT: 43 recorded outcomes = 35 DEFENDED, 8 OPEN_NONGATE (armed-not-fired), 0 NOTE, and 0 BREACH. IN-SCOPE FAIL-007 BREACHES: 0. The pack cannot overstate readiness — structurally: the Readiness enum has NO Pass/Ready/Scale-Ready member (tops at OWNER_REVIEW_REQUIRED); readiness is fail-closed NOT_READY on any incomplete §22 category or un-recorded smoke; a waiver is honored ONLY for a proposed smoke (SMK-016/017/018) and an owner-smoke (SMK-001..015) waiver is STRIPPED (swept all 15 owner smokes + truthy-non-bool + key-confusion + reverse-key-confusion — all stay un-run/NOT_READY); the 8 standing blockers (M6-P1000/M6-P1309 BLOCKED verdicts, the M6.2G/H/I/J forward conditions, M6-OD-011/012) are ALWAYS disclosed even in the terminal complete pack; the posture snapshot is a read-only MappingProxyType and the EvidencePack is frozen; correlation_id/evidence_id are masked on export; the assembler exposes no pass/ready/certify/sign_off/approve/enable/flip/advance verb (a hand-forged EvidencePack(readiness='PASS') is self-defeating: to_public() crashes on a raw-str readiness). CROSS-CUTTING full-matrix confirmations (so the assembled PASS-evidence is not hollow): FAIL-001 no revenue from a non-verified/quote row; FAIL-002 CRM revenue fail-closed 0 on opt-out and with no consumed facts (SMK-008); FAIL-004 no commission amount/rate/payout method (only commission_ready_revenue, a fail-closed revenue subset, + diamond_lead_rate, a measurement ratio) and set-once verified revenue is immutable (a differing re-materialize raises); FAIL-005 neither DataMart nor the pack exposes a trigger/scale/send/write verb; FAIL-007 integration: complete->OWNER_REVIEW_REQUIRED, drop one owner leg+one category->NOT_READY, and the carried M6.2J growth residuals (incl. F-GROWTH-3 verified_rows choke) are disclosed as a standing blocker. RESIDUALS (6, all armed-not-fired, code-exec-only or trusted-input-only, none channel-reachable, none trips FAIL-007) routed to CODER via M6-P2006: F-EVID-1 (assembler trusts truthiness/duck values not a validated run-trace: whitespace ids, a duck object with recorded=True dodging the id-conjunction and waiver-strip, and a row appended verbatim mislabeling the displayed smoke id — pin to spec.smoke_id + require stripped-non-blank status/correlation/evidence); F-EVID-2 (category completeness uses ref truthiness not shape/existence: whitespace refs mark COMPLETE); F-EVID-3 (no readiness<->standing-blocker cross-check: rebinding pack_assembler.STANDING_GAP_BLOCKERS empties the payload while readiness stays OWNER_REVIEW_REQUIRED — add a positive floor asserting the 8 standing ids present); F-EVID-4 (SmokeResult.status exported verbatim/unmasked — enum-constrain or mask); an X3 robustness gap (non-typed inputs fail-closed-by-crash rather than coerced); and the carried D4 module-global (mutating config.PRODUCTION_FLAG in-process echoes into the snapshot, code-exec-only). The completeness critic sharpened F-EVID-1 and surfaced F-EVID-3/F-EVID-4, and corrected a subtle first-pass error about which module binding the assembler reads. GOVERNANCE POSTURE UNCHANGED AND IMMUTABLE: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, SCALE_MODEL_RATIFIED=False, SCALE_EXECUTION_ENABLED=False, HASH_POLICY_RATIFIED=False, LEARNING_AUTOPUBLISH_ENABLED=False. No application code/test/migration/state-ledger/release-flag change; no CRM send, no commission computed, no Data-Mart trigger, no Core override, no scale/publish, no order-state/pricing; no enabling value written anywhere. The harness wrote 0 cpython-312 bytecode (-B) and 0 __pycache__ and modified no staged source. No raw secret/PII in this evidence (correlation/evidence ids referenced only in masked form; any PII-shaped test marker was assembled at runtime with no literal in source). status=PASS is my honest boundary self-report; it does NOT self-certify gate advancement (RULE-015) — the runner EVIDENCE_GATE and the slice Judge M6-P2009 decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2K.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/test-reports/M6.2K/SMOKE_RESULTS.md",
+    "04-artifacts/evidence/prompts/M6-P2004.json",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/pack_assembler.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/models.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/categories.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/gap_blockers.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/smoke_registry.py",
+    "04-artifacts/impl/M6.2K/app/config.py",
+    "04-artifacts/impl/M6.2K/app/measurement/masking.py",
+    "04-artifacts/impl/M6.2K/app/measurement/growth/reads.py",
+    "04-artifacts/impl/M6.2K/app/measurement/growth/crm.py",
+    "04-artifacts/impl/M6.2K/app/measurement/growth/diamond.py",
+    "04-artifacts/impl/M6.2K/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2K/tests/conftest.py",
+    "04-artifacts/impl/M6.2K/tests/test_pack_never_declares_pass_or_ready.py",
+    "04-artifacts/impl/M6.2K/tests/test_pack_posture_immutable_and_pii_safe.py",
+    "04-artifacts/impl/M6.2K/tests/test_evidence_ten_categories_mandatory_content.py"
+  ],
+  "files_changed": [
+    "04-artifacts/boundary-reports/M6.2K_boundary.md",
+    "work/attacks/m6_2k_attacks.py"
+  ],
+  "commands_run": [
+    "python csv read: ledger -> M6-P2005=RUNNING (order 181), M6-P2004=PASS, M6-P2000=SIGNED, M6-P1909=SIGNED (entry gate resolved)",
+    "PYTHONDONTWRITEBYTECODE=1 py -3.12 -B work/attacks/m6_2k_attacks.py  (byte-clean EXECUTED harness driving the real staged EvidencePackAssembler + carried subsystems; RESULT: SUMMARY {'DEFENDED':35,'OPEN_NONGATE':8}; TOTAL 43 outcomes; IN-SCOPE FAIL-007 BREACHES 0; posture BLOCKED/OFF/OFF unchanged; Readiness has no Pass/Ready member; wrote 0 cpython-312 bytecode, 0 __pycache__)",
+    "Workflow m6-2k-boundary-ideation (6 finders across readiness-overstate/smoke-launder/blocker-suppress/category-bypass/posture-pii/matrix-regression + 1 completeness critic; 58 + 18 vectors; every vector re-executed in the harness before classification, folded into Group X)",
+    "post-run cache check: find 04-artifacts/impl/M6.2K -name '*.cpython-312*.pyc' -> 0 ; -type d -name __pycache__ -> 0 ; git status impl -> untracked staged tree only, no source modified by this role"
+  ],
+  "evidence_refs": [
+    "04-artifacts/boundary-reports/M6.2K_boundary.md",
+    "04-boundary/work/attacks/m6_2k_attacks.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/pack_assembler.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/models.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/gap_blockers.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/smoke_registry.py",
+    "04-artifacts/impl/M6.2K/app/measurement/evidence/categories.py",
+    "04-artifacts/test-reports/M6.2K/SMOKE_RESULTS.md",
+    "04-artifacts/evidence/prompts/M6-P2004.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P2005. On PASS, proceed to M6-P2006 (M6_2K_SECURITY_REVIEW) — review the evidence-pack + this boundary report for PII-safe correlation/evidence ids and the F-EVID-1..4 residuals (truthiness-vs-shape validation, row-pinning, readiness<->standing cross-check, unmasked status), then M6-P2007 (PM EVIDENCE_COLLECT: assemble the 10 doc §22 categories into the owner review package; readiness must reach OWNER_REVIEW_REQUIRED, never Pass/Ready, while disclosing the 8 standing blockers), M6-P2008 (docs), and the slice gate judge M6-P2009. Governance flags stay BLOCKED/OFF/OFF; this slice proves capability with evidence only and never declares ROAS Pass or Scale Ready (owner-only, doc §23). The 6 armed-not-fired residuals are hardening for CODER; none is channel-reachable and none trips FAIL-007."
+}

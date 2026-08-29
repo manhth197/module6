@@ -1,0 +1,25 @@
+{
+  "record_type": "M4_DEFECT_FIX_VERIFIED",
+  "entry_id": "M6-ENTRY-004 (M4 half)",
+  "defect": "M4-PII-SAFETYBOUNDARY-UNSCANNED (found by adversary in _M4_JUDGE_VERDICT_2026-08-11.json)",
+  "verified_at": "2026-08-27",
+  "fix_commit": "4408a60d (branch dev, repo ginsengfood-business-platform, author manhth197) — 'fix(m4): scan recommendation safetyBoundary for PII on public surfaces (SAFE-003)'. NOT pushed (M4 rules forbid self-push; owner authorization pending).",
+  "status": "FIX VERIFIED + PUSHED. Rebased on push -> landed on origin/dev as 9f7e3dc8 (range-diff 4408a60d = 9f7e3dc8, patch IDENTICAL, re-verified). Defect CLOSED. Remaining bookkeeping: sync updated m4-no-pii-leak.md into pack copy + record Tai owner-sign sentence.",
+  "tech_lead_verification": [
+    "FinalResponseGuardService.scanStructuredFieldForPii(text, surface, correlationId) ADDED (+32).",
+    "M4AdvisorTurnService recommendation loop CALLS it for recommendation.safetyBoundary() and adds the result to guardResults (+6) — the previously-unscanned delivered field is now PII-scanned, surface-gated.",
+    "Fix does NOT modify recommendationText (verified: every recommendationText mention in the diff is an explanatory comment, no code change) — so it avoids the wrong 1-line approach that would have folded the standard 'Khong phai thuoc...' boundary into the shared guard chain and triggered HealthSensitiveWordingGuard, blocking every recommendation (recs 1->0). Tai proved that regression and chose the correct surface-gated PII-only scan (SAFE-003 / PA B), following the existing TPCN-disclaimer exemption precedent.",
+    "Tests added: M4AdvisorTurnSurfaceSecurityTesterTest T-PII-05 (PII in safetyBoundary blocked on PUBLIC_COMMENT through turn()) + T-PII-06 (private-surface vacuity). Evidence m4-no-pii-leak.md updated (+17) to DISCLOSE the safetyBoundary coverage (closes the 'not disclosed' condition)."
+  ],
+  "tai_server_evidence_reported": "server ssv@192.168.1.61 JDK 21, profile ci-unit (no Docker): RED pristine 3/3 PII vectors leak on PUBLIC_COMMENT; GREEN fixed M4AdvisorTurnSurfaceSecurityTesterTest 94/94; no-regression turn-service 77 / PII-guard 161 / guard-service 26 / smoke 80 / fail-gate 15 / contract-snapshot 6. (Reported by Tai; the RED->GREEN test run itself is on Tai's server, not independently re-run here — code fix independently verified from the commit.)",
+  "four_skipped_tests_explained": "4 methods of AiProductApprovedContentAuditPersistenceTest (@Testcontainers, disabledWithoutDocker=true) — auto-skip without Docker; run under ci-integration on a Docker host. Legitimate (env-gated), not out-of-scope, not broken.",
+  "m4_owner_signoff_sentence": "M4 / ENTRY-004 nua M4 — lo PII structured-field safetyBoundary (SAFE-003) da dong: field customer-facing nay gio duoc quet PII surface-gated qua scanStructuredFieldForPii ma khong kich claim/health guard; chung minh do->xanh tren server JDK 21 (3/3 vector bi chan tren public, private van giao), khong regress; cung ASSERT-001/003 da PROVEN, nua M4 khep o muc code-verified — cho Owner/Judge sign-off va push.",
+  "remaining_to_close_m4_half": [
+    "Owner (Manh) authorizes push of 4408a60d (M4 CLAUDE.md forbids self-push).",
+    "Sync the updated m4-no-pii-leak.md into the pack copy after push.",
+    "M4 owner (Tai) sign accepted.",
+    "Optional: full ai-suite green run (Tai verified the focused security/guard set, not all 3400+ repo tests)."
+  ],
+  "m4_half_grade_after_fix": "ASSERT-001 PROVEN, ASSERT-003 PROVEN, ASSERT-002 = covered for enumerated PII classes INCLUDING the previously-missed safetyBoundary (regex ceiling still applies + honestly disclosed). Runtime ceiling (production OFF, egress stubbed) unchanged and out of M6.2G scope.",
+  "note": "This closes the one defect the independent judge/adversary surfaced. The joint ENTRY-004 gate still depends on the M5 half (PARTIAL, runtime-ceiling with _OWNER_RISK_ACCEPTANCE) — production stays OFF."
+}

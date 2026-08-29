@@ -1,0 +1,60 @@
+{
+  "prompt_id": "M6-P1709",
+  "status": "PASS",
+  "summary": "M6_2H_SLICE_GATE_JUDGE (JUDGE, gate_review, fresh session, evidence-only). Verdict PASS (STAGED) for the slice M6.2H exit gate -- the six ADS strategy libraries + the learning-engine skeleton (Seed->Run->Learn->Review->Publish, doc 17); machine never fabricates origin strategy, never auto-publishes, content fill halts at framework. Production stays BLOCKED regardless; full reasoning in 04-artifacts/evidence/judge/M6-P1709_JUDGE_FINAL_SIGN_OFF.json. Entry: ledger M6-P1709=RUNNING, dependency M6-P1708=PASS; band M6-P1700=SIGNED + M6-P1701..1708 all PASS (single attempt, no SKIPPED/BLOCKED); posture BLOCKED/OFF/OFF + LEARNING_AUTOPUBLISH_ENABLED=False + LEARNING_SAFE_RANGE_RATIFIED=False (OD-006) + LEARNING_CONTENT_FILL_ENABLED=False (OD-007) + SCALE_EXECUTION_ENABLED=False + live_migrations=false unchanged and NOT flipped. In-scope fail gate M6-FAIL-006 (auto-publish). EXIT-GATE LEGS all 7 held: L1 SEED FRAMEWORK PASS -- verified IN CODE (libraries.py: six libraries verbatim; seed() rejects non-canonical seed_source [LibrarySeedViolation vs CANONICAL_SEED_SOURCES doc-17 tokens] + rejects content while LEARNING_CONTENT_FILL_ENABLED=False -> content stays None, framework-only, LEX-006). L2 NO AUTO-PUBLISH -- verified IN CODE (learning_engine.py: LearningEngine holds only {library_store,review_queue,audit}, no publish method; review() fail-closed forces safe_range UNKNOWN while LEARNING_SAFE_RANGE_RATIFIED=False -> HELD; APPROVE stays not-publishable [is_publish_authorized needs APPROVED AND WITHIN]; guarded_publish_blocked()=True); independent re-derivation: 0 publish executor/0 sink, is_publish_authorized ZERO non-test consumer, learning not imported by outbox/scale/dispatcher. L3 LEARNING-INPUT PRECONDITION -- verified IN CODE (learn() raises LearningPreconditionError unless seeded_kinds(); consumes only VerifiedSignal.is_usable = dq==PASS AND verified; input is a float score not raw channel text -> no prompt-injection surface). L4 SMK-011 PASS 6/6 (OUTSIDE/UNKNOWN HELD; WITHIN claim forced UNKNOWN; no publish method + guarded_publish_blocked True; APPROVE still not publishable; control discriminating-but-unreachable). Full suite 351 rc 0. L5 all 9 band evidence JSONs present/valid/PASS/fail_gate=false/open_blockers=[]/scan CLEAN (independent parse + PII sweep zero; security 171 files clean). L6 this sign-off PASS. L7 rollback documented (RUNBOOK sec.4 per-change table cross-checked exhaustive + migration DOWN 0011/0012 DROP staged + IMPLEMENTATION_NOTES; only patched carried file config.py adds 3 fail-closed learning flags). FAIL-006 NOT TRIPPED (no publish executor; is_publish_authorized zero consumer; review fail-closed; no learn->publish bridge; body can't fake state; boundary 29 outcomes 0 breach; security code-side 0 publish/0 sink). Boundary 'No BLOCKER'; security 'PASS, No open blocker, OD-003 N/A'. RESIDUALS (armed-not-fired -- no publish executor, no live HTTP binding [api/__init__ pure handlers, __main__ no server]; forward): ACCESS-1 (review-decision endpoint takes body actor -> authenticate reviewer at M6-OD-011 binding; inert today); F-LEARN-PII-1 (owner free-text export -> CODER+M6-OD-012); F-LEARN-1 (ReviewQueue.update transition validation + never-auto-wire-sender -> CODER+M6-OD-011); F-LEARN-2 (score non-finite/OverflowError crash -> CODER); F-LEARN-3 (review scrub decision -> CODER); F-LEARN-4 (mapping anchor validation; run() writes no Core value -> CODER); N-2 (no-auto-publish denylist test omits run/activate/promote/deploy -- run() verified inert skeleton today; test-hardening + CI guard so a future run() edit can't slip through). GOVERNANCE (unchanged): M6.2H opened design-altitude via M6-P1700 SIGNED; M6-P1000 + M6-P1309 verdicts stay BLOCKED (NOT converted); OD-006 (safe range) + OD-007 (content fill) stay OPEN keeping guarded-publish + content-fill BLOCKED. WHY PASS: all 7 legs hold staged; FAIL-006 not tripped (structural absence-of-executor + zero-consumer + fail-closed review, executed + independently re-derived); no unresolved BLOCKER; residuals armed-not-fired behind no-executor/no-binding/immutable-OFF. No self-certification; no application code/migration/flag change; module boundary intact (no consult content/public reply/auto-publish/Core write/pricing/order-state/CRM/commission); no raw secrets/PII.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2H.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1700.json",
+    "04-artifacts/evidence/prompts/M6-P1701.json",
+    "04-artifacts/evidence/prompts/M6-P1702.json",
+    "04-artifacts/evidence/prompts/M6-P1703.json",
+    "04-artifacts/evidence/prompts/M6-P1704.json",
+    "04-artifacts/evidence/prompts/M6-P1705.json",
+    "04-artifacts/evidence/prompts/M6-P1706.json",
+    "04-artifacts/evidence/prompts/M6-P1707.json",
+    "04-artifacts/evidence/prompts/M6-P1708.json",
+    "04-artifacts/boundary-reports/M6.2H_boundary.md",
+    "04-artifacts/security-reports/M6.2H_security.md",
+    "04-artifacts/test-reports/M6.2H/SMOKE_RESULTS.md",
+    "04-artifacts/analysis/slices/M6_2H_RUNBOOK.md",
+    "04-artifacts/impl/M6.2H/app/measurement/learning/learning_engine.py",
+    "04-artifacts/impl/M6.2H/app/measurement/learning/libraries.py"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/judge/M6-P1709_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/prompts/M6-P1709.json"
+  ],
+  "commands_run": [
+    "Read (read-only): CLAUDE_CONTEXT_BRIEF, slice M6.2H spec, FAIL_GATE_REGISTER (FAIL-006), boundary + security + smoke-results + RUNBOOK, and the load-bearing learning code learning_engine.py + libraries.py (no publish executor; review fail-closed; learn precondition + DQ-PASS+verified; seed-source rejection + content-fill BLOCKED -- confirmed in code)",
+    "Read (read-only): PROMPT_EXECUTION_LEDGER_LOCKED.csv M6.2H band -> M6-P1709=RUNNING, M6-P1708=PASS, M6-P1700=SIGNED, M6-P1701..1708=PASS",
+    "Workflow (read-only, 3 agents): leg-5 band-evidence cleanliness (all 9 clean, independent parse + PII sweep zero) + leg-4 smoke & leg-7 rollback (SMK-011 6/6; RUNBOOK sec.4 cross-checked exhaustive + DDL DOWN) + adversarial FAIL-006 refuter (refuted=false; independently re-derived 0 publish executor, is_publish_authorized zero consumer, review fail-closed, learn precondition, libraries reject non-canonical; N-2 run() verified inert)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/judge/M6-P1709_JUDGE_FINAL_SIGN_OFF.json",
+    "00-spec/slices/M6.2H.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "04-artifacts/evidence/prompts/M6-P1700.json",
+    "04-artifacts/evidence/prompts/M6-P1701.json",
+    "04-artifacts/evidence/prompts/M6-P1702.json",
+    "04-artifacts/evidence/prompts/M6-P1703.json",
+    "04-artifacts/evidence/prompts/M6-P1704.json",
+    "04-artifacts/evidence/prompts/M6-P1705.json",
+    "04-artifacts/evidence/prompts/M6-P1706.json",
+    "04-artifacts/evidence/prompts/M6-P1707.json",
+    "04-artifacts/evidence/prompts/M6-P1708.json",
+    "04-artifacts/boundary-reports/M6.2H_boundary.md",
+    "04-artifacts/security-reports/M6.2H_security.md",
+    "04-artifacts/test-reports/M6.2H/SMOKE_RESULTS.md",
+    "04-artifacts/analysis/slices/M6_2H_RUNBOOK.md",
+    "04-artifacts/impl/M6.2H/app/measurement/learning/learning_engine.py",
+    "04-artifacts/impl/M6.2H/app/measurement/learning/libraries.py",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine JUDGE_GATE for M6-P1709; on this PASS the slice M6.2H exit gate closes STAGED and the sequence proceeds to slice M6.2I (M6-P1800 entry-gate judge; its RequiredInputs include M6-ENTRY-002.json -> M6.2I re-checks the P5 channel-identity entry evidence). HARD FORWARD GATES before ANY real scale / external send / auto-publish (none blocks this design-altitude exit): M6-OD-006 (guarded auto-publish safe range) before the guarded-publish path is unblocked; M6-OD-007 (content fill) before any machine-generated origin content -- both OPEN, keeping the slice fail-closed. OWNER / M6-OD-011 HTTP binding: ACCESS-1 (authenticate the owner/marketing reviewer on the learning-candidates decision endpoint; never trust a body actor) + F-LEARN-1 (ReviewQueue.update must reject illegal transitions; the persistence binding must never auto-wire the review queue to a publisher). CODER: F-LEARN-2 (reject non-finite/bound magnitude/wrap float() for score), F-LEARN-3 (scrub decision=None on review), F-LEARN-4 (validate sku_ref against a sellable-SKU set + reject value-shaped verified_revenue_ref), F-LEARN-PII-1 (document/mask owner free-text on export), N-2 (harden the no-auto-publish denylist + add a CI guard asserting is_publish_authorized and run() reach no send path). Carried from M6.2G/M6.2A-G: the four M6-P1600 attestation true-ups, ENTRY-001/003 real-scale conditions, ENTRY-004 M5 DEBT-1..4 + the adversarial P4 re-gate, the scale-gate ACCESS-1/F-SCALE-*, M6-OD-002/003/004/005. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, LEARNING_AUTOPUBLISH_ENABLED=False, LEARNING_SAFE_RANGE_RATIFIED=False, LEARNING_CONTENT_FILL_ENABLED=False, SCALE_EXECUTION_ENABLED=False, live_migrations=false remain in force; M6-P1000 + M6-P1309 verdicts remain BLOCKED (not converted). Nothing here authorizes scale, external send, or auto-publish."
+}

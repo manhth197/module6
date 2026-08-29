@@ -1,0 +1,49 @@
+{
+  "prompt_id": "M6-P1904",
+  "status": "PASS",
+  "summary": "M6_2J_TESTER_RUN (mode=test). Entry gate verified in the state ledger before any work: M6-P1903 PASS (required predecessor), M6-P1904 RUNNING (this prompt, order 170). Executed the slice M6.2J Phase-3 growth-machine smoke suite with the pinned pack venv (python 3.12.13 / pytest 8.4.2 / pluggy 1.6.0), cache-free (PYTHONDONTWRITEBYTECODE=1, -p no:cacheprovider), NO shell redirection (the role guard blocks a >/2> co-occurring with the venv Scripts path). RESULTS: the three bound smoke files ran 11 passed / 0 failed, exit 0 (SMK-008 4/4, SMK-010 3/3, SMK-014 4/4); the full staged suite ran 425 passed / 0 failed / 0 skipped / 0 error, RC 0 (in-process pytest_runtest_logreport tally, empty failure list — the harness does not reliably capture pytest's long terminal summary; the tally agrees with the M6-P1903 collect-only total of 425). All three bound smoke ids PASSED: SMK-008 — an opt-out CRM subject is excluded from CRM revenue (0.0, fail-closed) and the CRM layer has no send/sync outbound surface; expired/missing/scope-not-granted excluded; a VALID CRM-scope consent + eligibility + suppression counts 250000 (non-vacuous). SMK-010 (growth leg) — neither the DataMart nor the GrowthReportBuilder exposes a trigger/send/scale/crm/commission/order-state verb, the report has kpis and no trigger (RULE-012/FAIL-005); the growth report is data-only; building it twice does not mutate the store. SMK-014 — a verified Diamond referral order records referral attribution (referral_link_id, order_code), diamond_revenue + commission_ready_revenue are measured, and NO commission method exists (RULE-019); no commission method even with no data; commission_ready fail-closed 0 without eligibility (diamond_revenue still measured); buyer identity masked on export. ACCEPTANCE CHECKS met: (1) commands_run non-empty (2 commands); (2) test_results has one entry per bound smoke id (3); (3) failures reported not fixed — there were 0 failures, and no code under test was patched (TESTER executes and reports only). Supporting M6.2J growth leg tests (test_crm_optout_excluded 4, test_crm_reorder_revenue_verified_only 5, test_data_mart_stays_support_view 3, test_diamond_referral_no_commission 5, test_reactivation_consent_eligibility_failclosed 4, test_growth_kpis_from_valid_signals_only 3, test_growth_measure_only_boundary 4) and the carried M6.2A-I tree (386) all ran green inside the 425. Recorded SMOKE_RESULTS.md (per-smoke PASS tables with node-level detail, exact commands, correlation-id note, boundary observations, exit-gate legs L1-L5). GOVERNANCE POSTURE UNCHANGED AND IMMUTABLE: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, SCALE_MODEL_RATIFIED=False, SCALE_EXECUTION_ENABLED=False, HASH_POLICY_RATIFIED=False, LEARNING_AUTOPUBLISH_ENABLED=False. No application code changed, no migration applied, no external call, no CRM sent, no commission computed, no Data-Mart trigger, no Core override, no scale/publish, no order-state/pricing, no flag flipped, no write to 04-artifacts/state/. The growth layer is measure-only. All ids synthetic; buyer identity masked on export; no raw secret/PII. status=PASS is an honest TESTER self-report of the executed run; it does NOT self-certify gate advancement — the runner EVIDENCE_GATE and the slice Judge (M6-P1909) decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/impl/M6.2J/tests/TEST_MANIFEST.md",
+    "04-artifacts/evidence/prompts/M6-P1903.json",
+    "00-spec/slices/M6.2J.md",
+    "00-spec/registers/SMOKE_REGISTER.md"
+  ],
+  "files_changed": [
+    "04-artifacts/test-reports/M6.2J/SMOKE_RESULTS.md"
+  ],
+  "commands_run": [
+    "02-tester/.venv/Scripts/python.exe -m pytest -v tests/smoke/test_smk_008_crm_optout_no_sync.py tests/smoke/test_smk_010_growth_data_mart_support_view_only.py tests/smoke/test_smk_014_diamond_referral_no_commission.py -p no:cacheprovider  (from 04-artifacts/impl/M6.2J; PYTHONDONTWRITEBYTECODE=1; RESULT: 11 passed in 0.12s; EXIT 0)",
+    "02-tester/.venv/Scripts/python.exe -c \"<pytest_runtest_logreport tally + pytest.main(['-q','-p','no:cacheprovider'])>\"  (from 04-artifacts/impl/M6.2J; PYTHONDONTWRITEBYTECODE=1; RESULT: COUNTS={'passed':425,'failed':0,'skipped':0,'error':0} RC=0; FAILS=[])"
+  ],
+  "test_results": [
+    {
+      "smoke_id": "M6-SMK-008",
+      "result": "PASS",
+      "detail": "tests/smoke/test_smk_008_crm_optout_no_sync.py 4/4 passed. Primary: opt-out CRM subject excluded from CRM revenue (0.0, fail-closed) + no send/sync/dispatch outbound surface. Negatives: expired/missing/scope-not-granted consent excluded. Control: VALID CRM-scope consent + eligibility + suppression counts 250000 (non-vacuous). Scenario/expected verbatim."
+    },
+    {
+      "smoke_id": "M6-SMK-010",
+      "result": "PASS",
+      "detail": "tests/smoke/test_smk_010_growth_data_mart_support_view_only.py 3/3 passed (growth leg). Primary: neither the DataMart nor the GrowthReportBuilder exposes a trigger/send/scale/crm/commission/order-state verb; report has kpis, no trigger (RULE-012/FAIL-005). Negatives: growth report is data-only; building it twice does not mutate the store. Scenario/expected verbatim."
+    },
+    {
+      "smoke_id": "M6-SMK-014",
+      "result": "PASS",
+      "detail": "tests/smoke/test_smk_014_diamond_referral_no_commission.py 4/4 passed. Primary: a verified Diamond referral order records referral attribution (referral_link_id, order_code), diamond_revenue 500000 + commission_ready_revenue 500000 measured, NO commission method (RULE-019). Negatives: no commission method even with no data; commission_ready fail-closed 0 without eligibility (diamond_revenue still 400000); buyer identity masked on export. Scenario/expected verbatim."
+    }
+  ],
+  "evidence_refs": [
+    "04-artifacts/test-reports/M6.2J/SMOKE_RESULTS.md",
+    "04-artifacts/impl/M6.2J/tests/TEST_MANIFEST.md",
+    "04-artifacts/impl/M6.2J/tests/smoke/test_smk_008_crm_optout_no_sync.py",
+    "04-artifacts/impl/M6.2J/tests/smoke/test_smk_010_growth_data_mart_support_view_only.py",
+    "04-artifacts/impl/M6.2J/tests/smoke/test_smk_014_diamond_referral_no_commission.py",
+    "04-artifacts/evidence/prompts/M6-P1903.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1904. On PASS, proceed to M6-P1905 (M6_2J_BOUNDARY_ADVERSARY) — verify the growth layer keeps the module boundary (measure-only: no CRM send, no commission computed, no Data-Mart trigger, no Core override; CRM revenue consent-gated; buyer identity masked) — then M6-P1906 (M6_2J_SECURITY_REVIEW) for PII/secret discipline on the referral attribution + growth export, M6-P1907 (evidence collect), M6-P1908 (docs), and the slice gate judge M6-P1909. Governance flags stay BLOCKED/OFF/OFF; the growth layer is measure-only and no forward gate is flipped."
+}

@@ -1,0 +1,63 @@
+{
+  "prompt_id": "M6-P1905",
+  "status": "PASS",
+  "summary": "M6_2J_BOUNDARY_ADVERSARY (analysis_only) attempt 1, against the FROZEN staged M6.2J Phase-3 growth-machine measurement (doc §9): CRM repeat/reorder revenue (consent+eligibility+suppression gated), dormant/reactivation eligibility, Diamond referral attribution + verified/commission-ready revenue (commission MEASURED-not-computed), value-optimization + Learning-Engine growth KPIs, all read-only over the M6-owned store + the M6.2F Data Mart support view. ENTRY GATE verified: ledger row 171 M6-P1905=RUNNING; dependency M6-P1904=PASS (bound smokes SMK-008/010/014 11/11, full staged suite 425 passed rc 0); entry judge M6-P1900 SIGNED (depends on the M6.2I judge M6-P1809); coder M6-P1901/1902 + tester M6-P1903/1904 PASS; posture immutable (BLOCKED/OFF/OFF) confirmed at runtime. METHOD: one read-only EXECUTED harness (04-boundary/work/attacks/m6_2j_attacks.py) imports the frozen staged app and drives the real paths -- CrmReorderMeasurement, DiamondReferralMeasurement, ReactivationMeasurement, GrowthReportBuilder, the ConsentGate, and the M6.2F DataMart; pinned launcher Python 3.12.10, -B byte-clean (my recording harness wrote 0 cpython-312 bytecode and modified NO source file; the staged source tree is untouched -- transient cpython-311 __pycache__ from the ideation workflow's separate processes aside); 30 recorded outcomes (DEFENDED=23, OPEN-non-gate=6, notes=1). PII probes assembled at runtime + never echoed raw. Coverage widened by a 6-agent adversarial-ideation workflow + a completeness critic (51 candidate vectors); every claimed breach was executed and every FAIL-002/004/005 candidate had its reachability verified against the real wiring. VERDICT: NO BLOCKER; none of the three in-scope fail gates is tripped (M6-FAIL-002 consent, M6-FAIL-004 core override/commission, M6-FAIL-005 Data Mart abuse). FAIL-002: CRM revenue is consent+eligibility+suppression gated -- an OPT_OUT/EXPIRED/MISSING/absent consent snapshot -> crm_revenue()==0.0; a VALID consent granting only audience_sync (not the CRM scope) -> excluded; a missing/False CRM-eligibility or suppression flag -> excluded; a truthy-but-not-True flag (1/'yes') -> excluded (strict `is True`); only all-pass counts (SMK-008); the CRM layer exposes no send/sync/dispatch/crm_send surface; reactivation is consent+CRM-eligibility gated (opt-out/not-eligible excluded, measure-only, member_key never emitted); the consent gate is hardened against the str/subclass/__contains__ type-confusion class (M6.2B/D F2/F-B fixes). FAIL-004: no commission is computed -- the Diamond layer exposes no commission amount/rate/payout method and a token sweep finds 0 commission/pricing/order-state/member-right override defs; commission-ready revenue is a REVENUE figure (the subset of verified referral revenue whose CONSUMED commission-eligible flag is True, commission_ready_revenue <= diamond_revenue, fail-closed to 0 without the flag, SMK-014); commission eligibility is a consumed Finance-owned flag M6 reads never decides; buyer identity masked on the referral export. FAIL-005: the DataMart and GrowthReportBuilder expose no trigger/send/sync/scale/publish/order-state/write verb (SMK-010); the GrowthReport export is a plain {kpis:[...]} dict with no trigger handle; building the report twice mutates nothing; reaching mart._store yields no CRM/pricing/scale/commission trigger-owner capability. OPEN residuals (all armed-not-fired; none trips an in-scope gate; routed): F-GROWTH-1 [CODER, primary] BORROWED CONSENT -- _crm_gate_passes calls ConsentGate.evaluate(snapshot, CRM) but NEVER binds snapshot.subject_ref to the verified row's buyer (customer_id/guest_id), so a consent snapshot belonging to a DIFFERENT subject (person_B), VALID+CRM, keyed to the order authorizes the buyer (person_A)'s CRM revenue straight into the exported §9 CRM Revenue KPI (crm_revenue==650000); reachable only via a mis-keyed/adversarial CONSUMED consent_by_order map (a trusted upstream input owned by the Consent/CRM system), not a channel; the M6.2E conversion seam already enforces this exact subject-bind (the F-D fix) and the Diamond path already reads the row's customer_id/guest_id, but the CRM growth path omits the bind; fix: require snapshot.subject_ref == the verified row's customer_id/guest_id before counting. F-GROWTH-2 [CODER + M6-P1906] two crm_revenue methods exist -- the gated growth one (used by the §9 KPI, =0 without consent, defense holds) and the consent-blind DataMart.crm_revenue (a carried M6.2F channel-breakdown aggregate, =800000) reachable via builder._mart; only naming keeps the ungated number out of the §9 figure; the shipped report is correct; fix: rename/mark the ungated aggregate or gate it. F-GROWTH-3 [CODER, extends D3] reads.verified_rows keys off revenue_value is not None (the M6.2F-style choke), NOT event_code=='ORDER_VERIFIED' (the M6.2I self-enforcing choke); combined with the materializer deriving `verified` from conversion.event_code, a mispaired (ORDER_VERIFIED conversion, QUOTE_SENT event) call stamps revenue onto a quote-content row which the growth layer counts as Diamond Revenue AND the Finance-facing commission-ready revenue (both 900000); not channel-reachable (the materializer is constructed only in tests) and FAIL-001 is out-of-scope for this slice, but it reaches a Finance-facing figure and is a RULE-003 cross-slice consistency regression vs M6.2I; fix: AND event_code=='ORDER_VERIFIED' with revenue presence in verified_rows. F-GROWTH-4 [CODER + M6-P1906] the Learning-Engine 'Candidate approval rate' KPI reads review_state.value=='APPROVED' only, never is_publish_authorized or the audited OwnerReviewDecision, so a candidate marked APPROVED at construction (no decision, safe-range UNKNOWN) inflates the rate; a measurement-integrity gap only -- it publishes nothing (the M6.2H is_publish_authorized still gates the real publish); fix: count only candidates with a bound audited decision. F-GROWTH-5 [CODER] GrowthReportBuilder.build() duck-types every injected collaborator (queue.all(), store.all(), the mart's reads) with no isinstance/Protocol guard, so a mis-wired side-effecting collaborator would run during build(); needs control of the composition root (the shipped ReviewQueue/MeasurementEventStore .all() are pure reads); fix: an isinstance/Protocol assertion. Note: N-1 [M6-P1906] ReferralAttribution.buyer_ref holds raw PII on the public dataclass attribute (mask is applied only in to_public()); a caller reading .buyer_ref directly gets the raw customer/guest id; the carried masking findings (short-id over-disclosure; the M6.2E context masks only psid) also route to M6-P1906. GOVERNANCE: analysis_only -- no application code, migration, state ledger, or flag written; no external call; no CRM sent, no commission computed, no Data-Mart trigger; BLOCKED/OFF/OFF unchanged and asserted post-run; no self-certification. status PASS is the adversary's honest self-report (fail_gate_tripped=false); the runner EVIDENCE_GATE and the slice Judge (M6-P1909) decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2J.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1904.json",
+    "04-artifacts/test-reports/M6.2J/SMOKE_RESULTS.md",
+    "04-artifacts/impl/M6.2J/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/crm.py",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/diamond.py",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/reactivation.py",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/growth.py",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/reads.py",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/models.py",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/signals.py",
+    "04-artifacts/impl/M6.2J/tests/conftest.py"
+  ],
+  "files_changed": [
+    "04-artifacts/boundary-reports/M6.2J_boundary.md",
+    "04-artifacts/evidence/prompts/M6-P1905.json",
+    "04-boundary/work/attacks/m6_2j_attacks.py"
+  ],
+  "commands_run": [
+    "py -3.12 --version -> Python 3.12.10 (pinned launcher; matches IMPLEMENTATION_TARGET_LOCKED 3.12 pin)",
+    "PYTHONDONTWRITEBYTECODE=1 py -3.12 -B work/attacks/m6_2j_attacks.py -> 30 recorded outcomes: DEFENDED=23, OPEN_NONGATE=6, NOTE=1; IN-SCOPE FAIL-GATE BREACHES (FAIL-002/004/005)=0; posture asserted unchanged at end of run",
+    "find 04-artifacts/impl/M6.2J 04-boundary/work -name '*.cpython-312*.pyc' -> 0 (my -B recording harness wrote 0 bytecode); find ... -type f -newermt 17:05 ! -name '*.pyc' -> empty (no source file modified; transient cpython-311 caches are from the ideation workflow's separate processes)",
+    "git status --porcelain -- 04-artifacts/impl/M6.2J -> '?? 04-artifacts/impl/M6.2J/' (untracked, no tracked diff)",
+    "NOTE: analysis_only. No application code, migration, state ledger, or flag written; no CRM sent, no commission computed, no Data-Mart trigger; no external/network call; no shell redirection co-occurring with a venv 'Scripts' path (role guard). 6-agent adversarial-ideation workflow + completeness critic run (51 vectors); every claimed breach executed before recording; the W1/W3 findings are executed to confirm the mechanism and classified armed-not-fired (borrowed consent needs a mis-keyed CONSUMED consent map; the materializer mispair is test-only-constructed -- neither is channel-reachable)."
+  ],
+  "evidence_refs": [
+    "04-artifacts/boundary-reports/M6.2J_boundary.md",
+    "04-boundary/work/attacks/m6_2j_attacks.py",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/crm.py",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/diamond.py",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/reactivation.py",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/growth.py",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/reads.py",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/models.py",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/signals.py",
+    "04-artifacts/impl/M6.2J/app/measurement/dashboard/data_mart.py",
+    "04-artifacts/impl/M6.2J/app/measurement/consent/gate.py",
+    "04-artifacts/impl/M6.2J/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2J/tests/conftest.py",
+    "04-artifacts/test-reports/M6.2J/SMOKE_RESULTS.md",
+    "04-artifacts/evidence/prompts/M6-P1904.json",
+    "00-spec/slices/M6.2J.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1905. None of the three in-scope fail gates is tripped (FAIL-002: CRM revenue + reactivation are consent+eligibility+suppression gated, fail-closed, no send surface; FAIL-004: no commission method, commission-ready is a fail-closed revenue subset, eligibility is a consumed Finance flag; FAIL-005: the Data Mart + growth builder expose no trigger and the report is data-only), so this evidence is PASS-eligible; the boundary report is 04-artifacts/boundary-reports/M6.2J_boundary.md. On PASS, proceed to M6-P1906 (M6_2J_SECURITY_REVIEW), which owns the PII/validation items: N-1 (raw buyer_ref attribute), F-GROWTH-2 (rename/mark the ungated DataMart.crm_revenue twin), F-GROWTH-4 (approval-rate measurement integrity), and the carried masking findings. The CODER should close F-GROWTH-1 (bind snapshot.subject_ref to the verified row's buyer in _crm_gate_passes, mirroring the M6.2E F-D fix), F-GROWTH-3 (AND event_code=='ORDER_VERIFIED' with revenue presence in reads.verified_rows, adopting the M6.2I self-enforcing choke), and F-GROWTH-5 (isinstance/Protocol guard on the builder's collaborators). Governance unchanged: staged-only, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF; the mandatory scale/publish/send re-gate and the M6-P1000/M6-P1309 BLOCKED verdicts remain in force."
+}

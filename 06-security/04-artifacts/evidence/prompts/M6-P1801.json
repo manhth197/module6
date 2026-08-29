@@ -1,0 +1,58 @@
+{
+  "prompt_id": "M6-P1801",
+  "status": "PASS",
+  "summary": "M6_2I_CODER_PLAN (plan_only, EVIDENCE_GATE). Produced 04-artifacts/impl/M6.2I/PLAN.md: the minimal, target-relative, STAGED change set to MEASURE the Phase-2 conversion machine (doc §8) -- the Golden Hour funnel across states PRE->LIVE->POST->CLOSED, the AI-consult handoff, order-capture signals, and retargeting on valid events + valid consent only. NO code/migration/flag this prompt (plan_only). Posture immutable & untouched: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, SCALE_MODEL_RATIFIED=False, SCALE_EXECUTION_ENABLED=False, HASH_POLICY_RATIFIED=False, LEARNING_AUTOPUBLISH_ENABLED=False, LEARNING_CONTENT_FILL_ENABLED=False, LEARNING_SAFE_RANGE_RATIFIED=False, live_migrations=false. KEY ARCHITECTURE CALL (top-0.1% design lens; it CHANGED the design, not a label): doc §13 (minimal Data Object Contract) defines NO golden-hour/funnel/session table, so M6.2I adds NO new table/migration/CTR -- it is a DERIVED READ-ONLY PROJECTION over the existing ads_measurement_events (CTR-001, mig 0002) + ads_attribution_context (CTR-002, mig 0006); inventing schema Module 6 does not own would breach RULE-018. The Golden Hour state is a MEASUREMENT OBSERVATION only (no start/close/emit controller) -- operating live sessions is Gateway/Live's and out-of-scope (RULE-013); GOLDEN_HOUR_START/REMINDER are M6-OD-009 OPEN (optional/disabled-by-default; base_events.py already fences them) so absent signals => state UNKNOWN (fail-closed) and the funnel measures the chain regardless. CHANGE SET (all under 04-artifacts/impl/M6.2I/, carry the M6.2H tree byte-identical then add): NEW funnel/ package -- golden_hour.py (GoldenHourState PRE/LIVE/POST/CLOSED/UNKNOWN + observe_state, measure-only), flow.py (doc §8 FlowStage map Ads->Live->Comment->Messenger->Quote->Order->Verified; REVENUE_VALID_STAGE=ORDER_TO_VERIFIED, RULE-003; event codes referenced from doc §8/§10 canon, none invented, RULE-001/018), models.py (frozen GoldenHourFunnelView; to_public masks psid, RULE-014/H02), funnel.py (GoldenHourFunnel assembler: group by live_session_id, bucket by state, per-stage counts + the doc §14 funnel rates REUSING kpi_metrics formula DEFINITIONS -- not calling the global compute -- verified-only revenue RULE-003, RULE-021 capture_gate_passed consumed flag absent=>False, live/comment/messenger trace from ads_attribution_context SMK-013; read-only, no write/send/scale/publish), retargeting.py (RetargetingMeasurement: measure-only eligibility reusing ConsentGate.evaluate under the EXISTING ConsentScope.AUDIENCE_SYNC -- retargeting is audience, NO new scope invented RULE-018; missing/expired/opt-out=>not eligible fail-closed; never enqueues/sends, external_send=OFF). PATCHED carried-forward: dashboard/models.py + api/dashboard.py surface a read-only golden_hour_funnel section on the EXISTING GET /api/admin/ads/dashboard (CTR-018) -- support-view only, never a trigger owner (RULE-012), untrusted body=DATA (RULE-H03). NO new migration (RULE-018) and NO new config flag (measure-only) -- both deliberate minimal-change calls. Tests T1-T7 mapped: T1 golden-hour funnel chain across PRE/LIVE/POST/CLOSED (Golden-Hour conversion smoke, exit-leg L1), T2 state measure-only + UNKNOWN fail-closed (RULE-013/OD-009), T3 quote-in-funnel-not-revenue (SMK-004/RULE-003/FAIL-001), T4 live-chain-trace-in-funnel (SMK-013), T5 retargeting consent-valid-only, T6 order-capture Commerce-gate RULE-021, T7 measure-only boundary. Every change-set item maps to an M6.2I exit-gate leg (L1 Golden-Hour conversion chain; L2 SMK-004; L3 SMK-013) or a registered smoke (SMK-004/013, the two bound to M6.2I) and carries a rollback step (new files->delete; patched dashboard->revert to M6.2H; no migration to unwind). All four slice rules_in_scope covered by ID: RULE-003 (verified-only revenue), RULE-013 (no Core/live-session override), RULE-016 (phase-order locked -- honored at entry via FAIL-010 clearance + the separate Audit/Implementation/Verify-Gate prompt rhythm), RULE-021 (order-capture recorded-not-owned); in-scope fail gates FAIL-001 (revenue misuse -- guarded by RULE-003 verified-only) + FAIL-010 (phase jump -- not tripped; Phase 1 A..H complete/sequential/SIGNED) both addressed. RAN AN ADVERSARIAL DESIGN RED-TEAM (ultracode; Workflow, 7 agents, 3 dimensions each verified by an independent skeptic driving the REAL M6.2H tree + registers): the load-bearing dimension (boundary/scope/invented-schema/measure-only) came back CLEAN with ZERO findings; 4 raw findings total, 2 REFUTED on verify (kpi reuse mechanically fine as a design intent; retargeting scope), 2 CONFIRMED and FIXED -- (MINOR) RULE-016 was not cited by ID -> added a §7 matrix row + §1 row + §9 note mapping phase-order to the FAIL-010 entry clearance and the separate-prompt rhythm; (NIT) the §4.2 flow table's boundary column was an English gloss under a VERBATIM label -> re-scoped the label to the event-code column. Also applied two cheap precision tightenings from the REFUTED findings to prevent implement-time missteps (named ConsentScope.AUDIENCE_SYNC so implement invents no scope; clarified the kpi formula-definition reuse is not a call into the global compute). No plan-deltas beyond these review fixes. STATUS is coder SELF-REPORTED (not a gate/judge sign-off, RULE-015); the runner gate + JUDGE decide, and the M6.2I exit gate M6-P1809 checks the legs (Golden Hour conversion chain across PRE/LIVE/POST/CLOSED + trace; SMK-004; SMK-013; every-prompt evidence; rollback). Module boundary intact (no live-ops M7, no consult content M4, no public reply M5, no pricing/QuoteSnapshot M3, no order-state M8, no CRM send, no commission Finance, no scale/publish); no raw secrets or unmasked PII in the plan or evidence; nothing sends/scales/publishes; no flag flipped.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2I.md",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/evidence/prompts/M6-P1800.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/impl/M6.2H/PLAN.md",
+    "04-artifacts/impl/M6.2H/app/measurement/models/attribution_context.py",
+    "04-artifacts/impl/M6.2H/app/measurement/models/measurement_event.py",
+    "04-artifacts/impl/M6.2H/app/measurement/attribution/resolver.py",
+    "04-artifacts/impl/M6.2H/app/measurement/dashboard/kpi_metrics.py",
+    "04-artifacts/impl/M6.2H/app/measurement/dashboard/data_mart.py",
+    "04-artifacts/impl/M6.2H/app/measurement/consent/gate.py",
+    "04-artifacts/impl/M6.2H/app/measurement/tracking/base_events.py",
+    "04-artifacts/impl/M6.2H/app/measurement/registry/validator.py",
+    "04-artifacts/impl/M6.2H/tests/smoke/test_smk_004_quote_not_revenue.py",
+    "04-artifacts/impl/M6.2H/tests/smoke/test_smk_013_live_chain_trace.py"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2I/PLAN.md",
+    "04-artifacts/evidence/prompts/M6-P1801.json"
+  ],
+  "commands_run": [
+    "Read (read-only): brief, IMPLEMENTATION_TARGET_LOCKED.json (LOCKED, OD-011 DECIDED), slice M6.2I spec, ARCH_BASELINE, M6-P1800 entry-judge evidence (PASS/SIGNED opens M6.2I)",
+    "Grep/Read (read-only): ledger -> M6-P1801=RUNNING depends M6-P1800 (SIGNED); SMOKE_REGISTER -> SMK-004/SMK-013 bound to M6.2I; RULES_LOCKED -> RULE-003/013/016/021; FAIL_GATE_REGISTER -> FAIL-001/010; M6_FULL_DETAIL_EXTRACT doc §8 flow table (L151-157), §10 event taxonomy, §13 data model (NO golden-hour/funnel/session table), §14 funnel rates, GOLDEN_HOUR states L138 + OD-009 codes L134",
+    "Read (read-only): M6.2H carry-forward tree -- attribution_context/measurement_event models, attribution resolver, kpi_metrics (§14 funnel rates), data_mart, consent gate (ConsentScope), base_events (OD-009 fence), registry validator, existing SMK-004/SMK-013 smokes -- to ground reuse-not-duplicate",
+    "Write: 04-artifacts/impl/M6.2I/PLAN.md (plan_only; no code, no migration, no flag)",
+    "Workflow m6-2i-plan-adversarial-review (read-only design red-team, 7 agents, 3 dimensions each verified by an independent skeptic on the real tree): boundary/scope/invented-schema dimension CLEAN (0 findings); 4 raw findings -> 2 REFUTED, 2 CONFIRMED (MINOR RULE-016 ID-coverage, NIT §4.2 verbatim-label) -> both FIXED in PLAN.md + 2 precision tightenings applied",
+    "Edit: PLAN.md -- add RULE-016 to §1 row + §7 matrix + §9 note; re-scope §4.2 VERBATIM label to event codes; name ConsentScope.AUDIENCE_SYNC in C6/§9; clarify kpi formula-definition reuse",
+    "Grep (verify): PLAN.md contains RULE-016 / AUDIENCE_SYNC / 'event codes VERBATIM' / 'formula definitions are' -- all edits landed"
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2I/PLAN.md",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2I.md",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/evidence/prompts/M6-P1800.json",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/M6_FULL_DETAIL_EXTRACT.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1801 (status self-reported PASS; the gate + JUDGE decide -- coder does not self-certify). The plan is complete: a STAGED, measure-only Golden Hour funnel PROJECTION over the existing ads_measurement_events (CTR-001) + ads_attribution_context (CTR-002) -- NO new table/migration/CTR/config flag (RULE-018), state measure-only (RULE-013), GOLDEN_HOUR_START/REMINDER optional/fail-closed to UNKNOWN (M6-OD-009), verified-only revenue (RULE-003/FAIL-001, SMK-004), live/comment/messenger trace (SMK-013), retargeting consent-valid-only under ConsentScope.AUDIENCE_SYNC, RULE-021 order-capture recorded-not-owned. Proceed to M6-P1802 (M6_2I_CODER_IMPLEMENT) to build the funnel/ package (golden_hour/flow/models/funnel/retargeting) + the read-only dashboard support-view section + tests T1-T7, carrying the M6.2H tree forward byte-identical. TESTER (M6-P1803/1804) authors + executes the official SMK-004 + SMK-013 (M6.2I copies) and the Golden Hour conversion smoke; the exit gate M6-P1809 checks the legs (chain across PRE/LIVE/POST/CLOSED + trace; SMK-004; SMK-013; every-prompt evidence; rollback). OUT OF SCOPE (do not build): operating live sessions (Gateway/Live, RULE-013), public final price (LEX-003/004), revenue from live signals (Module 7), AI consult content (M4), sending/audience-sync/CRM/scale/publish/commission. HARD FORWARD GATES unchanged: the M6.2G before-real-scale/send conditions + the M6.2H before-real-content/auto-publish conditions remain in force. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF and all scale/hash/learning flags remain in force; M6-P1000 + M6-P1309 verdicts stay BLOCKED (not converted). Nothing here authorizes scale, external send, auto-publish, or live-session operation."
+}

@@ -1,34 +1,51 @@
 # STATUS — Module 6 (Đo lường Quảng cáo / Attribution / ROAS)
 
-**Cập nhật:** 2026-08-11
-**Khoá an toàn (chủ ý, KHÔNG phải lỗi):** `production_flag = OFF` · `global_gateway_state = BLOCKED` — pack đang ở giai đoạn dựng + thẩm định bằng chứng, **chưa bật production**.
-**Cổng hiện tại:** M6.2G Scale Gate (`M6-P1600`) — **BLOCKED** (fail-closed, chờ đủ bằng chứng entry). Đây là gate đang chờ, **không phải PASS giả**.
+**Cập nhật:** 2026-08-29
+**Khoá an toàn (chủ ý, KHÔNG phải lỗi):** `production_flag = OFF` · `global_gateway_state = BLOCKED` · `external_send = OFF` — pack là công trình **dựng + thẩm định bằng chứng**, **chưa bật production**. Các cờ này bất biến với mọi role.
 
-> Đọc `_AI_CHECK_GUIDE.md` ở gốc repo để biết cách **tự kiểm độc lập** từng mục dưới đây.
+> Đọc `_AI_CHECK_GUIDE.md` ở gốc repo để **tự kiểm độc lập** từng mục dưới — kể cả để **tái hiện phần debt** nêu ở §4.
 
-## Bằng chứng entry (điều kiện vào Scale Gate)
+## 1. Toàn pack đã build xong (end-to-end)
 
-| Entry | Nội dung | Trạng thái | File bằng chứng |
-|---|---|---|---|
-| **ENTRY-001** | Verified revenue — doanh thu chỉ đếm từ `ORDER_VERIFIED`, fail-closed | ✅ **PROVEN** (judge độc lập + đối kháng) · chờ chữ ký owner M3 | `04-artifacts/evidence/entry/M6-ENTRY-001.json` + `M6-ENTRY-001/_REJUDGE_VERDICT_2026-08-11.json` + surefire XML (sha256 khớp) |
-| **ENTRY-002** | Channel identity (M5 Gateway) | ✅ clean | `04-artifacts/evidence/entry/M6-ENTRY-002.json` |
-| **ENTRY-003** | Event governance (event_registry: external_send / data_sensitivity / channel) | 🔴 **đang build** (schema + reseed + enforce) | (spec ở repo mã nguồn, chưa nộp) |
-| **ENTRY-004** | M4 + M5: không public giá cuối / không leak PII / không spam ra kênh công khai | 🟡 **cả 2 nửa đã judge độc lập**; nửa M4 = **ACCEPTED_PARTIAL** + 1 defect ghi thẳng (`safetyBoundary` chưa được PII guard quét) | `04-artifacts/evidence/entry/M6-ENTRY-004.json` + `M6-ENTRY-004/_M4_JUDGE_VERDICT_2026-08-11.json` |
-| DEFER-FBC | Consent fail-open (F-A…F-F) | ✅ đã đóng + nộp | `04-artifacts/evidence/decisions/M6-DEFER-FBC-M6.2D.json` |
+Ledger `04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv`: **198 prompt đều terminal** — **170 PASS + 25 SIGNED + 3 SKIPPED**. Không còn prompt nào TODO/RUNNING/BLOCKED.
 
-## Đã thẩm định thế nào (không tự chấm)
-- **Bốn-mắt:** author ≠ adversary ≠ judge; mọi verdict pin theo **commit SHA** repo mã nguồn (`a3aad246`, `97cc82bc`).
-- **ENTRY-001:** test tích hợp thật (Testcontainers PostgreSQL) chạy **xanh**, surefire XML + **sha256 khớp** (tự tính lại mà kiểm); adversary cố phá ranh giới doanh thu → **không phá được**.
-- **ENTRY-004 (M4):** ASSERT-001 (giá) + ASSERT-003 (spam) **PROVEN**; ASSERT-002 (PII) **PARTIAL** + đối kháng tìm ra lỗ `safetyBoundary` — **ghi thẳng, chưa che**.
+| Giai đoạn | Prompt | Trạng thái |
+|---|---|---|
+| BOOTSTRAP · DOC_LOCK · PHASE0 · HARMONIZATION | 76 | PASS |
+| M6.2A → M6.2K (11 slice build) | 110 | PASS/SIGNED (mỗi slice có JUDGE_GATE SIGNED) |
+| PR_PILOT (pilot production-OFF) | 12 | PASS/SIGNED — row cuối M6-P3011 SIGNED |
 
-## Còn lại để mở M6.2G
-1. **Phúc (M3):** ký owner ENTRY-001 + build ENTRY-003 (3 lớp).
-2. **Tài (M4):** fix `safetyBoundary` + ký owner M4.
-3. **Re-run `M6-P1600`** khi bằng chứng đủ — **không override, không bỏ qua bước nào**.
+**3 SKIPPED là minh bạch, KHÔNG phải PASS giả:** `M6-P1000` (M6.2A), `M6-P1306` + `M6-P1309` (M6.2D) — override transparent, judge verdict giữ **BLOCKED**, có decision file; đây cũng là các *standing blocker* mà evidence-pack M6.2K disclose thẳng.
 
-## Điểm trung thực (dấu hiệu tốt)
-- Mọi dossier liệt kê `open_blockers` thẳng, không tô hồng.
-- Override (nếu có) đều transparent: judge giữ BLOCKED, ledger ghi SKIPPED (không PASS), có decision file.
-- Lỗi (`safetyBoundary`) được ghi vào verdict, **không giấu**.
+## 2. Scale Gate M6.2G đã mở (đúng quy trình, không override)
 
-**Một câu:** bằng chứng thật · thẩm định thật · lỗi ghi thẳng · không có gì làm giả · production vẫn OFF.
+`M6-P1600` (M6.2G Scale Gate) = **SIGNED** bằng phiên Judge tươi trên bằng chứng entry thật — **không dùng owner override**, không bỏ qua bước nào. Cả 4 entry-evidence đã proven/judged độc lập bốn-mắt:
+
+| Entry | Trạng thái | Ghi chú |
+|---|---|---|
+| ENTRY-001 (verified revenue chỉ từ `ORDER_VERIFIED`) | **PROVEN** + owner M3 ký | runtime proof (surefire XML) sha256 khớp; adversary không phá được ranh giới doanh thu |
+| ENTRY-002 (channel identity M5) | **clean** | |
+| ENTRY-003 (event governance: external_send/data_sensitivity/channel fail-closed) | **PROVEN** | build trên `origin/dev` (V190 schema + V191 classify + enforce), judge độc lập; residual: owner-runtime create + enforce chưa wire egress (đúng posture production OFF) |
+| ENTRY-004 (M4+M5: không public giá / không leak PII / không spam) | M4 **PROVEN** · M5 **PARTIAL — risk-accepted (RATIFIED)** | M4 defect `safetyBoundary` đã fix (SAFE-003 @9f7e3dc8, RED→GREEN); M5 giữ PARTIAL cho pilot production-OFF |
+
+## 3. Pack readiness = OWNER_REVIEW_REQUIRED (không tự phong Pass/Scale-Ready)
+
+Evidence-pack cuối (M6.2K) lắp gói owner-sign-off. Enum `Readiness` **không có member Pass/Ready/Scale-Ready** — trần cấu trúc là `OWNER_REVIEW_REQUIRED`; pack **không thể tự tuyên bố** "ROAS Pass" hay "Scale Ready" (quyết định đó thuộc owner, theo doc §23). 8 *standing blocker* luôn được disclose kể cả khi pack đầy đủ.
+
+## 4. Nợ kỹ thuật còn mở — ghi thẳng, KHÔNG che (không phải rủi ro production)
+
+Hai loại forward-debt đã biết. **Không cái nào là rủi ro production** (cờ vẫn OFF/BLOCKED, các đường egress thật chưa bật/không reachable từ kênh):
+
+**(a) M5 runtime controls trước real external send** (ENTRY-004 DEBT-1..4): allowlist template, dedup cross-instance, send-rate outbound, real Graph sink — điều kiện **cứng trước bất kỳ post công khai thật nào**; đã owner risk-accept cho pilot production-OFF (`M6-ENTRY-004/_OWNER_RISK_ACCEPTANCE.md`).
+
+**(b) Lỗ trong evidence-assembler M6.2K — phát hiện bởi re-judge độc lập post-close, đã bị "ký đè" bằng fix hẹp, CHƯA thành owner-debt.** Ghi thẳng ở đây:
+- **Category-content forgery:** `app/measurement/evidence/pack_assembler.py:83` đánh dấu category COMPLETE bằng `provided.get(k)` *truthiness*. Một ref giả-đúng-dạng, hoặc **1 ref hợp lệ copy-paste vào cả 10 category**, làm mọi category COMPLETE ⇒ readiness `OWNER_REVIEW_REQUIRED` với **zero bằng chứng thật**. Nó **sống sót qua fix hẹp `stripped-non-blank`** đã carry. Cần: validate ref **tồn-tại + duy-nhất + buộc-đúng-category**.
+- **Collision / shadow:** floor kiểm gap-id là **set-subset** (`tests/test_gap_blocker_list_carries_standing_blockers.py`) → collapse duplicate → **không phát hiện id trùng/shadow** một standing-blocker chuẩn (M6-P1000/M6-P1309). Cần: pin/de-dup gap id.
+- **Đề xuất track:** `M6-OD-013` (forgery) + `M6-OD-014` (collision/shadow), đóng **trước khi pack được đưa ra bất kỳ endpoint thật nào**. Judge M6-P2009 sign-off **sound về cơ học** (verdict PASS, `open_blockers=[]`) nhưng đã reduce 2 lỗ này thành "coder hardening non-blocking" thay vì escalate lên owner-debt — nay ghi lại để không trôi.
+
+## 5. Điểm trung thực (dấu hiệu tốt)
+- Mọi dossier liệt kê `open_blockers`/residual thẳng, không tô hồng.
+- Override đều transparent: judge giữ BLOCKED, ledger SKIPPED (không PASS), có decision file.
+- Defect (`safetyBoundary`) và cả lỗ evidence-assembler (§4b) **ghi thẳng, không giấu** — kể cả khi nó lộ ra rằng một bước judge trước đó chưa vét kiệt.
+
+**Một câu:** pack build xong end-to-end, thẩm định thật bốn-mắt, production vẫn OFF; hai nợ forward (M5 runtime + evidence-assembler forgery/collision) **ghi thẳng, chưa đóng, không phải rủi ro production** — đóng trước khi chạm endpoint thật.

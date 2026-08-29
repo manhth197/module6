@@ -1,0 +1,33 @@
+{
+  "prompt_id": "M6-P3006",
+  "status": "PASS",
+  "summary": "M6-P3006 PRODUCTION_FLAG_STILL_OFF_VERIFY (PM_ORCHESTRATOR, analysis_only, PR_PILOT). Read-only verification that the immutable governance posture still holds and that NO file in the pack sets an enabling value. NULL RESULT confirmed. (1) AUTHORITATIVE STATE: 04-artifacts/state/CURRENT_STATE_LOCKED.json still shows global_gateway_state=BLOCKED and production_flag=OFF (module M6; note 'State ledger is operator-script-only. Executors never write here.'). (2) SOURCE DEFINITIONS: app/config.py (read line-by-line for the latest slice M6.2K, the byte-carried head of the A..K tree) defines every immutable token at its SAFE value — GLOBAL_GATEWAY_STATE='BLOCKED', PRODUCTION_FLAG='OFF', EXTERNAL_SEND='OFF', HASH_POLICY_RATIFIED=False, SCALE_MODEL_RATIFIED=False, SCALE_EXECUTION_ENABLED=False, DASHBOARD_ALERT_THRESHOLDS_DEFINED=False, LEARNING_AUTOPUBLISH_ENABLED=False, LEARNING_CONTENT_FILL_ENABLED=False, LEARNING_SAFE_RANGE_RATIFIED=False; the module-level constants are Final and the only send choke is a READ comparison (is_external_send_enabled(): return EXTERNAL_SEND == 'ON', which is always False because EXTERNAL_SEND=='OFF'). (3) ENABLING-ASSIGNMENT SCAN of the task scope (04-artifacts/evidence + 04-artifacts/impl): scanned 262 evidence files + 1323 impl files for a TRUE enabling ASSIGNMENT (op '=' [not '=='] or ':') of global_gateway_state/production_flag/external_send to any of OPEN/ENABLED/UNBLOCKED/ACTIVE/LIVE/ON/TRUE, and of the scale/hash/learning/dashboard bool flags to True/1/YES/ON/ENABLED, and of live_migrations to true. RESULT: 0 enabling assignments in .py source across BOTH roots; 0 hits of any kind in impl; the only 9 hits in evidence are prose inside JSON summary/judge_notes fields DESCRIBING the boundary force-attacks (e.g. 'forcing config.EXTERNAL_SEND=ON at runtime still yields egress_eligible=False') or judge verdicts — descriptions of a defended attack, never an assignment. A broader whole-pack sweep (15438 files) surfaced only the same two non-enabling classes: (a) the impl/M6.2*/app/config.py choke COMPARISON `EXTERNAL_SEND == 'ON'` (11 slices, a read not a write), and (b) boundary/security/evidence PROSE describing force-attacks that stay blocked (incl. M6.2K_boundary.md D4 'Mutate config.PRODUCTION_FLAG=\"ON\" then assemble' -> OPEN_NONGATE, code-exec-only, the snapshot echoes ON but the read-only MappingProxyType posture blocks the tamper via the pack) and the M6-OD-003 hash-force test (force HASH_POLICY_RATIFIED=True -> every field still hashed, allow-list empty). None is an enabling write to a pack artifact. (4) HONEST OPEN/BLOCKED REPORTING: the posture stays OFF BECAUSE the standing owner gates remain OPEN, not because they were silently cleared — DECISION_REGISTER shows M6-OD-001..010 + M6-OD-012 OPEN (M6-OD-011 DECIDED 2026-07-23), and the judge verdicts M6-P1000 (M6.2A entry) + M6-P1309 (M6.2D exit) remain BLOCKED (not converted); the M6.2G/H/I/J before-real-scale/send/auto-publish/surfacing forward conditions all remain in force. These are exactly the standing gap/blockers the M6.2K owner-review pack discloses; this prompt confirms none was turned into an enabling value. GOVERNANCE: analysis_only — no application code, migration, state ledger, or flag written; no external/network call; did NOT touch 04-artifacts/state/, did NOT mark any ledger row, did NOT modify any file it inspected; global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF unchanged. No raw secret/PII in this evidence (governance tokens only; no ids). status PASS is this reviewer's honest self-report of a NULL enabling-write result (fail_gate_tripped=false); the runner EVIDENCE_GATE and the Judge decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/state/CURRENT_STATE_LOCKED.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/impl/M6.2K/app/config.py"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/prompts/M6-P3006.json"
+  ],
+  "commands_run": [
+    "Glob (read-only): located 04-artifacts/state/CURRENT_STATE_LOCKED.json",
+    "Grep/Read (read-only): PROMPT_EXECUTION_LEDGER_LOCKED.csv -> M6-P3006=RUNNING (row 194, order 192), dependency M6-P3005=PASS; CURRENT_STATE_LOCKED.json -> global_gateway_state=BLOCKED, production_flag=OFF",
+    "Read (read-only): 04-artifacts/impl/M6.2K/app/config.py -> all immutable tokens defined at safe values; is_external_send_enabled() is a read comparison EXTERNAL_SEND=='ON' (always False)",
+    "python (read-only): enabling-shape scan of 04-artifacts (1874 files) -> 29 raw hits, all classified non-enabling (config.py '== ON' comparisons + boundary/security/evidence force-attack prose)",
+    "python (read-only): assignment-vs-comparison scan scoped to 04-artifacts/evidence (262 files) + 04-artifacts/impl (1323 files) -> 0 .py enabling assignments in both; 9 evidence prose hits (summary/judge_notes describing defended force-attacks); 0 impl hits",
+    "Grep (read-only): DECISION_REGISTER.md -> M6-OD-001..010 + M6-OD-012 OPEN, M6-OD-011 DECIDED; grounds the honest OPEN reporting (posture OFF because gates stay OPEN, not silently cleared)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/state/CURRENT_STATE_LOCKED.json",
+    "04-artifacts/impl/M6.2K/app/config.py",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P3006 (status self-reported PASS; the gate + Judge decide — the reviewer does not self-certify). The verification is a confirmed NULL result: CURRENT_STATE_LOCKED.json still shows global_gateway_state=BLOCKED + production_flag=OFF, config.py defines every immutable token at its safe value, and no file in the task scope (evidence + impl) — nor anywhere in the broader pack — sets an enabling value; the only matches are read-comparison chokes and prose describing defended force-attacks. On PASS, proceed to M6-P3007 (ROLLBACK_READINESS) then M6-P3008 (OPEN_ITEMS_REGISTER), M6-P3009 (PILOT_EVIDENCE_COLLECT), and M6-P3010 (POST_PILOT_SCALE_GATE_FRAME). The standing OPEN owner decisions (M6-OD-001..010, M6-OD-012) + the BLOCKED verdicts M6-P1000 / M6-P1309 + the M6.2G/H/I/J forward conditions remain in force and are owner-only to resolve; nothing here authorizes scale, external send, auto-publish, CRM send, commission computation, or a production/readiness flip. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF remain immutable through PR/PILOT."
+}

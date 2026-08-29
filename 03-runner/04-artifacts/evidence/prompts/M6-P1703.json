@@ -1,0 +1,44 @@
+{
+  "prompt_id": "M6-P1703",
+  "status": "PASS",
+  "summary": "M6_2H_TESTER_BUILD (mode=build, 'do not yet run'). Entry gate verified in the state ledger before any work: M6-P1700 SIGNED, M6-P1701 PASS, M6-P1702 PASS (required predecessor), M6-P1703 RUNNING (this prompt, order 149). Authored exactly one official smoke file for the single bound smoke id (M6-SMK-011), carrying the SMOKE_REGISTER scenario AND expected result VERBATIM (Vietnamese diacritics intact) in its docstring, driving the M6.2H learning layer: LearningEngine.review (fail-closed safe-range -> HOLD), record_review_decision (explicit owner approve/reject/hold), AdsLearningCandidate.is_publish_authorized (APPROVED + WITHIN), the append-only ReviewQueue, and guarded_publish_blocked(). Reused the shared conftest learning fixtures (learning_engine, review_queue, library_store, make_candidate, make_review_decision) and mirrored the coder's reference leg tests. SMK-011 (6 nodes): primary parametrized over OUTSIDE and UNKNOWN -> a candidate outside/unknown the safe range is HELD (review_state HOLD), safe_range_status forced UNKNOWN (M6-OD-006 OPEN), is_publish_authorized False, queue confirms HOLD; negatives: an untrusted WITHIN claim is forced UNKNOWN + HELD; the learning layer exposes no publish/auto-publish/go-live/execute/send method and guarded_publish_blocked() is True with the posture flags False; even a recorded owner APPROVE leaves is_publish_authorized False because the safe range stays UNKNOWN; control: a directly-constructed APPROVED+WITHIN candidate WOULD be publish-authorized (property discriminating) but review() forces UNKNOWN so no reviewed candidate reaches WITHIN. ACCEPTANCE CHECKS met: (1) one test per bound smoke id, scenario verbatim; (2) negative/fail-closed cases present; (3) existing coder test patterns reused (test_candidate_outside_safe_range_holds.py, test_no_auto_publish_review_queue_only.py) plus conftest fixtures. BUILD VALIDATION was collect-only (imports/collects, NO assertions executed) per the prompt, cache-free, no shell redirection: the new file collects clean (6 nodes) EXIT 0; the full staged suite collects to 351 (= 345 carried M6.2H baseline [313 carried M6.2G tree + 32 coder M6.2H learning leg tests] + 6 new) EXIT 0, total via an in-process pytest_collection_finish tally (harness clips a long terminal summary). A read-only adversarial static-verification workflow (2 agents: a verifier tracing EVERY assertion through the frozen implementation with cited source lines + a completeness critic) returned all-CLEAN, 0 errors: all 24 assertions (incl. the 8 parametrized primary cases and the discriminating control) predicted PASS at run time, scenario/expected verbatim confirmed, PII-clean and boundary-clean, and the critic confirmed the id covered with a verbatim primary + negatives, no self-certification, no state write. TEST_MANIFEST.md rebuilt for M6.2H (binding table, per-smoke verbatim section, fixtures, boundary, exit-gate legs L1-L4, execution plan for M6-P1704). GOVERNANCE POSTURE UNCHANGED AND IMMUTABLE: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, LEARNING_AUTOPUBLISH_ENABLED=False, LEARNING_SAFE_RANGE_RATIFIED=False (M6-OD-006 OPEN), LEARNING_CONTENT_FILL_ENABLED=False (M6-OD-007 OPEN), SCALE_EXECUTION_ENABLED=False, SCALE_MODEL_RATIFIED=False. No application code changed, no migration applied, no external call, nothing published / auto-published / content-generated, no origin strategy fabricated, no Core-policy write, no flag flipped, no order-state/pricing/CRM-send/commission, no write to 04-artifacts/state/. All ids synthetic; owner actor 'owner_ops' and sku 'SKU_HERO_1' synthetic, actor masked on export; no raw secret/PII. status=PASS is an honest TESTER self-report of a completed, collect-validated, statically-verified BUILD; it does NOT execute the smoke and does NOT advance any gate. Formal execution is M6-P1704; the runner EVIDENCE_GATE and the slice Judge (M6-P1709) decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/slices/M6.2H.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/impl/M6.2H/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2H/tests/conftest.py",
+    "04-artifacts/impl/M6.2H/app/measurement/learning/candidate.py",
+    "04-artifacts/impl/M6.2H/app/measurement/learning/learning_engine.py",
+    "04-artifacts/impl/M6.2H/tests/test_candidate_outside_safe_range_holds.py",
+    "04-artifacts/impl/M6.2H/tests/test_no_auto_publish_review_queue_only.py"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2H/tests/smoke/test_smk_011_learning_candidate_outside_safe_range_holds.py",
+    "04-artifacts/impl/M6.2H/tests/TEST_MANIFEST.md"
+  ],
+  "commands_run": [
+    "02-tester/.venv/Scripts/python.exe -m pytest tests/smoke/test_smk_011_learning_candidate_outside_safe_range_holds.py --collect-only -q -p no:cacheprovider  (from 04-artifacts/impl/M6.2H; PYTHONDONTWRITEBYTECODE=1; 6 nodes; EXIT=0; NO assertions executed)",
+    "02-tester/.venv/Scripts/python.exe -c \"<in-process pytest_collection_finish tally: len(session.items)>\" --collect-only -q -p no:cacheprovider  (from 04-artifacts/impl/M6.2H; COLLECTED_TOTAL=351; pytest RC=0)"
+  ],
+  "test_results": [
+    {
+      "smoke_id": "M6-SMK-011",
+      "result": "PASS",
+      "detail": "Built tests/smoke/test_smk_011_learning_candidate_outside_safe_range_holds.py (6 nodes) — scenario 'Learning candidate ngoài safe range' / expected 'Hold review, không publish' verbatim. Primary parametrized OUTSIDE/UNKNOWN -> review() HOLDs, safe_range forced UNKNOWN (M6-OD-006), is_publish_authorized False. Negatives: WITHIN-claim forced UNKNOWN+HELD; no publish/auto-publish method + guarded_publish_blocked True + posture flags False; a recorded owner APPROVE still not publishable (safe range UNKNOWN). Control: APPROVED+WITHIN would publish (discriminating) but review() forces UNKNOWN so unreachable. BUILD ONLY: collect-clean (EXIT 0) + adversarial static verification CLEAN (all 24 assertions predicted PASS); NOT executed — execution recorded by M6-P1704."
+    }
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2H/tests/smoke/test_smk_011_learning_candidate_outside_safe_range_holds.py",
+    "04-artifacts/impl/M6.2H/tests/TEST_MANIFEST.md",
+    "04-artifacts/impl/M6.2H/tests/conftest.py",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/slices/M6.2H.md",
+    "04-artifacts/evidence/prompts/M6-P1702.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1703. On PASS, proceed to M6-P1704 (M6_2H_TESTER_RUN): execute the full staged suite (expected 351 passed) and the bound smoke tests/smoke/test_smk_011_learning_candidate_outside_safe_range_holds.py (expected 6 passed), and record structured results + evidence refs into 04-artifacts/test-reports/M6.2H/SMOKE_RESULTS.md for exit-gate leg L4. Then M6-P1705 (boundary adversary) and M6-P1706 (security/PII) review the learning layer; the slice gate judge is M6-P1709. Governance flags stay BLOCKED/OFF/OFF; LEARNING_AUTOPUBLISH_ENABLED/LEARNING_SAFE_RANGE_RATIFIED/LEARNING_CONTENT_FILL_ENABLED stay False and M6-OD-006 (safe range) + M6-OD-007 (content) remain OPEN forward gates before any real publish or seed content."
+}

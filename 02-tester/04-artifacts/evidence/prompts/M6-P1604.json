@@ -1,0 +1,43 @@
+{
+  "prompt_id": "M6-P1604",
+  "status": "PASS",
+  "summary": "M6_2G_TESTER_RUN (mode=test). Entry gate verified in the state ledger before any work: M6-P1603 PASS (required predecessor), M6-P1604 RUNNING (this prompt, order 140). Executed the slice M6.2G Scale-Gate smoke suite with the pinned pack venv (python 3.12.13 / pytest 8.4.2 / pluggy 1.6.0), cache-free (PYTHONDONTWRITEBYTECODE=1, -p no:cacheprovider), NO shell redirection (the role guard blocks a >/2> co-occurring with the venv Scripts path). RESULTS: the two bound smoke files ran 14 passed / 0 failed, exit 0 (SMK-009 10/10, SMK-012 4/4); the full staged suite ran 313 passed / 0 failed / 0 skipped / 0 error, RC 0 (in-process pytest_runtest_logreport tally, empty failure list — the harness does not reliably capture pytest's long terminal summary; the tally agrees with the M6-P1603 collect-only total of 313). Both bound smoke ids PASSED: SMK-009 — any of the 6 Risk-row locks (recall/sale_lock/quality_hold/complaint_p0/platform_spam_flag/crm_suppression) forces Risk FAIL + overall FAIL (RULE-017 hard veto); a recall-locked request cannot be approved (ScaleGateViolation, stays PROPOSED, not authorized); unobserved risk is fail-closed HOLD; the risk re-check catches a sale_lock appearing after a clean proposal; control shows no-locks -> Risk PASS with overall still HOLD. SMK-012 — a proposal with no owner decision stays PROPOSED and is_scale_authorized False (RULE-015); the gate has no self/auto-approve or scale/execute entry point and SCALE_EXECUTION_ENABLED is False; even a recorded owner APPROVE leaves is_scale_authorized False because overall is HOLD (SCALE_MODEL_RATIFIED=False, M6-OD-005); an owner REJECT is recorded (REJECTED), never a scale. ACCEPTANCE CHECKS met: (1) commands_run non-empty (2 commands); (2) test_results has one entry per bound smoke id (2); (3) failures reported not fixed — there were 0 failures, and no code under test was patched (TESTER executes and reports only). Supporting M6.2G scale leg tests (test_scale_gate_risk_veto 7, test_scale_request_needs_owner_approval 2, test_no_executable_scale_path 4, test_scale_request_lifecycle 5, test_scale_conditions_failclosed 4, test_risk_recheck_at_approval 4) and the carried M6.2A-F tree (273) all ran green inside the 313. Recorded SMOKE_RESULTS.md (per-smoke PASS tables with node-level detail, exact commands, correlation-id note, boundary observations, exit-gate legs L1-L4). GOVERNANCE POSTURE UNCHANGED AND IMMUTABLE: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, SCALE_EXECUTION_ENABLED=False, SCALE_MODEL_RATIFIED=False (M6-OD-005 OPEN), DASHBOARD_ALERT_THRESHOLDS_DEFINED=False (M6-OD-002 OPEN), HASH_POLICY_RATIFIED=False. No application code changed, no migration applied, no external call, no scale executed / budget raised / campaign enabled / flag flipped, no order-state/pricing/CRM-send/commission, no write to 04-artifacts/state/. All ids synthetic; owner actor 'owner_ops' masked on export; no raw secret/PII. status=PASS is an honest TESTER self-report of the executed run; it does NOT self-certify gate advancement — the runner EVIDENCE_GATE and the slice Judge (M6-P1609) decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/impl/M6.2G/tests/TEST_MANIFEST.md",
+    "04-artifacts/evidence/prompts/M6-P1603.json",
+    "00-spec/slices/M6.2G.md",
+    "00-spec/registers/SMOKE_REGISTER.md"
+  ],
+  "files_changed": [
+    "04-artifacts/test-reports/M6.2G/SMOKE_RESULTS.md"
+  ],
+  "commands_run": [
+    "02-tester/.venv/Scripts/python.exe -m pytest -v tests/smoke/test_smk_009_recall_sale_lock_scale_fail.py tests/smoke/test_smk_012_scale_no_owner_approval.py -p no:cacheprovider  (from 04-artifacts/impl/M6.2G; PYTHONDONTWRITEBYTECODE=1; RESULT: 14 passed in 0.10s; EXIT 0)",
+    "02-tester/.venv/Scripts/python.exe -c \"<pytest_runtest_logreport tally + pytest.main(['-q','-p','no:cacheprovider'])>\"  (from 04-artifacts/impl/M6.2G; PYTHONDONTWRITEBYTECODE=1; RESULT: COUNTS={'passed':313,'failed':0,'skipped':0,'error':0} RC=0; FAILS=[])"
+  ],
+  "test_results": [
+    {
+      "smoke_id": "M6-SMK-009",
+      "result": "PASS",
+      "detail": "tests/smoke/test_smk_009_recall_sale_lock_scale_fail.py 10/10 passed. Primary parametrized over the 6 Risk locks -> Risk FAIL + overall FAIL (RULE-017 hard veto). Negatives: recall-locked request cannot be approved (ScaleGateViolation, stays PROPOSED, not authorized); unobserved risk -> fail-closed HOLD; re-check catches a late sale_lock at approval. Control: no locks -> Risk PASS, overall HOLD. Scenario/expected verbatim."
+    },
+    {
+      "smoke_id": "M6-SMK-012",
+      "result": "PASS",
+      "detail": "tests/smoke/test_smk_012_scale_no_owner_approval.py 4/4 passed. Primary: no owner decision -> PROPOSED, is_scale_authorized False (RULE-015). Negatives: no self/auto-approve entry point + SCALE_EXECUTION_ENABLED False; a recorded owner APPROVE still leaves is_scale_authorized False (overall HOLD, SCALE_MODEL_RATIFIED=False). Control: owner REJECT recorded (REJECTED), no scale. Scenario/expected verbatim."
+    }
+  ],
+  "evidence_refs": [
+    "04-artifacts/test-reports/M6.2G/SMOKE_RESULTS.md",
+    "04-artifacts/impl/M6.2G/tests/TEST_MANIFEST.md",
+    "04-artifacts/impl/M6.2G/tests/smoke/test_smk_009_recall_sale_lock_scale_fail.py",
+    "04-artifacts/impl/M6.2G/tests/smoke/test_smk_012_scale_no_owner_approval.py",
+    "04-artifacts/evidence/prompts/M6-P1603.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1604. On PASS, proceed to M6-P1605 (M6_2G_BOUNDARY_ADVERSARY) — verify the scale layer keeps the module boundary (no executable scale path, Risk hard veto, owner-decision gated, nothing acts) — then M6-P1606 (M6_2G_SECURITY_REVIEW) for PII/secret discipline on the owner-decision audit + evidence refs, M6-P1607 (evidence collect), M6-P1608 (docs), and the slice gate judge M6-P1609. Governance flags stay BLOCKED/OFF/OFF; SCALE_EXECUTION_ENABLED/SCALE_MODEL_RATIFIED stay False and M6-OD-005 (scale model) + M6-OD-002 (thresholds) remain OPEN forward gates before any real scale."
+}

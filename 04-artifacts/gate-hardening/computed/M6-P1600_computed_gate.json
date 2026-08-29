@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-08-28T01:48:22Z",
+  "claimed_fail_gate_tripped": false,
+  "classification": "judge",
+  "computed_fail_gate_tripped": false,
+  "computed_status": "CLEAN",
+  "evidence_present": true,
+  "evidence_sha256": {
+    "04-artifacts/evidence/prompts/M6-P1600.json": "e169a24c4276c7322cca02ea496a55939e7d11da37a59232e60363bae99236a3"
+  },
+  "failures": [],
+  "integrity_violations": [],
+  "mode": "gate",
+  "prompt_id": "M6-P1600",
+  "rules_version": "M6-SGV-1.0",
+  "warnings": []
+}

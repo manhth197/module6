@@ -1,0 +1,61 @@
+{
+  "prompt_id": "M6-P1605",
+  "status": "PASS",
+  "summary": "M6_2G_BOUNDARY_ADVERSARY (analysis_only) attempt 1, against the FROZEN staged M6.2G Scale Gate (compute the 8 doc §16 conditions, assemble evidence, PROPOSE an inert ads_scale_request; NEVER act). ENTRY GATE verified: ledger row 141 M6-P1605=RUNNING; dependency M6-P1604=PASS (bound smokes SMK-009/012 14/14, full staged suite 313 passed rc 0); entry judge M6-P1600 SIGNED; coder M6-P1601/1602 + tester M6-P1603/1604 PASS; prior-slice judge M6-P1509 SIGNED (M6.2F closed); posture immutable (BLOCKED/OFF/OFF/SCALE_EXECUTION_ENABLED=False/SCALE_MODEL_RATIFIED=False/DASHBOARD_ALERT_THRESHOLDS_DEFINED=False) confirmed at runtime. METHOD: one read-only EXECUTED harness (04-boundary/work/attacks/m6_2g_attacks.py) imports the frozen staged app and drives the real paths -- evaluate_conditions (8 conditions), the ScaleGate propose/approve/reject flow, AdsScaleRequest.is_scale_authorized, the inert ScaleRequestStore, and the POST /scale-requests handlers; pinned launcher Python 3.12.10, -B byte-clean (my run wrote 0 __pycache__; 04-artifacts/impl/M6.2G untracked, no tracked diff); 30 recorded outcomes (DEFENDED=24, OPEN-non-gate=4, notes=2). Owner/PII probes assembled at runtime (a phone-shaped free-text probe is built from a digit tuple so NO phone literal sits in the harness source) + never echoed raw. Coverage widened by a 6-agent adversarial-ideation workflow + a completeness critic (49 candidate vectors); every claimed breach was executed and every FAIL-006 candidate had its reachability verified against the real wiring. VERDICT: NO BLOCKER; the in-scope fail gate M6-FAIL-006 (auto scale) is NOT tripped, for five independent executed reasons. (1) No executable path: ScaleGate exposes only propose/record_owner_decision; the store only create/get/all/update_state/history; ScaleRequestDeps only {scale_gate,context,audit}; NO raise-budget/enable-campaign/open-audience/scale/execute/send/publish/dispatch/approve-all/auto-approve attribute anywhere; a token sweep of the 5 scale modules finds 0 action defs + 0 posture-flag writes. (2) is_scale_authorized is structurally unreachable: it requires overall==PASS, but the Funnel (M6-OD-002) and Dashboard (M6-OD-005) conditions are hard-wired HOLD in BOTH branches -- an EXHAUSTIVE 1296-cell ScaleContext cross-product yields overall==PASS in 0 cases, and the single maximally-favorable context is HOLD. (3) Config flips do not help: flipping BOTH DASHBOARD_ALERT_THRESHOLDS_DEFINED and SCALE_MODEL_RATIFIED True in-process still yields overall HOLD (the second branches also return HOLD -- triple fail-closed; flags saved/restored). (4) No consumer arms it: the scale surface reads NO posture flag (PRODUCTION_FLAG/GLOBAL_GATEWAY_STATE/EXTERNAL_SEND/SCALE_EXECUTION_ENABLED) to branch into an action and has NO is_scale_authorized consumer -- even a True would execute nothing; conditions.py references config only for the 2 OPEN-decision rows. (5) Nothing is wire-forgeable: there is NO deserializer (from_public/from_dict/json.loads/pickle/__setstate__/model_validate) on the scale surface, so every forge/laundering vector needs in-process code exec, not a channel breach; even a recorded owner APPROVE stays not-authorized (overall HOLD); and the untrusted request body can never fake a condition (conditions come from deps.context server-side). RULE-017 (Risk hard veto) holds: each of the 6 locks (recall/sale_lock/quality_hold/complaint_p0/platform_spam_flag/crm_suppression) -> Risk FAIL + overall FAIL; a risk-locked proposal cannot be approved; a lock active at approval time is caught by the fresh re-read and refused; an empty/partial fresh read with a HOLD proposal is refused (the coder's fail-closed fix, re-verified); unobserved risk is HOLD never PASS. RULE-010/015 (owner discipline) holds: never self-approves; a REJECT is recorded and is never a scale; a terminal request cannot be re-decided; an APPROVE requires budget_cap + rollback + a non-FAIL request; a FAIL request is refused even with no fresh read; the API requires all of actor/reason/audit_ref/evidence_ref, rejects a bad decision kind, and surfaces a Risk-veto refusal as APPROVAL_REFUSED (not a silent pass); the audit detail is machine-safe (untrusted owner reason/audit_ref NOT echoed; actor masked -- coder PII fix re-verified). RULE-020: missing entry evidence -> P3/P5/P6 HOLD -> overall HOLD. OPEN residuals (all armed-not-fired; none trips FAIL-006; routed): F-SCALE-1 [CODER + M6-P1606] stale-proposal risk fallback -- when the fresh risk read at approval is empty, _assert_risk_clear_at_approval falls back to the proposal's Risk condition, so a clean proposal (Risk PASS) approves even if a NEW lock is active but hidden by the empty read; no scale authorized (overall HOLD) and the API forwards deps.context.risk_flags, but the fresh-read veto is only complete when the fresh read is; fix: require a COMPLETE fresh risk read to approve. F-SCALE-2 [CODER + M6-OD-011] approval laundering / bait-and-switch -- ScaleRequestStore.update_state validates only request_id existence and does not pin scale_target/budget_cap/condition_results to what the owner reviewed, so an in-process replace()+update_state moves a genuine APPROVE onto a different larger target/budget (cmp_SMALL/100 -> cmp_HUGE/10M); in-process only (update_state is not wire-exposed; the gate's own path changes only approval_state/decision/decided_at) and inert today (no executor), but the closest shape to a real FAIL-006 if an executor is ever wired; fix: update_state must reject any transition mutating target/cap/condition_results, and the M6-OD-011 binding must RE-RUN evaluate_conditions on load rather than trust a stored overall_status. F-SCALE-3 [CODER + M6-P1606] budget_cap not validated -- -1/0/+inf/NaN all pass as a 'present' cap (handler checks only numeric-not-bool; is_scale_authorized checks only 'is not None'); inert today; fix: require math.isfinite AND >0. F-SCALE-4 [CODER + M6-P1606] rollback_condition presence-only -- a whitespace ' ' satisfies the RULE-010 cap+rollback safety pairing; fix: content-validate the rollback plan. Notes: N-1 frozen-record object.__setattr__ forge and N-2 module-global mutation of RISK_LOCKS/REQUIRED_ENTRY_EVIDENCE both require arbitrary in-process code exec (all in-memory invariants moot) and authorize no scale -> defense-in-depth limits, not channel-reachable; harden via a frozen/validated registry. Cosmetic: scale_gate.py has a dead 'from app import config' (config unused there). GOVERNANCE: analysis_only -- no application code, migration, state ledger, or flag written; no external call; nothing scaled; BLOCKED/OFF/OFF/SCALE_EXECUTION_ENABLED=False/SCALE_MODEL_RATIFIED=False/DASHBOARD_ALERT_THRESHOLDS_DEFINED=False unchanged and asserted post-run (the A5/W3 in-process flips are saved+restored); no self-certification. status PASS is the adversary's honest self-report (fail_gate_tripped=false); the runner EVIDENCE_GATE and the slice Judge (M6-P1609) decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "00-spec/slices/M6.2G.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P1604.json",
+    "04-artifacts/test-reports/M6.2G/SMOKE_RESULTS.md",
+    "04-artifacts/impl/M6.2G/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2G/app/measurement/scale/conditions.py",
+    "04-artifacts/impl/M6.2G/app/measurement/scale/scale_gate.py",
+    "04-artifacts/impl/M6.2G/app/measurement/scale/models.py",
+    "04-artifacts/impl/M6.2G/app/measurement/scale/scale_request_store.py",
+    "04-artifacts/impl/M6.2G/app/api/scale_requests.py",
+    "04-artifacts/impl/M6.2G/app/config.py",
+    "04-artifacts/impl/M6.2G/app/measurement/audit.py",
+    "04-artifacts/impl/M6.2G/tests/conftest.py"
+  ],
+  "files_changed": [
+    "04-artifacts/boundary-reports/M6.2G_boundary.md",
+    "04-artifacts/evidence/prompts/M6-P1605.json",
+    "04-boundary/work/attacks/m6_2g_attacks.py"
+  ],
+  "commands_run": [
+    "py -3.12 --version -> Python 3.12.10 (pinned launcher; matches IMPLEMENTATION_TARGET_LOCKED 3.12 pin)",
+    "PYTHONDONTWRITEBYTECODE=1 py -3.12 -B work/attacks/m6_2g_attacks.py -> 30 recorded outcomes: DEFENDED=24, OPEN_NONGATE=4, NOTE=2; IN-SCOPE FAIL-GATE BREACHES (FAIL-006)=0; full posture asserted unchanged at end of run",
+    "find 04-artifacts/impl/M6.2G 04-boundary/work -name '*.pyc' -newermt '2026-08-28 00:00:00' -> 0 (my -B run wrote 0 bytecode)",
+    "git status --porcelain -- 04-artifacts/impl/M6.2G -> '?? 04-artifacts/impl/M6.2G/' (untracked, no tracked diff)",
+    "NOTE: analysis_only. No application code, migration, state ledger, or flag written; nothing scaled; no external/network call; no shell redirection co-occurring with a venv 'Scripts' path (role guard). 6-agent adversarial-ideation workflow + completeness critic run (49 vectors); every claimed breach executed before recording; the in-process config/global flips (A5 config flags, W3 module globals) are saved+restored so the module is left clean. A post-write secret-scan flag on an early phone-shaped literal in the D5 probe was fixed by assembling the digit run at runtime (no phone literal in source)."
+  ],
+  "evidence_refs": [
+    "04-artifacts/boundary-reports/M6.2G_boundary.md",
+    "04-boundary/work/attacks/m6_2g_attacks.py",
+    "04-artifacts/impl/M6.2G/app/measurement/scale/conditions.py",
+    "04-artifacts/impl/M6.2G/app/measurement/scale/scale_gate.py",
+    "04-artifacts/impl/M6.2G/app/measurement/scale/models.py",
+    "04-artifacts/impl/M6.2G/app/measurement/scale/scale_request_store.py",
+    "04-artifacts/impl/M6.2G/app/api/scale_requests.py",
+    "04-artifacts/impl/M6.2G/app/config.py",
+    "04-artifacts/impl/M6.2G/app/measurement/audit.py",
+    "04-artifacts/impl/M6.2G/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2G/tests/conftest.py",
+    "04-artifacts/test-reports/M6.2G/SMOKE_RESULTS.md",
+    "04-artifacts/evidence/prompts/M6-P1604.json",
+    "00-spec/slices/M6.2G.md",
+    "00-spec/registers/RULES_LOCKED.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1605. M6-FAIL-006 is not tripped (five independent executed reasons: no executable path, structurally-unreachable overall PASS across an exhaustive 1296-cell sweep, config-flip triple fail-closed, no posture-flag/is_scale_authorized consumer, no wire deserializer), so this evidence is PASS-eligible; the boundary report is 04-artifacts/boundary-reports/M6.2G_boundary.md. On PASS, proceed to M6-P1606 (M6_2G_SECURITY_REVIEW), which owns the validation/PII items: F-SCALE-3 (budget_cap isfinite AND >0), F-SCALE-4 (content-validate rollback_condition), and F-SCALE-1 (risk-recheck completeness). The CODER should close F-SCALE-1 (require a COMPLETE fresh risk read to approve; do not fall back to the proposal on an empty read) and F-SCALE-2 (ScaleRequestStore.update_state must reject any transition that mutates scale_target/budget_cap/condition_results for an existing request). The M6-OD-011 integration binding must RE-RUN evaluate_conditions on load (never trust a stored overall_status) and must not wire any scale executor while the posture stands. Governance unchanged: staged-only, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, SCALE_EXECUTION_ENABLED=False, SCALE_MODEL_RATIFIED=False (M6-OD-005 OPEN), DASHBOARD_ALERT_THRESHOLDS_DEFINED=False (M6-OD-002 OPEN); the mandatory scale re-gate remains in force before any real scale or external send."
+}

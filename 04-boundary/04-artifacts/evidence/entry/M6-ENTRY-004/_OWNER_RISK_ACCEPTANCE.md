@@ -1,6 +1,6 @@
 # _OWNER_RISK_ACCEPTANCE (NHÁP) — M6-ENTRY-004, phần M5 / Gateway
 
-> **Trạng thái: DRAFT** — do M5 Evidence Author soạn để Owner cân nhắc ký. **Chưa có hiệu lực tới khi Owner ratify.**
+> **Trạng thái: RATIFIED 2026-08-27** — Owner (Nguyễn Đức Mạnh, M5/Gateway + program owner) đã chấp nhận rủi ro PARTIAL cho pilot production-OFF theo đúng điều kiện dưới. Có hiệu lực cho M6.2G Scale-Gate entry (production/egress giữ OFF). DEBT-1..4 + re-gate là điều kiện CỨNG trước bất kỳ real send nào.
 > **Entry:** M6-ENTRY-004 · **Module:** M5 (Facebook Gateway) · **Ngày soạn:** 01/08/2026 · Mẫu theo ENTRY-003.
 
 ## 1. Điều được risk-accept
@@ -31,5 +31,5 @@
 - Pilot **external-send OFF**, **production OFF**, `GLOBAL_GATEWAY` BLOCKED. Không có post công khai thật ra Meta.
 
 ## 6. Ký (chờ Owner)
-- **Owner (M5 / Gateway):** Nguyễn Đức Mạnh — [ ] chấp nhận rủi ro PARTIAL cho pilot theo điều kiện trên · Ngày: ______
+- **Owner (M5 / Gateway):** Nguyễn Đức Mạnh — [x] **chấp nhận** rủi ro PARTIAL cho pilot theo điều kiện trên · Ngày: **2026-08-27** (xác nhận trong phiên điều phối; Tech-Lead ghi thay theo mô hình owner-xác-nhận).
 - **Ghi chú:** memo này chỉ có hiệu lực khi Owner ký; joint dossier M6-ENTRY-004 còn cần nửa M4 (AI Advisor). Thiếu 1 bên hoặc còn open_blocker ⇒ M6.2G BLOCKED (trung thực).

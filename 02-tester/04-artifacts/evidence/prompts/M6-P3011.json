@@ -1,0 +1,59 @@
+{
+  "prompt_id": "M6-P3011",
+  "status": "PASS",
+  "summary": "FINAL_REVIEW_JUDGE (JUDGE, gate_review, fresh session, evidence-only) -- the FINAL whole-pack review (PR/PILOT) of the Module 6 build. Verdict PASS = READY FOR OWNER REVIEW, and NOTHING MORE: the pack does NOT declare ROAS Pass or Scale Ready (owner-only, doc-23), authorizes no scale/send/auto-publish/CRM/commission/production, and flips no flag. Full reasoning in 04-artifacts/evidence/judge/M6-P3011_JUDGE_FINAL_SIGN_OFF.json. Posture BLOCKED/OFF/OFF + all scale/hash/learning flags False + live_migrations=false unchanged and NOT flipped. Entry: ledger M6-P3011=RUNNING; full PR/PILOT band M6-P3000..M6-P3010 all PASS. ACCEPTANCE CHECKS all satisfied on real source: (1) OWNER PACKET COMPLETE -- OWNER_SIGNOFF_PACKET.md assembles all TEN doc-22 categories (Event Registry, Consent, Outbox, Dedup, Attribution, Dashboard, Scale Gate, Learning, Security/Privacy, Smoke Report) with mandatory content + owner-review notes, caveated where the owner decision is OPEN; explicit no-ROAS-Pass/Scale-Ready statement; readiness caps at OWNER_REVIEW_REQUIRED (no PASS member). (2) PRODUCTION FLAG VERIFIED OFF -- M6-P3006 NULL result independently re-derived: CURRENT_STATE_LOCKED BLOCKED/OFF + config.py all safe Final values + whole-pack sweep 0 enabling assignments (only read-comparison chokes + defended-force-attack prose); posture OFF because gates stay OPEN, not silently cleared. (3) OPEN ITEMS REGISTER COMPLETE -- M6-P3008 five-category register (11 OPEN owner decisions OD-001..010/012 [OD-011 DECIDED + ACCESS-1/CTR-018/019/020 forward]; 5 OPEN conflicts; entry evidence ENTRY-001/003 RISK-ACCEPTED + ENTRY-002 clean + ENTRY-004 READY_FOR_JUDGE owner-ratified with the 00-spec register row honestly flagged STALE; 2 BLOCKED verdicts not converted; 3 proposed smokes awaiting acceptance), honest, no silent shrinking. WHOLE-PACK GATE POSTURE (independently re-derived from ledger + verdict files): all pre-slice gates SIGNED; 20/22 slice gates SIGNED; the 2 exceptions M6-P1000 (M6.2A entry) + M6-P1309 (M6.2D exit) are ledger SKIPPED via owner overrides with their JUDGE_FINAL_SIGN_OFF files STILL reading verdict=BLOCKED -- staged, NOT converted, disclosed. No BLOCKED verdict silently flipped; no gate missing. OVERSTATEMENT CHECK: no artifact declares ROAS Pass/Scale Ready or emits readiness above OWNER_REVIEW_REQUIRED; PILOT_READINESS_REVIEW NOT-scale-ready HOLD; F-EVID-5 (recorded!=passed) disclosed + moot (18/18 P0 PASS, 4 spot-re-run reproducible); 8 standing blockers all disclosed none dropped; the one channel-reachable-shaped finding (F-SEC-2I-1 / N5) armed-not-fired (funnel/growth/materializer UNWIRED from every app/api endpoint, external_send=OFF, is_publish_authorized False); imported dev-password UUID masked (73b***92), disclosed OPEN hygiene, not a raw leak. A 3-lens adversarial refute pass (band-cleanliness + owner-packet-completeness + gate-posture/production-flag) returned refuted=false. WHY PASS: 3 checks satisfied; gate posture honest (2 BLOCKED disclosed not converted); packet complete + truthful; production STILL OFF (independent NULL result); open items complete + honest incl. its own stale-register doc-sync disclosure -- a doc-sync item routed to operator, not a fail-closed blocker (production OFF regardless). OWNER MUST (this PASS authorizes NONE): declare ROAS-Pass/Scale-Ready (owner-only, confirm production STILL OFF); convert/re-gate M6-P1000 + M6-P1309 (not via overrides); ratify 11 OPEN decisions + 5 conflicts; complete M6-OD-011 authN + CTR-018/019/020; direct CODER hardening (F-SEC-2I-1, F-GROWTH-3/1, F-DASH-1/3, F-EVID-5, order_code fan-out, masking family M6-OD-012); close ENTRY-004 M5 DEBT-1..4 + P4 re-gate before real send; accept/waive 3 proposed smokes; reconcile the stale ENTRY-004 register row + the dev-password hygiene item. Concludes the M6 build-pack gated review: M6.2A..M6.2K STAGED + PR/PILOT band PASS, handed to owner with an honest, complete, production-OFF evidence package. No self-certification; no application code/migration/flag change; module boundary intact; no raw secrets/PII.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/state/CURRENT_STATE_LOCKED.json",
+    "04-artifacts/impl/M6.2K/app/config.py",
+    "04-artifacts/analysis/pilot/OWNER_SIGNOFF_PACKET.md",
+    "04-artifacts/evidence/prompts/M6-P3000.json",
+    "04-artifacts/evidence/prompts/M6-P3001.json",
+    "04-artifacts/evidence/prompts/M6-P3002.json",
+    "04-artifacts/evidence/prompts/M6-P3003.json",
+    "04-artifacts/evidence/prompts/M6-P3004.json",
+    "04-artifacts/evidence/prompts/M6-P3005.json",
+    "04-artifacts/evidence/prompts/M6-P3006.json",
+    "04-artifacts/evidence/prompts/M6-P3007.json",
+    "04-artifacts/evidence/prompts/M6-P3008.json",
+    "04-artifacts/evidence/prompts/M6-P3009.json",
+    "04-artifacts/evidence/prompts/M6-P3010.json",
+    "04-artifacts/evidence/judge/M6-P1000_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/judge/M6-P1309_JUDGE_FINAL_SIGN_OFF.json"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/judge/M6-P3011_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/prompts/M6-P3011.json"
+  ],
+  "commands_run": [
+    "Read (read-only): CLAUDE_CONTEXT_BRIEF; OWNER_SIGNOFF_PACKET.md (10 doc-22 categories + gate posture + gap/blocker list); M6-P3006.json (production-flag NULL result); M6-P3008.json (open-items register 5 categories)",
+    "Read (read-only): PROMPT_EXECUTION_LEDGER_LOCKED.csv PR/PILOT band -> M6-P3011=RUNNING, M6-P3000..3010 all PASS",
+    "Workflow (read-only, 3 agents): PR/PILOT band-evidence cleanliness (all 11 clean, independent parse + PII sweep zero) + owner-packet 10-category completeness & open-items honesty (all 10 present, no overstatement, register complete + honest incl. stale-ENTRY-004 disclosure) + adversarial gate-posture/production-flag refuter (refuted=false; independently read all 198 ledger rows -> only M6-P1000/M6-P1309 non-SIGNED [SKIPPED, judge-BLOCKED] + M6-P3011 RUNNING; opened both verdict files -> each still verdict=BLOCKED not converted; production OFF re-derived, 0 enabling assignments; 8 standing blockers all disclosed)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/judge/M6-P3011_JUDGE_FINAL_SIGN_OFF.json",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/state/CURRENT_STATE_LOCKED.json",
+    "04-artifacts/impl/M6.2K/app/config.py",
+    "04-artifacts/analysis/pilot/OWNER_SIGNOFF_PACKET.md",
+    "04-artifacts/evidence/prompts/M6-P3000.json",
+    "04-artifacts/evidence/prompts/M6-P3001.json",
+    "04-artifacts/evidence/prompts/M6-P3002.json",
+    "04-artifacts/evidence/prompts/M6-P3003.json",
+    "04-artifacts/evidence/prompts/M6-P3004.json",
+    "04-artifacts/evidence/prompts/M6-P3005.json",
+    "04-artifacts/evidence/prompts/M6-P3006.json",
+    "04-artifacts/evidence/prompts/M6-P3007.json",
+    "04-artifacts/evidence/prompts/M6-P3008.json",
+    "04-artifacts/evidence/prompts/M6-P3009.json",
+    "04-artifacts/evidence/prompts/M6-P3010.json",
+    "04-artifacts/evidence/judge/M6-P1000_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/judge/M6-P1309_JUDGE_FINAL_SIGN_OFF.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine JUDGE_GATE for M6-P3011; on this PASS the FINAL whole-pack review closes and the M6 build pack is READY FOR OWNER REVIEW. HAND TO THE OWNER: the assembled evidence package (04-artifacts/analysis/pilot/OWNER_SIGNOFF_PACKET.md -- 10 doc-22 categories, all OPEN decisions + recommendations, the Conflict Matrix, the slice-gate results, the honest gap/blocker list) + the open-items register (M6-P3008). THE OWNER'S DECISION AGENDA (this PASS authorizes none of it; all owner-only): (1) declare-or-withhold ROAS Pass / Scale Ready (doc-23) after confirming production_flag is STILL OFF; (2) convert-or-re-gate the two BLOCKED verdicts M6-P1000 (M6.2A entry) + M6-P1309 (M6.2D exit) -- NOT via the overrides; (3) ratify the 11 OPEN owner decisions (OD-001..010, OD-012) + resolve the 5 OPEN conflicts; (4) complete the M6-OD-011 admin-endpoint authN/authZ integration + the MISSING CTR-018/019/020; (5) direct the CODER hardening -- F-SEC-2I-1 single-subject trace bind before any admin export, F-GROWTH-3 carry the verified-only ORDER_VERIFIED choke to the growth path, F-GROWTH-1/N6 CRM/reactivation subject-bind, F-DASH-1/3 verified-revenue integrity, F-EVID-5 drop readiness to NOT_READY on any recorded FAIL/HOLD, order_code consumed-fact fan-out, and the export-masking-scope family under M6-OD-012; (6) close the ENTRY-004 M5 DEBT-1..4 + run the mandatory adversarial P4 re-gate before any real send; (7) accept-or-waive the 3 proposed smokes SMK-016/017/018; (8) reconcile the STALE 00-spec ENTRY_EVIDENCE_REGISTER M6-ENTRY-004 row against the filed evidence + decide the imported dev-password-UUID hygiene item. Until the owner records these, global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, HASH_POLICY_RATIFIED=False, SCALE_MODEL_RATIFIED=False, SCALE_EXECUTION_ENABLED=False, LEARNING_AUTOPUBLISH_ENABLED=False, live_migrations=false remain in force; M6-P1000 + M6-P1309 remain BLOCKED (not converted); and nothing scales, sends, auto-publishes, computes commission, or is declared ROAS Pass / Scale Ready. This PASS means READY FOR OWNER REVIEW ONLY -- it authorizes no production action."
+}

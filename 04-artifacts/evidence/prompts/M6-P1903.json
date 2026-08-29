@@ -1,0 +1,59 @@
+{
+  "prompt_id": "M6-P1903",
+  "status": "PASS",
+  "summary": "M6_2J_TESTER_BUILD (mode=build, 'do not yet run'). Entry gate verified in the state ledger before any work: M6-P1900 SIGNED, M6-P1901 PASS, M6-P1902 PASS (required predecessor), M6-P1903 RUNNING (this prompt, order 169). Authored exactly three official smoke files, one per bound smoke id (M6-SMK-008, M6-SMK-010, M6-SMK-014), each carrying the SMOKE_REGISTER scenario AND expected result VERBATIM (Vietnamese diacritics intact) in its docstring, driving the M6.2J Phase-3 growth machine: CrmReorderMeasurement (gated verified-only CRM revenue, no send surface), DiamondReferralMeasurement (referral attribution + verified/commission-ready revenue, buyer masked, no commission method), and the read-only DataMart + GrowthReportBuilder (no trigger). SMK-010 is RE-BOUND in M6.2J (was M6.2F), so its new file is the growth leg coexisting with the carried dashboard smoke (same coexistence pattern as SMK-004/006/013 across slices). Reused the shared conftest growth fixtures (make_crm_measurement, make_crm_consent, make_diamond_measurement, make_growth_builder, make_data_mart, make_verified_row, measurement_store) and mirrored the coder's reference leg tests. SMK-008 (4 nodes): primary -> an opt-out CRM subject is excluded from CRM revenue (0.0, fail-closed) and the CRM layer has NO send/sync/dispatch outbound surface; negatives: expired/missing/scope-not-granted consent excluded; control -> a VALID CRM-scope consent + eligibility + suppression counts 250000 (non-vacuous). SMK-010 (3 nodes): primary -> neither the DataMart nor the GrowthReportBuilder exposes a trigger/send/scale/crm/commission/order-state verb, the report has kpis and no trigger (RULE-012/FAIL-005); negatives: the growth report is data-only; building it twice does not mutate the store. SMK-014 (4 nodes): primary -> a verified Diamond referral order records referral attribution (referral_link_id, order_code), diamond_revenue + commission_ready_revenue measured, and NO commission method exists (RULE-019); negatives: no commission method even with no data; commission_ready fail-closed 0 without eligibility (diamond_revenue still measured); buyer identity masked on export. ACCEPTANCE CHECKS met: (1) one test per bound smoke id, scenario verbatim; (2) negative/fail-closed cases present in all three files; (3) existing coder test patterns reused (test_crm_optout_excluded.py, test_data_mart_stays_support_view.py, test_diamond_referral_no_commission.py) plus conftest fixtures. BUILD VALIDATION was collect-only (imports/collects, NO assertions executed) per the prompt, cache-free, no shell redirection: the three new files collect clean (per-file nodes 4,3,4 = 11 new) EXIT 0; the full staged suite collects to 425 (= 414 carried M6.2J baseline [386 carried M6.2I tree + 28 coder M6.2J growth leg tests] + 11 new) EXIT 0, total via an in-process pytest_collection_finish tally (harness clips a long terminal summary). A read-only adversarial static-verification workflow (4 agents: one verifier per smoke file tracing EVERY assertion through the frozen implementation with cited source lines + a completeness critic) returned all-CLEAN, 0 errors: all 22 assertions (SMK-008 5, SMK-010 7, SMK-014 10) predicted PASS at run time, scenario/expected verbatim confirmed, PII-clean (buyer identity masked, synthetic ids) and boundary-clean on all three files, and the critic confirmed all three ids covered with one verbatim primary + negatives, no self-certification, no state write. TEST_MANIFEST.md rebuilt for M6.2J (binding table, per-smoke verbatim sections, fixtures, boundary, exit-gate legs L1-L5, execution plan for M6-P1904). GOVERNANCE POSTURE UNCHANGED AND IMMUTABLE: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, SCALE_MODEL_RATIFIED=False, SCALE_EXECUTION_ENABLED=False, HASH_POLICY_RATIFIED=False, LEARNING_AUTOPUBLISH_ENABLED=False. No application code changed, no migration applied, no external call, no CRM sent, no commission computed, no Data-Mart trigger, no Core override, no scale/publish, no order-state/pricing, no flag flipped, no write to 04-artifacts/state/. The growth layer is measure-only. All ids synthetic; buyer identity masked on export; no raw secret/PII. status=PASS is an honest TESTER self-report of a completed, collect-validated, statically-verified BUILD; it does NOT execute the smokes and does NOT advance any gate. Formal execution is M6-P1904; the runner EVIDENCE_GATE and the slice Judge (M6-P1909) decide closure.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "00-spec/slices/M6.2J.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/impl/M6.2J/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2J/tests/conftest.py",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/crm.py",
+    "04-artifacts/impl/M6.2J/app/measurement/growth/diamond.py",
+    "04-artifacts/impl/M6.2J/tests/test_crm_optout_excluded.py",
+    "04-artifacts/impl/M6.2J/tests/test_data_mart_stays_support_view.py",
+    "04-artifacts/impl/M6.2J/tests/test_diamond_referral_no_commission.py"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2J/tests/smoke/test_smk_008_crm_optout_no_sync.py",
+    "04-artifacts/impl/M6.2J/tests/smoke/test_smk_010_growth_data_mart_support_view_only.py",
+    "04-artifacts/impl/M6.2J/tests/smoke/test_smk_014_diamond_referral_no_commission.py",
+    "04-artifacts/impl/M6.2J/tests/TEST_MANIFEST.md"
+  ],
+  "commands_run": [
+    "02-tester/.venv/Scripts/python.exe -m pytest tests/smoke/test_smk_008_crm_optout_no_sync.py tests/smoke/test_smk_010_growth_data_mart_support_view_only.py tests/smoke/test_smk_014_diamond_referral_no_commission.py --collect-only -q -p no:cacheprovider  (from 04-artifacts/impl/M6.2J; PYTHONDONTWRITEBYTECODE=1; per-file nodes 4,3,4; EXIT=0; NO assertions executed)",
+    "02-tester/.venv/Scripts/python.exe -c \"<in-process pytest_collection_finish tally: len(session.items)>\" --collect-only -q -p no:cacheprovider  (from 04-artifacts/impl/M6.2J; COLLECTED_TOTAL=425; pytest RC=0)"
+  ],
+  "test_results": [
+    {
+      "smoke_id": "M6-SMK-008",
+      "result": "PASS",
+      "detail": "Built tests/smoke/test_smk_008_crm_optout_no_sync.py (4 nodes) — scenario 'CRM opt-out' / expected 'Không sync CRM audience/CRM event outbound' verbatim. Primary: opt-out CRM subject excluded from CRM revenue (0.0, fail-closed) + no send/sync/dispatch outbound surface. Negatives: expired/missing/scope-not-granted consent excluded. Control: VALID CRM-scope consent + eligibility + suppression counts 250000 (non-vacuous). BUILD ONLY: collect-clean (EXIT 0) + adversarial static verification CLEAN (all 5 assertions predicted PASS); NOT executed — execution recorded by M6-P1904."
+    },
+    {
+      "smoke_id": "M6-SMK-010",
+      "result": "PASS",
+      "detail": "Built tests/smoke/test_smk_010_growth_data_mart_support_view_only.py (3 nodes) — scenario 'Data Mart tạo trigger CRM/scale' / expected 'Fail - Data Mart chỉ support view' verbatim (growth leg). Primary: neither the DataMart nor the GrowthReportBuilder exposes a trigger/send/scale/crm/commission/order-state verb; report has kpis, no trigger (RULE-012/FAIL-005). Negatives: growth report is data-only; building it twice does not mutate the store. BUILD ONLY: collect-clean + static verification CLEAN (all 7 assertions predicted PASS); NOT executed — M6-P1904 executes."
+    },
+    {
+      "smoke_id": "M6-SMK-014",
+      "result": "PASS",
+      "detail": "Built tests/smoke/test_smk_014_diamond_referral_no_commission.py (4 nodes) — scenario 'Diamond referral order verified' / expected 'Gắn referral attribution, không tự tính commission' verbatim. Primary: a verified Diamond referral order records referral attribution (referral_link_id, order_code), diamond_revenue 500000 + commission_ready_revenue 500000 measured, NO commission method (RULE-019). Negatives: no commission method even with no data; commission_ready fail-closed 0 without eligibility (diamond_revenue still 400000); buyer identity masked on export (raw never in export). BUILD ONLY: collect-clean + static verification CLEAN (all 10 assertions predicted PASS); NOT executed — M6-P1904 executes."
+    }
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2J/tests/smoke/test_smk_008_crm_optout_no_sync.py",
+    "04-artifacts/impl/M6.2J/tests/smoke/test_smk_010_growth_data_mart_support_view_only.py",
+    "04-artifacts/impl/M6.2J/tests/smoke/test_smk_014_diamond_referral_no_commission.py",
+    "04-artifacts/impl/M6.2J/tests/TEST_MANIFEST.md",
+    "04-artifacts/impl/M6.2J/tests/conftest.py",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/slices/M6.2J.md",
+    "04-artifacts/evidence/prompts/M6-P1902.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P1903. On PASS, proceed to M6-P1904 (M6_2J_TESTER_RUN): execute the full staged suite (expected 425 passed) and the three bound smokes tests/smoke/test_smk_008_crm_optout_no_sync.py, test_smk_010_growth_data_mart_support_view_only.py, test_smk_014_diamond_referral_no_commission.py (expected 11 passed), and record structured results + evidence refs into 04-artifacts/test-reports/M6.2J/SMOKE_RESULTS.md for exit-gate legs L3-L5. Then M6-P1905 (boundary adversary) and M6-P1906 (security/PII) review the growth layer; the slice gate judge is M6-P1909. Governance flags stay BLOCKED/OFF/OFF; the growth layer is measure-only (no CRM send, no commission, no Data-Mart trigger)."
+}

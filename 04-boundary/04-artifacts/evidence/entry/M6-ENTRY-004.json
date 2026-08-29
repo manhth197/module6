@@ -2,14 +2,14 @@
   "schema_version": "GFD-M6-ENTRY-EVIDENCE-001",
   "entry_id": "M6-ENTRY-004",
   "source_module": "Module 4 (AI Advisor) + Module 5 (Gateway) — JOINT",
-  "supplied_by": "M4 owner: Nguyễn Phát Tài; M5 owner: Nguyễn Đức Mạnh (Tech Lead)",
+  "supplied_by": "M4 owner: Nguyễn Phát Tài; M5 owner: Nguyễn Đức Mạnh (Tech Lead). Grade tu re-judge doc lap 4-mat (KHONG tu cham).",
   "captured_at": "2026-08-04T10:00:00Z",
+  "re_extracted_at": "2026-08-27T00:00:00Z",
   "status": "READY_FOR_JUDGE",
-  "overall_grade": "PARTIAL",
-  "scope": "Public/privacy conduct: AI (M4) và Gateway (M5) KHÔNG public giá cuối, KHÔNG leak PII, KHÔNG spam ra kênh công khai. Input cho M6.2G Scale Gate + PR/PILOT. Cần CẢ HAI bên; thiếu 1 bên là chưa đủ.",
+  "overall_grade": "M4 half PROVEN (ASSERT-001 no-public-price + ASSERT-003 no-spam PROVEN; ASSERT-002 no-PII PARTIAL-disclosed, safetyBoundary gap DONG bang SAFE-003 @9f7e3dc8). M5 half PARTIAL — RISK-ACCEPTED (RATIFIED 2026-08-27) cho M6.2G production-OFF (external_send OFF, khong co duong egress cong khai hoat dong). Joint = ACCEPTABLE tai M6.2G design-altitude (production OFF); KHONG phai full-PROVEN — M5 runtime controls (DEBT-1..4) la dieu kien cung TRUOC real send (gate sau).",
   "provenance": {
-    "m4": "Repo business-platform, commit 97cc82bccae6ed4238a59307ceafb0a5d870d265 (nhánh dev; SAFE-001). Tech Lead verify hướng-code fail-closed + wiring. Suite M4 Coder-run GREEN 04/08 (3798 pass/0 fail/0 error/4 skip); state green đang được Tài commit — SHA mới sẽ cập nhật khi push.",
-    "m5": "Module5-workspace/01-coder/module5-app. main@87fad536a4a18f2a6c2493c784ed719e493c182e (đã merge; KHÔNG có public egress). spotlight feat/live-spotlight-endpoint@0f7923e (CHƯA merge/push, local; nơi DUY NHẤT có LIVE_SPOTLIGHT). Posture: production OFF (feature-flag.service.ts:17 PRODUCTION_ENABLED=false hard-locked), real Graph sink stub P4 (graph-post-comment-sink.ts:22 throws), default sink MOCK. Nửa M5 đã qua Independent Judge four-eyes (READY_FOR_JUDGE 2026-08-01); artifact trong bundle ĐÃ đồng bộ byte-khớp từ fragment đã-ký (D:/M6/M5/M6-ENTRY-004)."
+    "m4": "Repo business-platform, branch dev. SAFE-001 surface routing + PII @97cc82bc (judged ACCEPTED_PARTIAL); SAFE-003 safetyBoundary PII fix @9f7e3dc8 (pushed origin/dev, RED->GREEN verified, range-diff = 4408a60d). M4 suite green (4 skip = AiProductApprovedContentAuditPersistenceTest Docker-gated, chinh dang).",
+    "m5": "Module5-workspace/01-coder/module5-app. main@87fad536 (KHONG public egress). spotlight feat/live-spotlight-endpoint@0f7923e (CHUA merge/push; noi duy nhat co LIVE_SPOTLIGHT). Posture: production OFF hard-locked (feature-flag.service.ts:17 PRODUCTION_ENABLED=false), real Graph sink stub P4 nem loi (graph-post-comment-sink.ts:22), default sink MOCK. Nua M5 qua Independent Judge 4-mat (READY_FOR_JUDGE 2026-08-01)."
   },
   "evidence_refs": [
     "04-artifacts/evidence/entry/M6-ENTRY-004/m4-no-final-price-public.md",
@@ -18,91 +18,43 @@
     "04-artifacts/evidence/entry/M6-ENTRY-004/m5-no-final-price-public.md",
     "04-artifacts/evidence/entry/M6-ENTRY-004/m5-no-pii-leak.md",
     "04-artifacts/evidence/entry/M6-ENTRY-004/m5-antispam-controls.md",
+    "04-artifacts/evidence/entry/M6-ENTRY-004/_M4_JUDGE_VERDICT_2026-08-11.json",
+    "04-artifacts/evidence/entry/M6-ENTRY-004/_M4_SAFETYBOUNDARY_FIX_VERIFIED_2026-08-27.json",
     "04-artifacts/evidence/entry/M6-ENTRY-004/_OWNER_RISK_ACCEPTANCE.md"
   ],
   "assertions": [
-    {
-      "id": "ASSERT-001",
-      "claim": "M4 — AI KHÔNG public giá cuối ra kênh công khai (chỉ tư vấn/đề xuất trong ranh giới, không tự chốt giá công khai)",
-      "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-004/m4-no-final-price-public.md",
-      "grade": "M4_IMPLEMENTED_PENDING_INDEPENDENT_TESTER_JUDGE"
-    },
-    {
-      "id": "ASSERT-002",
-      "claim": "M4 — Nội dung AI KHÔNG rò PII của khách ra kênh công khai",
-      "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-004/m4-no-pii-leak.md",
-      "grade": "M4_IMPLEMENTED_PENDING_INDEPENDENT_TESTER_JUDGE"
-    },
-    {
-      "id": "ASSERT-003",
-      "claim": "M4 — AI KHÔNG tự spam/gửi hàng loạt ngoài luồng được duyệt",
-      "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-004/m4-no-spam.md",
-      "grade": "M4_IMPLEMENTED_PENDING_INDEPENDENT_TESTER_JUDGE"
-    },
-    {
-      "id": "ASSERT-004",
-      "claim": "M5 — Gateway KHÔNG public giá cuối / reply công khai chứa giá chốt",
-      "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-004/m5-no-final-price-public.md",
-      "grade": "M5_PARTIAL"
-    },
-    {
-      "id": "ASSERT-005",
-      "claim": "M5 — KHÔNG leak PII (PSID/phone/email) ra comment/message công khai; chỉ hashed/masked",
-      "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-004/m5-no-pii-leak.md",
-      "grade": "M5_PARTIAL"
-    },
-    {
-      "id": "ASSERT-006",
-      "claim": "M5 — Có kiểm soát chống spam (rate/dedup/allowlist) trên đường gửi ra kênh",
-      "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-004/m5-antispam-controls.md",
-      "grade": "M5_PARTIAL"
-    }
+    { "id": "ASSERT-001", "claim": "M4 — AI KHONG public gia cuoi ra kenh cong khai", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-004/_M4_JUDGE_VERDICT_2026-08-11.json", "grade": "PROVEN", "note": "Judge + adversary @97cc82bc: ResponseChannelSurfaceResolver fail-closed (unknown/blank/null -> PUBLIC_COMMENT), resolve tu raw pair truoc default; PUBLIC surface chan final price. Adversary khong tao duoc public-final-price path." },
+    { "id": "ASSERT-002", "claim": "M4 — Noi dung AI KHONG ro PII ra kenh cong khai", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-004/_M4_SAFETYBOUNDARY_FIX_VERIFIED_2026-08-27.json", "grade": "PARTIAL_DISCLOSED", "note": "PIIExposureGuard chan phone/email/address/PSID surface-gated. Lo safetyBoundary (field giao ra khach chua duoc quet) DONG bang SAFE-003 @9f7e3dc8 (scanStructuredFieldForPii, RED->GREEN T-PII-05/06, khong regress). Con tran regex (label-less street, non-VN address) — KHAI ro, khong phai leak an." },
+    { "id": "ASSERT-003", "claim": "M4 — AI KHONG tu spam/gui hang loat ngoai luong duyet", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-004/_M4_JUDGE_VERDICT_2026-08-11.json", "grade": "PROVEN", "note": "Structural: 0/20 pattern sender/scheduler/async trong M4 tree; HttpClient chi o 2 Gemini adapter; gateway port blocked moi path. 'Khong gui duoc by construction'." },
+    { "id": "ASSERT-004", "claim": "M5 — Gateway KHONG public gia cuoi / reply cong khai chua gia chot", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-004/m5-no-final-price-public.md", "grade": "PARTIAL_RISK_ACCEPTED", "note": "Dung theo nghia khong co duong cong khai hoat dong (real sink stub, production OFF, spotlight chua merge). DEBT-1 (ODR-002 template allowlist) truoc real send." },
+    { "id": "ASSERT-005", "claim": "M5 — KHONG leak PII ra comment/message cong khai; chi hashed/masked", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-004/m5-no-pii-leak.md", "grade": "PARTIAL_RISK_ACCEPTED", "note": "Guard-chan-truoc-gui chung minh voi MOCK sink; khong post that. DEBT-1 truoc real send." },
+    { "id": "ASSERT-006", "claim": "M5 — Co kiem soat chong spam (rate/dedup/allowlist) tren duong gui", "evidence_ref": "04-artifacts/evidence/entry/M6-ENTRY-004/m5-antispam-controls.md", "grade": "PARTIAL_RISK_ACCEPTED", "note": "Gap that: dedup per-instance; rate-limit outbound chi doc Meta throttle. DEBT-2/3 truoc real send. Khong active vi external_send OFF." }
   ],
   "sha256_manifest": [
-    {
-      "path": "04-artifacts/evidence/entry/M6-ENTRY-004/m4-no-final-price-public.md",
-      "sha256": "3960ed5d68fdb6a85d75d50d1c1b4571b01b521661b8766f76e1c2786888dffa"
-    },
-    {
-      "path": "04-artifacts/evidence/entry/M6-ENTRY-004/m4-no-pii-leak.md",
-      "sha256": "e454d01f1d932f9794455cf84cc48b11286b6ff7930c99458073f6a3f4dfcad0"
-    },
-    {
-      "path": "04-artifacts/evidence/entry/M6-ENTRY-004/m4-no-spam.md",
-      "sha256": "958d51e2b10f35f53a125d3e159c7021065dbcefe29cfa197b38f50b2aa4d077"
-    },
-    {
-      "path": "04-artifacts/evidence/entry/M6-ENTRY-004/m5-no-final-price-public.md",
-      "sha256": "5714818b14b35d64741e61169cf5cb9c280c351ecb48fa2c63a4c13007cf3542"
-    },
-    {
-      "path": "04-artifacts/evidence/entry/M6-ENTRY-004/m5-no-pii-leak.md",
-      "sha256": "9f2d60db212a479e87b6d443bb44d465c1830d2d4acf7fa8b4b0e00f2e3b63ef"
-    },
-    {
-      "path": "04-artifacts/evidence/entry/M6-ENTRY-004/m5-antispam-controls.md",
-      "sha256": "982a88b364e7a4a04a4ca1e3f43964b673a209e05a0422e5ca32149ff92a3f73"
-    },
-    {
-      "path": "04-artifacts/evidence/entry/M6-ENTRY-004/_OWNER_RISK_ACCEPTANCE.md",
-      "sha256": "673fa36e911b9316846867e27192f4cd466767f60ead4c87ff53c3ea924c14ff"
-    }
+    { "path": "04-artifacts/evidence/entry/M6-ENTRY-004/m5-no-final-price-public.md", "sha256": "5714818b14b35d64741e61169cf5cb9c280c351ecb48fa2c63a4c13007cf3542" },
+    { "path": "04-artifacts/evidence/entry/M6-ENTRY-004/m5-no-pii-leak.md", "sha256": "9f2d60db212a479e87b6d443bb44d465c1830d2d4acf7fa8b4b0e00f2e3b63ef" },
+    { "path": "04-artifacts/evidence/entry/M6-ENTRY-004/m5-antispam-controls.md", "sha256": "982a88b364e7a4a04a4ca1e3f43964b673a209e05a0422e5ca32149ff92a3f73" },
+    { "path": "04-artifacts/evidence/entry/M6-ENTRY-004/_OWNER_RISK_ACCEPTANCE.md", "sha256": "RATIFIED_2026-08-27_owner-signed (hash se cap nhat khi finalize)" }
   ],
-  "open_blockers": [
-    "M4-INDEPENDENT-VERIFY-PARTIAL: ASSERT-001/002/003 implemented @97cc82bc (surface resolver fail-closed default→PUBLIC_COMMENT wired M4AdvisorTurnService:420; PIIExposureGuard +ADDRESS+PSID; xoá dead-code). Suite M4 chạy GREEN 04/08 (3798 pass / 0 fail / 0 error / 4 skip, BUILD SUCCESS — Coder-run) → giải tỏa caveat \"chưa chạy test\". CÒN: (a) state green đang commit — SHA mới pending, cập nhật provenance khi Tài push; (b) 4 test skip cần xác nhận chính đáng; (c) independent Tester+Judge session (khác Coder-run) vẫn riêng theo sprint.",
-    "M4-002-PII-REGEX-CEILING: PII detection pattern-based, đủ cho các dạng address/PSID liệt kê, OPEN cho dạng ngoài đó (không phải parser địa chỉ đầy đủ).",
-    "M5-DEBT-1: hiện thực ODR-002 §4 default-deny TEMPLATE/allowlist owner-duyệt cho card text (đóng ASSERT-004 + 005). Đang PARK (owner + M7 Live).",
-    "M5-DEBT-2: thay dedup store → persistent/cross-instance (thay InMemoryIdempotencyStore per-instance) (ASSERT-006).",
-    "M5-DEBT-3: thêm bộ đếm send-rate outbound do M5 tự áp trên đường public, HOẶC document rõ đang dựa Meta channel-throttle + limiter inbound và risk-accept cho pilot (ASSERT-006).",
-    "M5-DEBT-4: hiện thực real Graph sink (graph-post-comment-sink, P4) để certify phủ định end-to-end; gated bởi production.",
-    "M5-BRANCH-NOT-MERGED: feat/live-spotlight-endpoint@0f7923e chưa merge/push (cố ý — không được merge khi GLOBAL_GATEWAY BLOCKED)."
+  "m4_evidence_sync_note": "m4-no-final-price-public.md / m4-no-pii-leak.md / m4-no-spam.md trong pack la ban @97cc82bc. Repo @9f7e3dc8 co ban m4-no-pii-leak.md cap nhat (khai safetyBoundary SAFE-003). Sync ban moi vao pack + cap nhat hash = follow-up bookkeeping (khong chan grade; verdict files da ghi day du).",
+  "forward_conditions_before_real_send": [
+    "M5-DEBT-1: ODR-002 §4 default-deny TEMPLATE/allowlist owner-duyet cho card text (dong ASSERT-004+005).",
+    "M5-DEBT-2: dedup store persistent/cross-instance (ASSERT-006).",
+    "M5-DEBT-3: bo dem send-rate outbound M5 tu ap tren duong public, HOAC document + risk-accept rieng (ASSERT-006).",
+    "M5-DEBT-4: hien thuc real Graph sink (P4), gated boi production.",
+    "M5-BRANCH: feat/live-spotlight-endpoint@0f7923e CHUA merge/push (co y — khong merge khi GLOBAL_GATEWAY BLOCKED).",
+    "RE-GATE bat buoc truoc real posting: adversarial tren build P4 (posted==scanned, structural A/B/C/D)."
+  ],
+  "closed_blockers": [
+    "M4-INDEPENDENT-VERIFY-PARTIAL: DONG — independent Judge (ACCEPTED_PARTIAL) + Tester attempt-5 PASS + owner sign.",
+    "M4-002-PII (safetyBoundary): DONG — SAFE-003 @9f7e3dc8 (scanStructuredFieldForPii), RED->GREEN, khong regress."
   ],
   "pii_handling": "MASKED_OR_NONE",
   "signoff": {
-    "authorized_by": "Nguyễn Đức Mạnh — Tech Lead (M5 owner; tổng hợp joint dossier M4+M5)",
-    "m4_owner_confirmation": "PENDING — Nguyễn Phát Tài (M4): evidence Coder-self-verified, cần independent Tester+Judge của M4 chạy suite + ký.",
-    "m5_owner_confirmation": "Nguyễn Đức Mạnh — M5 half đã qua Independent Judge four-eyes (READY_FOR_JUDGE 2026-08-01, verdict 05-judge/signoffs/ENTRY-004_M5_JUDGE_VERDICT.md); artifact trong bundle đồng bộ byte-khớp từ fragment đã-ký @0f7923e. Trần PARTIAL/0-PROVEN; chờ real egress + production ON + owner-approved template registry để lên PROVEN.",
-    "note": "KHÔNG phải PASS tự phong. Nộp trung thực với open_blockers ở trên → Judge M6-P1600 dự kiến PARTIAL/BLOCKED (fail-closed đúng), hoặc Owner risk-accept cho pilot external-send OFF như ENTRY-003."
+    "authorized_by": "Nguyễn Đức Mạnh — Tech Lead (tong hop joint dossier M4+M5); grade tu re-judge doc lap.",
+    "m4_owner_confirmation": "CONFIRMED 2026-08-27 — M4 owner Nguyễn Phát Tài: lo safetyBoundary da dong (SAFE-003 @9f7e3dc8, RED->GREEN, khong regress); ASSERT-001/003 PROVEN; nua M4 khep o muc code-verified. + independent Judge 4-mat (ACCEPTED_PARTIAL -> defect fixed).",
+    "m5_owner_confirmation": "RATIFIED 2026-08-27 — M5 owner Nguyễn Đức Mạnh KY risk-acceptance (_OWNER_RISK_ACCEPTANCE.md): chap nhan M5 PARTIAL cho pilot production-OFF (external_send OFF, khong duong egress hoat dong); DEBT-1..4 + re-gate la dieu kien cung truoc real send. Tran = PARTIAL, KHONG PROVEN.",
+    "note": "Chu ky != PASS tu phong; verdict cuoi thuoc phien Judge tuoi M6-P1600. Joint acceptable tai M6.2G design-altitude (production OFF): M4 PROVEN + M5 PARTIAL-risk-accepted-ratified. M5 runtime controls deferred to real-egress gate — DUNG sequencing, khong phai bo qua."
   },
-  "review_note": "Input cho phiên Judge M6-P1600 (M6.2G Scale Gate); KHÔNG phải PASS tự phòng. Joint dossier M4 (AI Advisor) + M5 (Gateway). open_blockers đã ghi đủ (làm gate BLOCKED, trung thực), không để trống."
+  "review_note": "RE-EXTRACT 2026-08-27. M4 half: independent judge (_M4_JUDGE_VERDICT_2026-08-11) + safetyBoundary fix verified (_M4_SAFETYBOUNDARY_FIX_VERIFIED_2026-08-27, pushed 9f7e3dc8). M5 half: PARTIAL by design (runtime ceiling, production OFF) + owner risk-acceptance RATIFIED. Input cho Judge tuoi M6-P1600."
 }
