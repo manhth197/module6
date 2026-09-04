@@ -1,0 +1,41 @@
+{
+  "prompt_id": "M6-P2100",
+  "status": "PASS",
+  "summary": "M6_2L_ENTRY_GATE_JUDGE (JUDGE, gate_review, fresh session, evidence-only). Verdict PASS -- opens slice M6.2L (Post-Pilot Audit Fix Batch: close the 5 M6-self-doable defects from the 2026-09-03 chief-auditor audit against commit 5f09894 -- A3 attribution_id trace, A4 ad-hierarchy intake, B2 evidence-forgery validation, B3 gap-id collision floor, B4 ROAS verified-lock -- proven by regression evidence only) for STAGED implementation; full reasoning in 04-artifacts/evidence/judge/M6-P2100_JUDGE_FINAL_SIGN_OFF.json. ENTRY gate: only the four acceptance checks judged; the M6.2L exit legs (the 5 fixes + SMK-019..023 + rollback) are checked at M6-P2109. Posture BLOCKED/OFF/OFF unchanged and NOT flipped. Untrusted-input: the referenced audit is third-party DATA; judged only from canonical slice spec + registers + ledger. Precondition: ledger M6-P2100=RUNNING, dependency M6-P3011=SIGNED, band M6-P2101..2109 TODO. CHECK 1 previous gate: M6-P3011 (FINAL_REVIEW_JUDGE) ledger=SIGNED, sign-off verdict=PASS (READY FOR OWNER REVIEW), fail_gate=false -> SATISFIED. CHECK 2 target+OD-011: IMPLEMENTATION_TARGET_LOCKED status=LOCKED, M6-OD-011 DECIDED 2026-07-23 -> SATISFIED. CHECK 3 contracts: M6-CTR-002 (ads_attribution_context) DRAFT_LOCKED + M6-CTR-025 (evidence package) DRAFT_LOCKED + M6-CTR-016 (POST /api/ads/events/track) MISSING but harmonization M6-P0711 (CONTRACT_TRACK_APIS) PASS -> all resolved-for-entry -> SATISFIED. CHECK 4 entry evidence: M6.2L not a 'checked-at' slice for any ENTRY-00X, no 'Entry evidence required' section -> N/A -> SATISFIED. OPEN OWNER DECISIONS enumerated vs M6.2L scope: grep DECISION_REGISTER for M6.2L -> no rows; for M6-OD-013/M6-OD-014 -> NO ROWS. The slice references OD-013 (B2) + OD-014 (B3) as fix-decision-ids for two M6-SELF-DOABLE hardening fixes the slice IMPLEMENTS (fully specified by exit legs 3/4), NOT owner-gated preconditions; the owner-gated audit items (B1 psid_hash->OD-003; A1/A2 M3 wire; A6/B5 registry; A5/B6/B8->OD-011/owner; C-band + M5 DEBT-1..4) are explicitly OUT OF SCOPE. NO OPEN owner decision blocks the entry. DOC-SYNC FLAG (governance hygiene, NOT a blocker): OD-013/OD-014 are referenced by the slice spec but not yet rows in DECISION_REGISTER -> operator should register them (analogous to the stale ENTRY-004 row flagged at M6-P3011); does not gate the entry (contracts resolved, fixes M6-self-doable + fully specified, production OFF). IN-SCOPE FAIL GATES/RULES: FAIL-001 + RULE-003/009 (the B4 fix hardens verified-only revenue at verified_rows()+materialize()); FAIL-007 + RULE-015 (the B2 fix hardens pack_assembler evidence-ref validation); RULE-014 masking (A3/A4). The slice STRENGTHENS these gates; opening it trips none. WHY PASS: all 4 checks satisfied on real source; previous gate a real judge PASS/SIGNED; target LOCKED + OD-011 DECIDED; all 3 contracts resolved-for-entry; no entry evidence required; no OPEN owner decision blocks (OD-013/014 are in-scope M6-self-doable fix-ids). NOTABLE: M6.2L closes exactly the M6-self-doable CODER-hardening items in the pack's standing-blocker list + M6-P3011 owner agenda (B4=F-DASH-1/F-GROWTH-3, B2=F-EVID-1/2, B3=F-EVID-3) -- honest remediation strengthening the build before the owner acts. GOVERNANCE (unchanged): M6-P1000 + M6-P1309 verdicts stay BLOCKED (not converted); the M6.2G/H/I/J + OD-011/012 + owner-gated forward conditions remain hard gates before any real scale/send. No self-certification; no application code/migration/flag change; module boundary intact; no raw secrets/PII.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2L.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P3011.json",
+    "04-artifacts/evidence/judge/M6-P3011_JUDGE_FINAL_SIGN_OFF.json"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/judge/M6-P2100_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/prompts/M6-P2100.json"
+  ],
+  "commands_run": [
+    "Read (read-only): CLAUDE_CONTEXT_BRIEF, IMPLEMENTATION_TARGET_LOCKED.json (LOCKED, OD-011 DECIDED), slice M6.2L spec (5 M6-self-doable fixes A3/A4/B2/B3/B4; owner-gated items out-of-scope), M6-P3011 evidence + sign-off (PASS/SIGNED)",
+    "Read (read-only): PROMPT_EXECUTION_LEDGER_LOCKED.csv -> M6-P2100=RUNNING, M6-P3011=SIGNED, M6.2L band M6-P2101..2109 TODO",
+    "Grep (read-only): CONTRACT_REGISTER -> CTR-002 + CTR-025 DRAFT_LOCKED, CTR-016 MISSING (harmonization M6-P0711 PASS); DECISION_REGISTER (M6.2L sweep + M6-OD-013/014) -> no rows name M6.2L, and OD-013/OD-014 are not in the register (doc-sync flag; the slice implements them as M6-self-doable fixes)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/judge/M6-P2100_JUDGE_FINAL_SIGN_OFF.json",
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2L.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P3011.json",
+    "04-artifacts/evidence/judge/M6-P3011_JUDGE_FINAL_SIGN_OFF.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine JUDGE_GATE for M6-P2100; on this PASS sign-off the slice M6.2L entry gate opens (STAGED) and the sequence proceeds to M6-P2101 (M6.2L coder plan) to implement the 5 M6-self-doable audit fixes as a cumulative superset of M6.2K under 04-artifacts/impl/M6.2L/: A3 (attribution_id as a first-class key of AdsAttributionContext + handoff payload, traced to campaign), A4 (campaign_id/adset_id/ad_id/live_session_id through track intake + normalize -> HIGH source confidence), B2/M6-OD-013 (pack_assembler evidence-ref existence + uniqueness + category-binding validation, not raw truthiness), B3/M6-OD-014 (gap-blocker id pin/de-dup + membership-count floor), B4 (verified-revenue event_code enforcement at verified_rows() + materialize()), each proven by regression smoke SMK-019..023 (executed OR owner-waived). DESIGN CONSTRAINTS (out of scope, not entry blockers): B1 psid_hash (M6-OD-003), A1/A2 order_verified wire (M3), A6/B5 event taxonomy (registry + M3/M5/M7), A5 ads_spend / B6 authN / B8 DB-HTTP bind (M6-OD-011/owner), all C-band cross-module seams + M5 DEBT-1..4; no flag flip. OPERATOR HYGIENE (non-blocking): register M6-OD-013 + M6-OD-014 in DECISION_REGISTER.md (referenced by the slice spec but not yet rows); reconcile the stale ENTRY_EVIDENCE_REGISTER M6-ENTRY-004 row (carried from M6-P3011). Before the M6.2L EXIT gate (M6-P2109): all 5 fixes proven by regression + SMK-019..023 recorded + posture unchanged. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF and all posture flags remain in force; M6-P1000 + M6-P1309 verdicts remain BLOCKED (not converted); the M6.2G/H/I/J + OD-011/012 + owner-gated forward conditions from the M6-P3011 readiness package remain in force. Nothing here authorizes scale, external send, auto-publish, or a readiness/Pass declaration."
+}

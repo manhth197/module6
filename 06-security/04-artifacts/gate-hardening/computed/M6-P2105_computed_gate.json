@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-09-04T03:38:48Z",
+  "claimed_fail_gate_tripped": false,
+  "classification": "standard",
+  "computed_fail_gate_tripped": false,
+  "computed_status": "CLEAN",
+  "evidence_present": true,
+  "evidence_sha256": {
+    "04-artifacts/evidence/prompts/M6-P2105.json": "9706eab4129bcd1b6724ebb08654fca33030bf1c23e308e1efbf0bfcb34e3512"
+  },
+  "failures": [],
+  "integrity_violations": [],
+  "mode": "gate",
+  "prompt_id": "M6-P2105",
+  "rules_version": "M6-SGV-1.0",
+  "warnings": []
+}

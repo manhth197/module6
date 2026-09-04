@@ -37,7 +37,7 @@
     <file>00-spec/SPEC.md</file>
     <file>00-spec/registers/CONTRACT_REGISTER.md</file>
   </inputs_expected>
-  <task>Research the six strategy libraries: schema per library, seed-source constraints verbatim, the mapping chain as a data structure, review/scoring hooks for the learning engine. The per-library purpose + seed-source and the mapping chain are LOCKED VERBATIM in SPEC §8.4 (doc §17, extract lines 336-353) — read that section and reproduce the seed-source constraints from it. Do NOT invent persona / behavior / keyword / negative-keyword / landing / CTA seeds: any library seed not present in SPEC §8.4 is a BLOCKED item, not a build-time guess.</task>
+  <task>Research the six strategy libraries (doc §17 lines 338-345): schema per library, seed-source constraints verbatim, the mapping chain (line 336) as a data structure, review/scoring hooks for the learning engine.</task>
   <entry_gate>
     <required_previous_prompts>M6-PC0210</required_previous_prompts>
     <global_gateway_state>BLOCKED unless explicit gate evidence proves otherwise</global_gateway_state>

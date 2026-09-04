@@ -16,7 +16,7 @@ SLICES_DIR = os.path.normpath(os.path.join(HERE, "..", "00-spec", "slices"))
 def main():
     with open(os.path.join(SLICES_DIR, "slice_definitions.json"), encoding="utf-8") as f:
         data = json.load(f)
-    for s in data["slices"]:
+    for s in data["slices"] + data.get("post_pilot_slices", []):
         lines = []
         a = lines.append
         a("<!-- GENERATED from slice_definitions.json by scripts/gen_slices.py — do not hand-edit -->")

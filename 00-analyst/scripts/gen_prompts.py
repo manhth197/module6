@@ -382,7 +382,9 @@ HARM_JUDGE = "M6-P0715"
 # --------------------------------------------------------------------------
 with open(os.path.join(ROOT, "00-spec", "slices", "slice_definitions.json"),
           encoding="utf-8") as f:
-    SLICES = json.load(f)["slices"]
+    _SLICE_DATA = json.load(f)
+SLICES = _SLICE_DATA["slices"]
+POST_SLICES = _SLICE_DATA.get("post_pilot_slices", [])
 
 def slice_band(idx, s, prev_gate):
     base = 1000 + idx * 100
@@ -634,6 +636,15 @@ add("M6-P3011", "PR_PILOT", "PR_PILOT", "JUDGE", "gate_review", "JUDGE_GATE",
     registers=["00-spec/registers/DECISION_REGISTER.md"])
 
 # --------------------------------------------------------------------------
+# Band 8: POST-PILOT fix slices (M6.2L ...) — appended AFTER PR/PILOT so no
+# existing prompt is reordered or re-pointed. Each such slice reuses the
+# standard 10-prompt slice band and depends on the final PR/PILOT judge.
+# --------------------------------------------------------------------------
+post_gate = "M6-P3011"
+for j, s in enumerate(POST_SLICES):
+    post_gate = slice_band(len(SLICES) + j, s, post_gate)
+
+# --------------------------------------------------------------------------
 # Emission
 # --------------------------------------------------------------------------
 def build_xml(p, order):
@@ -721,12 +732,21 @@ def build_xml(p, order):
 
 def main():
     force = "--force" in sys.argv
+    # Merge-preserve mode (DEFAULT when a ledger already exists): keep each existing
+    # row's live Status/Note/UpdatedAt/Attempt (matched by PromptId) and emit only
+    # genuinely-new PromptIds as TODO. This lets a post-pilot fix slice (e.g. M6.2L)
+    # be added WITHOUT resetting the completed pack. --force does a full fresh build
+    # (everything TODO) — only for a pristine, pre-execution pack.
+    prev = {}
     if os.path.exists(LEDGER_CSV) and not force:
         with open(LEDGER_CSV, encoding="utf-8-sig", newline="") as f:
             for row in csv.DictReader(f):
-                if (row.get("Status") or "TODO") != "TODO":
-                    print("REFUSING: ledger has non-TODO rows; use --force to overwrite state.")
-                    sys.exit(2)
+                prev[row["PromptId"]] = {
+                    "Status": row.get("Status") or "TODO",
+                    "Note": row.get("Note") or "",
+                    "UpdatedAt": row.get("UpdatedAt") or "",
+                    "Attempt": row.get("Attempt") or "0",
+                }
 
     # id uniqueness + DAG sanity (no forward refs by construction order)
     seen = {}
@@ -766,18 +786,28 @@ def main():
             "ExpectedJudge": jf(p["pid"]) if is_judge else "",
             "RequiredInputs": ";".join(p["inputs"]),
             "RequiredOutputs": ";".join(p["outputs"]),
-            "Status": "TODO", "Note": "", "UpdatedAt": now, "Attempt": "0",
+            "Status": (prev[p["pid"]]["Status"] if p["pid"] in prev else "TODO"),
+            "Note": (prev[p["pid"]]["Note"] if p["pid"] in prev else ""),
+            "UpdatedAt": (prev[p["pid"]]["UpdatedAt"] if p["pid"] in prev else now),
+            "Attempt": (prev[p["pid"]]["Attempt"] if p["pid"] in prev else "0"),
         })
 
     cols = ["PromptId", "Order", "Role", "Agent", "Phase", "Slice", "Title", "File",
             "RequiresEvidence", "RequiresJudge", "GateLevel", "DependsOn",
             "ExpectedEvidence", "ExpectedJudge", "RequiredInputs", "RequiredOutputs",
             "Status", "Note", "UpdatedAt", "Attempt"]
-    for path in (INDEX_CSV, LEDGER_CSV):
-        with io.open(path, "w", encoding="utf-8", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=cols, lineterminator="\n")
-            w.writeheader()
-            w.writerows(rows)
+    # INDEX = frozen structural template (Status always TODO, as at first generation).
+    # LEDGER = live state (existing rows' Status/Note/UpdatedAt/Attempt preserved above;
+    # genuinely-new rows are TODO).
+    index_rows = [dict(r, Status="TODO", Note="", UpdatedAt=now, Attempt="0") for r in rows]
+    with io.open(INDEX_CSV, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=cols, lineterminator="\n")
+        w.writeheader()
+        w.writerows(index_rows)
+    with io.open(LEDGER_CSV, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=cols, lineterminator="\n")
+        w.writeheader()
+        w.writerows(rows)
 
     state = {
         "module": "M6",
