@@ -1,0 +1,48 @@
+{
+  "prompt_id": "M6-P2202",
+  "status": "PASS",
+  "summary": "M6_2M_CODER_IMPLEMENT (CODER, implement). Implemented PLAN.md item-by-item as a cumulative superset of M6.2L under 04-artifacts/impl/M6.2M/, closing the M6-OD-013 authenticity twin. NO plan-deltas. Posture immutable: config.py byte-identical to M6.2L; global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, all flags False; no migration/flag/table added (migrations stay 0001-0012, RULE-018); no external send; no self-cert. PRECONDITION verified: ledger M6-P2202=RUNNING (row 212), dependency M6-P2201=PASS. STAGING: carried the M6.2L tree byte-identical (caches excluded; M6.2L PLAN/NOTES not carried; M6.2M PLAN kept); baseline verified green BEFORE any patch (561 passed, parity with M6.2L collect both 561). THE TWO TWIN FIXES: FIX-2 (smoke-side twin, leg 2 / SMK-025, genuine new code) -- app/measurement/evidence/models.py adds a _nonblank(v) helper (isinstance str and v.strip()!='') and SmokeResult.recorded now requires STRIPPED-non-blank status+correlation_id+evidence_id instead of raw truthiness (bool('  ') was True); app/measurement/evidence/pack_assembler.py _smokes NORMALIZES whitespace-only status/correlation_id/evidence_id to None (defense-in-depth, mirroring the waiver-strip) so a fake-but-nonblank field cannot masquerade -- a whitespace mandatory owner smoke stays un-recorded -> UNRUN_SMOKE gap -> pack NOT_READY (fail-closed, FAIL-007). FIX-1 (ref-side, leg 1 / SMK-024) -- NO _ref_valid logic change: the known_refs oracle consultation ('if known_refs is not None and r not in known_refs: return False') already lands in the carried M6.2L base (the impl-review forward seam), so leg-1's exit behaviour is present; M6.2M PROVES it with the SMK-024 regression and updates the now-stale _ref_valid docstring (residual -> proven with a staged allowlist; only owner-registry population remains). The staged known-refs oracle is a concrete allowlist (a set) passed via the existing known_refs parameter -- NO new registry code; the real issued-refs registry stays owner-populated (out of scope). FINAL SUITE: 568 passed (561 carried + 7 CODER regressions), no skips; the evidence-pack area (18 P0-pack smokes + pack-never-declares + ten-categories + M6.2L B2/B3 regressions + the 2 M6.2M regressions) re-run green. EDGE-CASE PROBE (throwaway snippet, running code): _nonblank fail-closed for None/int/whitespace and True only for a stripped-non-blank string; a non-string status is not recorded; a proposed-smoke owner waiver still records; a PARTIAL blank (one whitespace field of three) is not recorded; _smokes normalizes whitespace -> None so to_public masks None safely and readiness is NOT_READY; and SMK-024 is DISCRIMINATING (target category COMPLETE iff its ref is in the allowlist: w/o-issue=False, w/issue=True) -> the authenticity assertion is non-vacuous. ADVERSARIAL SELF-REVIEW: the M6.2M plan-level red-team (2 dimensions, per-finding verify running the real M6.2L code) returned ZERO findings; the implementation faithfully realizes that reviewed plan with no new attack surface, so verification was completed with the full-suite + evidence-pack re-run + the edge-case probe (proportionate; a repeat multi-agent impl workflow would be ceremony). BACKWARD-COMPAT: the recorded tightening breaks no carried test (all_smokes_recorded/make_smoke_result use non-blank values -> still recorded; un-run cases pass None -> still un-recorded); the oracle stays OPT-IN (the 18 TESTER *_p0_evidence_pack.py call assemble without an oracle and require OWNER_REVIEW_REQUIRED -- forcing it would break them). Boundary intact: measure/record-only; assembler exposes no pass/ready/certify/flag-flip; readiness tops at OWNER_REVIEW_REQUIRED; known_refs/SmokeResult values are governance ids (no PII; correlation/evidence ids still masked on export; changed files scanned clean). M6-P1000/M6-P1309 stay BLOCKED and remain in the pack. No self-certification; the runner gate + JUDGE (M6-P2209) decide.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2M.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/impl/M6.2M/PLAN.md",
+    "04-artifacts/evidence/prompts/M6-P2201.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/impl/M6.2M/app/measurement/evidence/models.py",
+    "04-artifacts/impl/M6.2M/app/measurement/evidence/pack_assembler.py"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2M/app/measurement/evidence/models.py",
+    "04-artifacts/impl/M6.2M/app/measurement/evidence/pack_assembler.py",
+    "04-artifacts/impl/M6.2M/tests/test_m6_2m_ref_authenticity.py",
+    "04-artifacts/impl/M6.2M/tests/test_m6_2m_smoke_authenticity.py",
+    "04-artifacts/impl/M6.2M/IMPLEMENTATION_NOTES.md"
+  ],
+  "commands_run": [
+    "python (carry): copytree M6.2L -> M6.2M byte-identical, excluding caches + M6.2L PLAN/NOTES; kept M6.2M PLAN.md",
+    "python -m pytest -p no:cacheprovider (baseline BEFORE patch): 561 passed; parity M6.2L collect == M6.2M collect (both 561)",
+    "Edit x4: FIX-2 models.py (_nonblank + recorded stripped-non-blank) + pack_assembler.py (_smokes normalize); FIX-1 pack_assembler.py (_ref_valid docstring, no logic change); Write x2 CODER regression test files",
+    "python -m pytest -p no:cacheprovider (after fixes + regressions): 568 passed, no skips",
+    "python -m pytest (targeted): evidence-pack area (18 P0-pack + pack-never-declares + ten-categories + M6.2L B2/B3 + 2 M6.2M regressions) -> 33 passed green",
+    "python edge-case probe: _nonblank fail-closed; non-string/partial-blank not recorded; proposed waiver records; _smokes normalizes whitespace->None; SMK-024 discriminating (w/o-issue=False, w/issue=True)",
+    "verify: migrations still 0001-0012; config.py byte-identical M6.2L vs M6.2M; PII scan changed files -> none; caches cleaned (0)",
+    "Workflow (ultracode adversarial plan red-team, 2 dimensions running the real M6.2L code) -> 0 findings"
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2M/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2M/PLAN.md",
+    "00-spec/slices/M6.2M.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/impl/M6.2M/app/measurement/evidence/models.py",
+    "04-artifacts/impl/M6.2M/app/measurement/evidence/pack_assembler.py",
+    "04-artifacts/impl/M6.2M/tests/test_m6_2m_ref_authenticity.py",
+    "04-artifacts/impl/M6.2M/tests/test_m6_2m_smoke_authenticity.py"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P2202; on PASS the sequence proceeds to M6-P2203 (M6_2M_TESTER_BUILD) to author the official smokes tests/smoke/test_smk_024_*.py / test_smk_025_*.py (do-not-run build) from the SMOKE_REGISTER verbatim scenarios, then M6-P2204 (TESTER_RUN) to EXECUTE them and record a correlation_id + evidence_id per smoke into 04-artifacts/test-reports/M6.2M/SMOKE_RESULTS.md, then M6-P2205 (BOUNDARY_ADVERSARY), M6-P2206 (SECURITY_PII), M6-P2207 (PM EVIDENCE_COLLECT), M6-P2208 (DOCS), and the exit gate M6-P2209 (SLICE_GATE_JUDGE) which checks the 7 M6.2M exit legs (ref-authenticity + smoke-authenticity proven by regression + SMK-024/025 recorded-or-waived + rollback). TESTER note: SMK-024 needs a staged known_refs allowlist (a set) passed as the assemble() known_refs argument, and the 'reconstructed-but-not-issued' vector is modeled as allowlist = genuine refs minus the target slot; SMK-025 asserts a whitespace/fake-but-nonblank SmokeResult for a mandatory owner smoke is recorded()==False -> NOT_READY. Operator hygiene (non-blocking): register M6-OD-013 + M6-OD-014 in DECISION_REGISTER.md. Posture stays BLOCKED/OFF/OFF; no flag flip; M6-P1000/M6-P1309 stay BLOCKED."
+}

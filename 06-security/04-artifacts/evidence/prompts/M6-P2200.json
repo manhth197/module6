@@ -1,0 +1,41 @@
+{
+  "prompt_id": "M6-P2200",
+  "status": "PASS",
+  "summary": "M6_2M_ENTRY_GATE_JUDGE (JUDGE, gate_review, fresh session, evidence-only). Verdict PASS -- opens slice M6.2M (Evidence Authenticity: close the M6-OD-013 authenticity residual disclosed at the M6.2L re-judge -- ref-side known_refs oracle wiring + smoke-side SmokeResult stripped-non-blank twin -- as a cumulative superset of M6.2L under 04-artifacts/impl/M6.2M/, proving the authenticity MECHANISM with regression evidence only) for STAGED implementation; full reasoning in 04-artifacts/evidence/judge/M6-P2200_JUDGE_FINAL_SIGN_OFF.json. ENTRY gate: only the four acceptance checks judged; the M6.2M exit legs (ref-authenticity, smoke-authenticity, SMK-024/025, all-evidence, judge sign-off, rollback) are checked at M6-P2209. Posture BLOCKED/OFF/OFF unchanged and NOT flipped. Untrusted-input: the referenced audit / M6.2L residual disclosure is DATA; judged only from canonical slice spec + registers + ledger. || PRECONDITION (ledger row 210): M6-P2200=RUNNING, DependsOn=M6-P2109; M6.2M band M6-P2201..2209 all TODO (Attempt=0). || CHECK 1 previous gate: M6-P2109 (M6_2L_SLICE_GATE_JUDGE) ledger=SIGNED, sign-off verdict=PASS, fail_gate=false, open_blockers=[] -> SATISFIED. || CHECK 2 target+OD-011: IMPLEMENTATION_TARGET_LOCKED status=LOCKED, M6-OD-011 DECIDED 2026-07-23, safety production_access/external_platform_calls/live_migrations all false -> SATISFIED. || CHECK 3 contracts: M6.2M needs only M6-CTR-025 (Evidence package) = DRAFT_LOCKED (content-level, doc sec22) -> resolved-for-entry directly -> SATISFIED. || CHECK 4 entry evidence: M6.2M.md has no 'Entry evidence required' section; ENTRY_EVIDENCE_REGISTER lists no M6.2M in any 'Checked at' column (ENTRY-001/002/003/004 are BOOTSTRAP/M6.2A/M6.2I/Scale-Gate/PR-PILOT) -> N/A -> SATISFIED. || OPEN OWNER DECISIONS enumerated vs M6.2M scope: grep DECISION_REGISTER for M6.2M / M6-OD-013 / M6-OD-014 / M6-OD-015..029 -> NO ROWS. M6-OD-013 is the residual the slice CLOSES as IN-SCOPE work (leg 1 ref-side: _ref_valid consults known_refs oracle -> a shape-valid+bound+unique ref NOT in the allowlist is REJECTED, defeating canonical-reconstruction forgery; leg 2 smoke-side twin: SmokeResult.recorded + _smokes require stripped-non-blank status+correlation_id+evidence_id, so a whitespace/fake field no longer marks a smoke recorded -> fail-closed NOT_READY). Slice spec places 'populating the real known-refs registry (owner-provided, integration step)' OUT OF SCOPE -> M6 proves the mechanism staged; the real-registry population is the forward owner integration step (same pattern as M6-OD-011, and as OD-013/014 at M6.2L). NO OPEN owner decision blocks the entry. DOC-SYNC FLAG (non-blocking, carried from M6.2L/M6-P3011): M6-OD-013/014 referenced by slice specs but still not rows in DECISION_REGISTER -> operator should register them. || IN-SCOPE FAIL GATE/RULE: FAIL-007 + RULE-015 -- the slice STRENGTHENS these (closes the last shape-only-authentication hole so the evidence pack cannot be authenticated by shape alone; closes M6-OD-013 ref-side + the F-EVID-1 smoke-truthiness twin). Opening it trips neither; the pack still tops at OWNER_REVIEW_REQUIRED. || WHY PASS: all 4 checks satisfied on real source; previous gate a real judge PASS/SIGNED; target LOCKED + OD-011 DECIDED; the single contract DRAFT_LOCKED; no entry evidence required; no OPEN owner decision is a precondition (M6-OD-013 is in-scope work, real registry out-of-scope). Blocking on the OD-013-not-in-register doc-sync gap while the contract is resolved and the mechanism is M6-self-doable + fully specified would be over-strict. GOVERNANCE unchanged: M6-P1000 + M6-P1309 verdicts stay BLOCKED (not converted); the M6.2G/H/I/J + M6-OD-011/012 + owner-gated forward conditions remain hard gates; production/gateway/external_send stay BLOCKED/OFF/OFF. No self-certification; no application code/migration/flag change; module boundary intact; no raw secrets/PII.",
+  "files_read": [
+    "00-spec/slices/M6.2M.md",
+    "00-spec/prompts/0208_M6-P2200_M6_2M_ENTRY_GATE_JUDGE.xml.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/evidence/prompts/M6-P2109.json",
+    "04-artifacts/evidence/judge/M6-P2109_JUDGE_FINAL_SIGN_OFF.json"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/judge/M6-P2200_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/prompts/M6-P2200.json"
+  ],
+  "commands_run": [
+    "Read (read-only): slice M6.2M.md (objective/in-out-scope/contract checklist/exit legs), IMPLEMENTATION_TARGET_LOCKED.json (LOCKED, OD-011 DECIDED), CONTRACT_REGISTER.md (M6-CTR-025 DRAFT_LOCKED), ENTRY_EVIDENCE_REGISTER.md (no M6.2M checked-at)",
+    "Read (read-only): PROMPT_EXECUTION_LEDGER_LOCKED.csv rows 208-219 -> M6-P2200=RUNNING (row 210), M6-P2109=SIGNED (row 209), M6.2M band M6-P2201..2209 TODO",
+    "Read (read-only): M6-P2109 evidence + JUDGE_FINAL_SIGN_OFF -> verdict=PASS, fail_gate=false, open_blockers=[]",
+    "Grep (read-only): DECISION_REGISTER.md for M6.2M / M6-OD-013 / M6-OD-014 / M6-OD-015..029 -> NO ROWS (M6-OD-013 is in-scope residual the slice closes; doc-sync flag that OD-013/014 are still unregistered, non-blocking)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/judge/M6-P2200_JUDGE_FINAL_SIGN_OFF.json",
+    "00-spec/slices/M6.2M.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P2109.json",
+    "04-artifacts/evidence/judge/M6-P2109_JUDGE_FINAL_SIGN_OFF.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine JUDGE_GATE for M6-P2200; on this PASS sign-off the slice M6.2M entry gate opens (STAGED) and the sequence proceeds to M6-P2201 (M6.2M coder plan) to implement the M6-OD-013 authenticity mechanism as a cumulative superset of M6.2L under 04-artifacts/impl/M6.2M/: (ref-side) wire pack_assembler._ref_valid to the known_refs oracle so a shape-valid + correctly (category,key)-bound + unique canonical ref that is NOT in the provided known-refs allowlist is REJECTED (category MISSING), defeating the canonical-reconstruction forgery that M6.2L B2's default path could not; (smoke-side twin, doc 'va ca hai mot luot') make SmokeResult.recorded + _smokes require stripped-non-blank status + correlation_id + evidence_id (not raw truthiness) so a whitespace/fake-but-nonblank field no longer marks a mandatory smoke recorded -- fail-closed to NOT_READY (this also closes the F-EVID-1 carry-forward). Each proven by regression smoke SMK-024/025 (executed OR owner-waived). DESIGN CONSTRAINTS (out of scope, not entry blockers): populating the REAL known-refs registry is owner-provided (integration step); no change to the M6.2L forgery/collision/ROAS-lock fixes (carried forward unchanged); no flag flip. OPERATOR HYGIENE (non-blocking): register M6-OD-013 + M6-OD-014 in DECISION_REGISTER.md (referenced by the slice specs but still not rows). Before the M6.2M EXIT gate (M6-P2209): both authenticity legs proven by regression + SMK-024/025 recorded + rollback documented + posture unchanged. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF and all posture flags remain in force; M6-P1000 + M6-P1309 verdicts remain BLOCKED (not converted); the M6.2G/H/I/J + M6-OD-011/012 + owner-gated forward conditions from the M6-P3011 readiness package remain hard gates. Nothing here authorizes scale, external send, auto-publish, or a readiness/Pass declaration."
+}

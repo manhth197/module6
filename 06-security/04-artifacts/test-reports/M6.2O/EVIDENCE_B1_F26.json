@@ -1,0 +1,49 @@
+{
+  "prompt_id": "M6-2O-TESTER-B1-F26-ADHOC",
+  "status": "PASS",
+  "summary": "Operator-directed (owner, free-form; NOT a ledger prompt) TESTER build+run on 04-artifacts/impl/M6.2O/. GOVERNANCE FRAMING: M6.2N/M6.2O are out-of-band -- no ledger row / slice-spec yet (last ledger row M6-P2209 = M6.2M judge SIGNED; last RUNNING M6-P2202); this matches the coder's own M6.2O IMPLEMENTATION_NOTES.md. Boundary honored exactly as instructed: tests-only under M6.2O/tests/smoke/, NO app code changed, no 00-spec/ or 04-artifacts/state/ write, no flag flipped, no self-cert. Posture verified immutable: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, all flags False. TASK 1 (2 official smokes, build+run): (B1 psid_hash, tests/smoke/test_b1_psid_hash_smoke.py, 4/4 PASS) -- (a) a raw PSID at the resolve seam is one-way hashed; as_stored() carries psid_hash:... and NEVER the raw psid (no raw key; _PSID not in str(as_stored())); (b) hash_psid is psid_hash:-prefixed, one-way (output != input, raw not in hash), deterministic for the same pepper, collision-sensitive (distinct psids -> distinct hashes); (c) fail-closed -- with production injected True (a call argument; the immutable PRODUCTION_FLAG is NOT flipped -- asserted still OFF) AND the pepper env removed via monkeypatch.delenv, resolve_pepper + hash_psid raise PsidHashPolicyError; (d) non-vacuity -- hash_psid(None/blank) -> None and a context with no psid signal has psid_hash None. (F2-6 duck-coerce, tests/smoke/test_f2_6_duck_recorded_coerced.py, 3/3 PASS) -- a duck SimpleNamespace(recorded=True, status/correlation_id/evidence_id=None) for mandatory owner smoke M6-SMK-001 is coerced by _smokes to a canonical SmokeResult, recorded recomputed False, gap UNRUN:M6-SMK-001, readiness NOT_READY; isolation non-vacuous (17 others genuinely recorded, only M6-SMK-001 ducked) still flips readiness to NOT_READY; genuine control still records -> OWNER_REVIEW_REQUIRED. TASK 2 (re-bless 2 stale SMK-013 smokes, rename/docstring only, ASSERTIONS UNCHANGED): test_smk_013_live_chain_trace.py -- renamed test_smk_013_neg_psid_is_masked_on_export_but_kept_durably -> test_smk_013_neg_psid_hashed_no_raw_on_any_surface + module/function docstring updated to the B1 contract ('raw PSID never stored; durable + export both one-way psid_hash'); test_smk_013_funnel_live_chain_trace.py -- module + function docstring 'masked on export' -> 'one-way psid_hash' (function name kept per instruction). Both files still 4/4; the renamed node is collected and the old name is gone; every chain-trace + no-raw-psid assertion is byte-unchanged (these assertions were already correct + strong for the B1 contract -- only the name/doc lagged, so this is a pure re-bless, not a make-green). RESULTS: baseline BEFORE authoring 584 passed RC 0; full suite AFTER 591 passed / 0 failed / 0 skipped / 0 error RC 0 (delta +7 = B1 4 + F2-6 3; SMK-013 re-bless kept its node count) -> NO REGRESSION (591 >= 584 baseline); isolated 4-file cross-check 15 passed RC 0. Counts via in-process pytest_runtest_logreport tally (python 3.12.13 / pytest 8.4.2, run -B / PYTHONDONTWRITEBYTECODE=1, -p no:cacheprovider; pytest stdout swallowed via redirect_stdout because the harness clips the summary). INCIDENT (honest): the B1 smoke first written as tests/smoke/test_b1_psid_hash.py collided (duplicate basename, no __init__.py, prepend import mode) with the coder's pre-existing tests/test_b1_psid_hash.py -> pytest collection error RC 2; FIXED by renaming to tests/smoke/test_b1_psid_hash_smoke.py + removing the duplicate; re-run clean. NO assertion loosened/skipped/deleted; every result is a real executed PASS (had any failed I would report BLOCKED). NO raw psid / pepper anywhere; psid markers synthetic + runtime-assembled (RULE-014 / FAIL-008). status=PASS is an honest TESTER self-report of the executed run; it self-certifies no gate/readiness (RULE-015).",
+  "files_read": [
+    "04-artifacts/impl/M6.2O/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2O/app/measurement/identity/psid_hash.py",
+    "04-artifacts/impl/M6.2O/app/measurement/attribution/resolver.py",
+    "04-artifacts/impl/M6.2O/app/measurement/models/attribution_context.py",
+    "04-artifacts/impl/M6.2O/tests/test_duck_smoke_recorded.py",
+    "04-artifacts/impl/M6.2O/tests/smoke/test_smk_013_live_chain_trace.py",
+    "04-artifacts/impl/M6.2O/tests/smoke/test_smk_013_funnel_live_chain_trace.py",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2O/tests/smoke/test_b1_psid_hash_smoke.py",
+    "04-artifacts/impl/M6.2O/tests/smoke/test_f2_6_duck_recorded_coerced.py",
+    "04-artifacts/impl/M6.2O/tests/smoke/test_smk_013_live_chain_trace.py",
+    "04-artifacts/impl/M6.2O/tests/smoke/test_smk_013_funnel_live_chain_trace.py",
+    "04-artifacts/test-reports/M6.2O/SMOKE_RESULTS_B1_F26.md"
+  ],
+  "commands_run": [
+    "ls 04-artifacts/impl -> slices A..O present (M6.2N/O on disk); ledger tail -> last row M6-P2209 (M6.2M) SIGNED, no M6.2N/O row (out-of-band, confirmed by M6.2O IMPLEMENTATION_NOTES.md)",
+    "02-tester/.venv/Scripts/python.exe -B -c \"<pytest_runtest_logreport tally; pytest.main(['-p','no:cacheprovider'])>\"  (baseline BEFORE authoring, from 04-artifacts/impl/M6.2O; RESULT: 584 passed, 0 failed, RC 0)",
+    "02-tester/.venv/Scripts/python.exe -B -c \"<collect-only>\"  (diagnosed RC 2 collection error -> tests/smoke/test_b1_psid_hash.py duplicate-basename collision with tests/test_b1_psid_hash.py)",
+    "Write tests/smoke/test_b1_psid_hash_smoke.py (unique basename) ; rm tests/smoke/test_b1_psid_hash.py (colliding duplicate, allowed write root, just-created)",
+    "02-tester/.venv/Scripts/python.exe -B -c \"<tally + per-file; pytest.main(['-p','no:cacheprovider'])>\"  (full suite AFTER; RESULT: 591 passed, 0 failed, RC 0, delta +7; per-file B1 4/4, F2-6 3/3, SMK-013 live 4/4, SMK-013 funnel 4/4)",
+    "02-tester/.venv/Scripts/python.exe -B -c \"<tally + node names; pytest.main([the 4 target files, '-p','no:cacheprovider'])>\"  (isolated; RESULT: 15 passed, RC 0; renamed node present, old name gone)"
+  ],
+  "test_results": [
+    {"smoke_id": "B1-psid_hash", "result": "PASS", "detail": "tests/smoke/test_b1_psid_hash_smoke.py 4/4. (a) no raw psid in as_stored() (psid_hash: only, _PSID absent); (b) one-way + psid_hash: prefix + deterministic-same-pepper + collision-sensitive; (c) fail-closed production(injected)+pepper-unset -> PsidHashPolicyError (PRODUCTION_FLAG asserted still OFF, not flipped); (d) None/blank psid -> None, no-signal ctx psid_hash None. correlation_id cor***b1 / evidence_id ev_***b1 (synthetic, masked)."},
+    {"smoke_id": "F2-6-duck", "result": "PASS", "detail": "tests/smoke/test_f2_6_duck_recorded_coerced.py 3/3. Duck SimpleNamespace(recorded=True, None fields) for owner smoke M6-SMK-001 -> coerced canonical SmokeResult, recorded False, gap UNRUN:M6-SMK-001, NOT_READY; isolation (only duck) flips readiness NOT_READY; genuine control -> OWNER_REVIEW_REQUIRED. correlation_id cor***26 / evidence_id ev_***26."},
+    {"smoke_id": "M6-SMK-013:live", "result": "PASS", "detail": "tests/smoke/test_smk_013_live_chain_trace.py 4/4 (re-blessed). Renamed neg_psid_is_masked_on_export_but_kept_durably -> neg_psid_hashed_no_raw_on_any_surface + docstring updated to B1 contract; ALL assertions (live/comment/messenger chain trace + psid_hash: prefix + no raw psid on any surface) unchanged. correlation_id cor***13 / evidence_id ev_***13."},
+    {"smoke_id": "M6-SMK-013:funnel", "result": "PASS", "detail": "tests/smoke/test_smk_013_funnel_live_chain_trace.py 4/4 (re-blessed). Module + function docstring 'masked on export' -> 'one-way psid_hash'; function name + ALL chain-trace/psid_hash assertions unchanged. correlation_id cor***1f / evidence_id ev_***1f."}
+  ],
+  "evidence_refs": [
+    "04-artifacts/test-reports/M6.2O/SMOKE_RESULTS_B1_F26.md",
+    "04-artifacts/impl/M6.2O/tests/smoke/test_b1_psid_hash_smoke.py",
+    "04-artifacts/impl/M6.2O/tests/smoke/test_f2_6_duck_recorded_coerced.py",
+    "04-artifacts/impl/M6.2O/tests/smoke/test_smk_013_live_chain_trace.py",
+    "04-artifacts/impl/M6.2O/tests/smoke/test_smk_013_funnel_live_chain_trace.py",
+    "04-artifacts/impl/M6.2O/app/measurement/identity/psid_hash.py",
+    "04-artifacts/impl/M6.2O/IMPLEMENTATION_NOTES.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "This was an operator-directed OUT-OF-BAND TESTER task (no ledger prompt). All 4 target smokes PASS and the full M6.2O suite is 591 passed / 0 failed (no regression vs 584 baseline); nothing was loosened or patched. GOVERNANCE / operator-hygiene (non-blocking, for the operator/analyst): M6.2N (B1) and M6.2O (F2-6) still have NO ledger row / slice-spec / entry-judge -- register them (slice_definitions + PROMPT_EXECUTION_LEDGER + entry gate) so this work is captured by the formal EVIDENCE_GATE/JUDGE flow; also register a SMOKE_REGISTER id for B1 psid_hash + F2-6 if they are to be owner-tracked smokes (currently they have descriptive ids only, no SMK-0xx). B1's cross-module PSID joins (M6<->M3/M7) and the shared-pepper question remain a separate owner+chief decision (out of scope). Posture stays BLOCKED/OFF/OFF; M6-P1000/M6-P1309 stay BLOCKED. This evidence is self-reported PASS (RULE-015); it advances no gate."
+}

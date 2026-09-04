@@ -1,0 +1,58 @@
+{
+  "prompt_id": "M6-B1-PSID-HASH",
+  "status": "PASS",
+  "summary": "B1 PSID one-way hash (M6-OD-003 / M5 PSID hash policy DAP-M5-cho-M6 @ M5 1f3a4a7, PSID_HASH_POLICY_M5_TMP) -- OPERATOR-DIRECTED, OUT-OF-BAND (not a ledger-sequenced prompt). B1 (psid_hash) was OUT OF SCOPE of M6.2L/M6.2M pending the M5 hash policy; M5 has now issued it, unblocking B1. Applied as a NEW cumulative superset 04-artifacts/impl/M6.2N/ of the latest impl M6.2M (already-SIGNED impls untouched); the last ledger-RUNNING prompt is M6-P2202 (M6.2M implement; its gate + M6.2M slice-completion M6-P2203..2209 still pending). GOVERNANCE FLAG (non-blocking, surfaced for the operator): there is no M6.2N slice-spec / SMOKE_REGISTER entry / ledger row for B1 yet -- operator/analyst should register the B1 slice + its smokes. Posture immutable & untouched: config.py byte-identical to M6.2M; global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, live_migrations=false. POLICY APPLIED: a raw PSID is stored NOWHERE (not even durable Zone B); mask() is reversible and insufficient; PSID is hashed to 'psid_hash:' + base64url(HMAC-SHA256(pepper, psid)) -- one-way + salted. The pepper is a SECRET (M6-own; env M6_PSID_HASH_PEPPER via secret_ref at deploy; fail-closed in production when unset; a labelled non-secret mock pepper is used ONLY in dev/staged tests) and is NEVER committed/logged/emitted; cross-module joins are a separate owner+chief decision (OUT OF SCOPE). CHANGE SET (all under impl/M6.2N/): new app/measurement/identity/psid_hash.py (hash_psid + resolve_pepper fail-closed + PsidHashPolicyError; production flag injectable so the fail-closed branch is testable WITHOUT flipping the immutable governance flag); models/attribution_context.py field psid -> psid_hash, to_public/as_stored emit the hash (no mask, no raw-keep), dropped unused mask import; attribution/resolver.py hashes at ingest in resolve_live_session so the raw psid lives only in that one call (RAM), LiveContext.psid -> psid_hash; funnel/funnel.py + funnel/models.py FunnelTrace psid -> psid_hash (no mask); new migrations/0013_psid_to_psid_hash.sql (staged ALTER RENAME psid -> psid_hash; append-only, 0006 kept historical with comments forward-noted); 5 carried tests REALIGNED to the new one-way-hash contract (2 of them TESTER-authored SMK-013 smokes -- realigned NOT weakened: they still prove no raw psid on any surface + the live-chain trace; function names left for TESTER re-bless) + new tests/test_b1_psid_hash.py. SECURITY VERIFICATION (running code, edge-probe + grep): as_stored()/to_public() carry psid_hash and NO 'psid' key; the model has no raw-psid field; the raw psid appears in NEITHER str(as_stored()) NOR str(to_public()) NOR the funnel view NOR any audit record; grep app/ for a raw .psid field/[\"psid\"] key -> NONE (only psid_hash); the sole raw-psid touch is the single hash-on-ingest point; the hash is one-way (pepper as HMAC KEY) + deterministic (stable join key); resolve_pepper(production=True) with the env unset RAISES; the mock pepper is reachable only in non-production; no PII/pepper literal in the changed files. FINAL SUITE: 581 passed (575 carried incl. the 5 realigned + 6 new B1 tests), no skips, no regress (baseline was 575 before any patch). ADVERSARIAL SELF-REVIEW (ultracode, 8 agents, skeptics running the real M6.2N code): the load-bearing leak axis CONFIRMED CLEAN (no raw-PSID/pepper leak; fail-closed + mock-pepper reachability correct; no regression; scope intact); 2 CONFIRMED NIT both FIXED here -- (1) hash_psid silently dropped a non-str psid (privacy-safe but lost a legit join key) -> now coerces str() + regression; (2) migration 0006 comments still called the column reversibly-'masked' PII -> forward-noted to psid_hash + 'mask() not sufficient'; plus a funnel.py stale docstring fixed. No self-certification; the runner gate + JUDGE decide (RULE-015).",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/impl/M6.2N/app/measurement/models/attribution_context.py",
+    "04-artifacts/impl/M6.2N/app/measurement/attribution/resolver.py",
+    "04-artifacts/impl/M6.2N/app/measurement/funnel/funnel.py",
+    "04-artifacts/impl/M6.2N/app/measurement/funnel/models.py",
+    "04-artifacts/impl/M6.2N/migrations/0006_create_ads_attribution_context.sql",
+    "04-artifacts/impl/M6.2N/tests/test_live_session_chain_trace.py",
+    "04-artifacts/impl/M6.2N/tests/smoke/test_smk_013_live_chain_trace.py",
+    "04-artifacts/impl/M6.2N/tests/test_golden_hour_funnel_chain.py",
+    "04-artifacts/impl/M6.2N/tests/test_live_chain_trace_in_funnel.py",
+    "04-artifacts/impl/M6.2N/tests/smoke/test_smk_013_funnel_live_chain_trace.py"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2N/app/measurement/identity/psid_hash.py",
+    "04-artifacts/impl/M6.2N/app/measurement/models/attribution_context.py",
+    "04-artifacts/impl/M6.2N/app/measurement/attribution/resolver.py",
+    "04-artifacts/impl/M6.2N/app/measurement/funnel/funnel.py",
+    "04-artifacts/impl/M6.2N/app/measurement/funnel/models.py",
+    "04-artifacts/impl/M6.2N/migrations/0006_create_ads_attribution_context.sql",
+    "04-artifacts/impl/M6.2N/migrations/0013_psid_to_psid_hash.sql",
+    "04-artifacts/impl/M6.2N/tests/test_live_session_chain_trace.py",
+    "04-artifacts/impl/M6.2N/tests/smoke/test_smk_013_live_chain_trace.py",
+    "04-artifacts/impl/M6.2N/tests/test_golden_hour_funnel_chain.py",
+    "04-artifacts/impl/M6.2N/tests/test_live_chain_trace_in_funnel.py",
+    "04-artifacts/impl/M6.2N/tests/smoke/test_smk_013_funnel_live_chain_trace.py",
+    "04-artifacts/impl/M6.2N/tests/test_b1_psid_hash.py",
+    "04-artifacts/impl/M6.2N/IMPLEMENTATION_NOTES.md"
+  ],
+  "commands_run": [
+    "python (carry): copytree M6.2M -> M6.2N byte-identical, excluding caches + M6.2M PLAN/NOTES",
+    "PYTHONDONTWRITEBYTECODE=1 python -B -m pytest -p no:cacheprovider (baseline BEFORE patch): 575 passed; parity with M6.2M (both 575)",
+    "Write/Edit: new psid_hash util + migration 0013; psid -> psid_hash across model/resolver/funnel; realigned 5 carried tests; new B1 test",
+    "PYTHONDONTWRITEBYTECODE=1 python -B -m pytest (after patch): 580 passed, then 581 after the review NIT fixes (non-str coercion regression); no skips, no regress",
+    "python edge-probe (running code): as_stored()/to_public()/funnel view carry psid_hash and NO 'psid' key; raw psid NOT in any export/durable/audit surface; one-way + deterministic; fail-closed production raises; ctx has no raw psid attr",
+    "grep app/ for raw .psid field/[\"psid\"] key -> NONE (only psid_hash); migrations 0001-0013; config.py byte-identical M6.2M vs M6.2N; PII/pepper literal scan of changed files -> none; caches cleaned (0)",
+    "Workflow (ultracode adversarial B1 red-team, 8 agents running the real M6.2N code): leak axis CLEAN; 2 NIT fixed"
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2N/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2N/app/measurement/identity/psid_hash.py",
+    "04-artifacts/impl/M6.2N/app/measurement/models/attribution_context.py",
+    "04-artifacts/impl/M6.2N/app/measurement/attribution/resolver.py",
+    "04-artifacts/impl/M6.2N/app/measurement/funnel/models.py",
+    "04-artifacts/impl/M6.2N/migrations/0013_psid_to_psid_hash.sql",
+    "04-artifacts/impl/M6.2N/tests/test_b1_psid_hash.py",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator: (1) provision the real per-environment secret pepper as M6_PSID_HASH_PEPPER via secret_ref at the deploy/integration step (production fail-closes if unset) -- the pepper is never in code/evidence; (2) register the B1 slice + its smoke(s) in the slice defs / SMOKE_REGISTER / ledger so the out-of-band patch has a governance row (currently none); (3) route M6.2N through the TESTER (re-bless / rename the realigned SMK-013 psid companions, whose assertions now prove the one-way-hash contract, not the old masked-and-kept-raw one) + BOUNDARY + SECURITY_PII + slice-gate JUDGE. B1 closes the psid_hash residual left OUT OF SCOPE at M6.2L (waiting on the M5 policy). Cross-module PSID joins (M6<->M3/M7) remain a separate owner+chief decision (out of scope). Governance unchanged: production_flag=OFF, global_gateway_state=BLOCKED, external_send=OFF; M6-P1000/M6-P1309 stay BLOCKED. No readiness/Pass is declared here."
+}

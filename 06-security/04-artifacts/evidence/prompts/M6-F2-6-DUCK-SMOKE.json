@@ -1,0 +1,42 @@
+{
+  "prompt_id": "M6-F2-6-DUCK-SMOKE",
+  "status": "PASS",
+  "summary": "F2-6 (code-exec-only, NOT channel-reachable, no prod risk) + C7 (M5 runtime-controls invariant, doc-only) -- OPERATOR-DIRECTED, OUT-OF-BAND (not a ledger prompt). Stacked as a NEW cumulative superset 04-artifacts/impl/M6.2O/ of the latest impl M6.2N (already-SIGNED impls untouched). GOVERNANCE FLAG (non-blocking): no M6.2O slice-spec / SMOKE_REGISTER / ledger row yet -- operator/analyst should register it; last ledger-RUNNING prompt is M6-P2202. Posture immutable & untouched: config.py byte-identical to M6.2N; global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, live_migrations=false. F2-6 HOLE (verified @ M6.2N pack_assembler.py:157): _smokes took smoke_results.get(spec.smoke_id) AS-IS; _readiness/_gap_blockers read s.recorded, so a duck object with .recorded=True + blank status/correlation_id/evidence_id (waived=False) slipped through the waiver-strip + whitespace-normalize and was treated as RECORDED -- the assembler trusted the caller's .recorded instead of computing it from fields (FAIL-007). FIX (only _smokes; models.py NOT changed; B2/B3/B4/A3/A4 NOT changed -- all verified byte-identical to M6.2N): COERCE every provided object to a canonical frozen SmokeResult rebuilt from its FIELDS (smoke_id = the registry's; status/correlation_id/evidence_id/waived via getattr defaulting None/False), so recorded is RECOMPUTED by SmokeResult.recorded (fail-closed); the existing strip-waiver + whitespace-normalize run after, unchanged. TEST (tests/test_duck_smoke_recorded.py): a duck (.recorded=True, blank fields) for a mandatory owner smoke -> smk.recorded is False + UNRUN:M6-SMK-001 gap + NOT_READY; an ISOLATING case (all other smokes genuinely recorded, only the duck) -> readiness FLIPS to NOT_READY (non-vacuous: without the fix the trusted duck would leave it OWNER_REVIEW_REQUIRED); non-vacuity -> real SmokeResults still record. FINAL SUITE: 584 passed (581 carried + 3 F2-6 tests), PYTHONDONTWRITEBYTECODE=1 python -B, no skips, no regress (baseline 581 before any patch, parity with M6.2N). C7 (doc-only, no code): recorded the M5 runtime-controls invariant in 04-artifacts/impl/M6.2O/INVARIANTS_M5_RUNTIME_CONTROLS.md -- do NOT enable external_send / a real Graph sink until the four M5 controls (allowlist / cross-instance dedup / send-rate / real Graph sink) are closed AND the owner signs. M6's side is already enforced fail-closed (M6-verified @ M6.2O: EXTERNAL_SEND immutable Final='OFF' + the ==ON helper returns False; every send raises ExternalSendBlocked via the staged transport; permits_external_send() per-event gate) -- matches the operator. The 4 controls' status is M5-REPORTED cross-module DATA (per DAP-M5-cho-M6.md; M6 records verbatim, does not verify M5's tree); moving the 4 debts (allowlist=done, dedup=B5, rate=Redis, sink=B11) into FIX_M5 is an owner/chief action. GOVERNANCE-PLACEMENT FLAG: the canonical home (Scale-Gate/go-live checklist + _OWNER_RISK_ACCEPTANCE.md + ENTRY-004 DEBT-1..4) is owner/analyst/judge-owned and outside the coder write scope -- the ANALYST/PM should merge this record there (the .md here is the coder-side capture). SCOPE verified: only pack_assembler.py changed in app/ (_smokes); config.py + evidence/models.py + gap_blockers.py (B3) + data_mart.py + measurement_event_store.py (B4) + attribution_context.py (A3/B1) all byte-identical to M6.2N; migrations 0001-0013 unchanged; no PII in the changed file; caches clean. No self-certification; the runner gate + JUDGE decide (RULE-015).",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/impl/M6.2N/app/measurement/evidence/pack_assembler.py",
+    "04-artifacts/impl/M6.2O/app/measurement/evidence/pack_assembler.py",
+    "04-artifacts/impl/M6.2O/app/config.py",
+    "04-artifacts/impl/M6.2O/app/measurement/integration/platform_transport.py",
+    "04-artifacts/impl/M6.2O/app/measurement/outbox/transport.py",
+    "04-artifacts/impl/M6.2O/app/measurement/registry/validator.py"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2O/app/measurement/evidence/pack_assembler.py",
+    "04-artifacts/impl/M6.2O/tests/test_duck_smoke_recorded.py",
+    "04-artifacts/impl/M6.2O/INVARIANTS_M5_RUNTIME_CONTROLS.md",
+    "04-artifacts/impl/M6.2O/IMPLEMENTATION_NOTES.md"
+  ],
+  "commands_run": [
+    "python (carry): copytree M6.2N -> M6.2O byte-identical, excluding caches + M6.2N PLAN/NOTES",
+    "PYTHONDONTWRITEBYTECODE=1 python -B -m pytest -p no:cacheprovider (baseline BEFORE patch): 581 passed; parity with M6.2N",
+    "Edit: pack_assembler._smokes coerce provided object -> canonical SmokeResult from fields (models.py untouched); Write tests/test_duck_smoke_recorded.py + INVARIANTS_M5_RUNTIME_CONTROLS.md",
+    "PYTHONDONTWRITEBYTECODE=1 python -B -m pytest (after patch): 584 passed, no skips, no regress; duck test file green",
+    "python scope verify: config.py + evidence/models.py + gap_blockers.py + data_mart.py + measurement_event_store.py + attribution_context.py byte-identical M6.2N vs M6.2O; only pack_assembler.py changed in app/; migrations 0001-0013; PII scan changed file -> none; caches cleaned (0)",
+    "grep verify (M6 fail-closed enforcement facts for the C7 invariant): EXTERNAL_SEND Final=OFF + ==ON helper, ExternalSendBlocked raised by staged transport, permits_external_send() gate"
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2O/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2O/INVARIANTS_M5_RUNTIME_CONTROLS.md",
+    "04-artifacts/impl/M6.2O/app/measurement/evidence/pack_assembler.py",
+    "04-artifacts/impl/M6.2O/tests/test_duck_smoke_recorded.py",
+    "04-artifacts/impl/M6.2O/app/config.py",
+    "04-artifacts/impl/M6.2O/app/measurement/outbox/transport.py",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator: (1) register the F2-6 fix + C7 invariant as a governance row (slice defs / ledger) so the out-of-band M6.2O patch is tracked; (2) ANALYST/PM: merge INVARIANTS_M5_RUNTIME_CONTROLS.md into the canonical Scale-Gate/go-live checklist + _OWNER_RISK_ACCEPTANCE.md (map ENTRY-004 DEBT-1..4); (3) owner/chief: move the 4 M5 debts (allowlist=done, dedup=B5, rate=Redis, sink=B11) into FIX_M5; (4) route M6.2O through the TESTER (an official smoke for the duck-.recorded hardening) + BOUNDARY + SECURITY_PII + slice-gate JUDGE. F2-6 is code-exec-only, not channel-reachable, no production risk; it strengthens FAIL-007. Governance unchanged: production_flag=OFF, global_gateway_state=BLOCKED, external_send=OFF; M6-P1000/M6-P1309 stay BLOCKED; external_send must NOT be enabled until the 4 M5 controls close + owner sign. No readiness/Pass declared."
+}

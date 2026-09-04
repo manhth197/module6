@@ -1,0 +1,41 @@
+{
+  "prompt_id": "M6-B1-F2-6-RECORD",
+  "status": "PASS",
+  "summary": "Coder-role RECORD step for the already-staged, operator-directed out-of-band change-set B1 (psid_hash) + F2-6 (duck-coerce) under 04-artifacts/impl/M6.2O/ (the cumulative superset M6.2M -> M6.2N (B1) -> M6.2O (F2-6)). NOT a re-implement: this step wrote ONLY the two record artifacts (PLAN.md, IMPLEMENTATION_NOTES.md) + this evidence; NO impl code changed; no 00-spec/ or 04-artifacts/state/ touched; posture flags not flipped. Read the M6.2O tree + the two source evidence files (M6-B1-PSID-HASH.json, M6-F2-6-DUCK-SMOKE.json). PLAN.md = a file:anchor change-set table (each item -> B1 or F2-6 -> rollback per item). IMPLEMENTATION_NOTES.md = the consolidated B1+F2-6 record with VERIFIED confirmations. ACCEPTANCE (all verified fresh this step, not asserted): (1) config.py sha256 911b3238... byte-identical to M6.2M (posture BLOCKED/OFF/OFF + all flags False untouched); (2) the B2/B3/B4 fix-logic FILES are whole-file byte-identical to M6.2M -- evidence/gap_blockers.py (B3), dashboard/data_mart.py + store/measurement_event_store.py + growth/reads.py (B4), evidence/models.py (B2/B3 twin), evidence/categories.py (B2); (3) inside the files B1/F2-6 DID touch, the A3/A4/B2/B3 fix LOGIC is unchanged -- a diff confirms NO attribution_id/derive_attribution_id/_entry_channels/ads.complete/LIVE_ORGANIC line changed in attribution_context.py (28 changed lines) or resolver.py (13) [A3 trace + A4 resolver rule intact], and NO _ref_valid/_ref_binding/_categories/standing_floor_ok/known_refs line changed in pack_assembler.py (16 changed lines) [B2 ref-authenticity + B3 floor intact; F2-6 changed _smokes only]; (4) grep app/ for a raw .psid field/[\"psid\"] key (excl psid_hash) => NONE -- 0 raw PSID in the durable store; the sole raw-psid touch is the single hash-on-ingest point (resolver.resolve_live_session, RAM only); as_stored()/to_public() carry psid_hash and no psid key; (5) pepper ONLY via env M6_PSID_HASH_PEPPER/secret_ref, fail-closed in production when unset (resolve_pepper(production=True) raises), the only pepper literal is the labelled non-secret dev mock reachable only in non-production; (6) _smokes coerces every provided object to a field-built canonical SmokeResult (caller .recorded not trusted); (7) migration 0006 change is comment-only (0 non-comment/non-psid-column diff lines); migrations 0001-0013. Full suite (as staged): 584 passed (PYTHONDONTWRITEBYTECODE=1 python -B), no skips, no regress (baseline 581). C7 invariant doc (INVARIANTS_M5_RUNTIME_CONTROLS.md) is present in the tree (doc-only; canonical Scale-Gate/go-live checklist + _OWNER_RISK_ACCEPTANCE.md placement is owner/analyst-owned). No raw psid/pepper appears in these records or this evidence. No self-certification; the runner gate + JUDGE decide (RULE-015).",
+  "files_read": [
+    "04-artifacts/impl/M6.2O/app/measurement/identity/psid_hash.py",
+    "04-artifacts/impl/M6.2O/app/measurement/models/attribution_context.py",
+    "04-artifacts/impl/M6.2O/app/measurement/attribution/resolver.py",
+    "04-artifacts/impl/M6.2O/app/measurement/funnel/funnel.py",
+    "04-artifacts/impl/M6.2O/app/measurement/funnel/models.py",
+    "04-artifacts/impl/M6.2O/app/measurement/evidence/pack_assembler.py",
+    "04-artifacts/impl/M6.2O/migrations/0013_psid_to_psid_hash.sql",
+    "04-artifacts/impl/M6.2O/migrations/0006_create_ads_attribution_context.sql",
+    "04-artifacts/evidence/prompts/M6-B1-PSID-HASH.json",
+    "04-artifacts/evidence/prompts/M6-F2-6-DUCK-SMOKE.json"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2O/PLAN.md",
+    "04-artifacts/impl/M6.2O/IMPLEMENTATION_NOTES.md"
+  ],
+  "commands_run": [
+    "python (verify): sha256 config.py M6.2M == M6.2O (911b3238...); byte-identity of the B2/B3/B4 fix-logic files (gap_blockers, data_mart, measurement_event_store, growth/reads, evidence/models, categories) M6.2M vs M6.2O -> all True",
+    "python (diff): the 5 files B1/F2-6 touched differ, but NO A3/A4 marker (attribution_id/derive_attribution_id/_entry_channels/ads.complete/LIVE_ORGANIC) changed in attribution_context.py/resolver.py and NO B2/B3 marker (_ref_valid/_ref_binding/_categories/standing_floor_ok/known_refs) changed in pack_assembler.py; _smokes coerce present",
+    "python (verify): grep app/ for raw .psid field/[\"psid\"] key (excl psid_hash) -> NONE; migration 0006 diff = comment-only (0 non-comment/non-psid-column lines); migrations 0001-0013",
+    "grep (line refs for PLAN.md change-set): psid_hash.py resolve_pepper/hash_psid/PsidHashPolicyError/_MOCK_PEPPER; attribution_context/resolver/funnel psid_hash anchors; 0013 RENAME; pack_assembler _smokes coerce block",
+    "Write: 04-artifacts/impl/M6.2O/PLAN.md + IMPLEMENTATION_NOTES.md (record only; no impl code changed)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2O/PLAN.md",
+    "04-artifacts/impl/M6.2O/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2O/INVARIANTS_M5_RUNTIME_CONTROLS.md",
+    "04-artifacts/evidence/prompts/M6-B1-PSID-HASH.json",
+    "04-artifacts/evidence/prompts/M6-F2-6-DUCK-SMOKE.json",
+    "04-artifacts/impl/M6.2O/app/measurement/identity/psid_hash.py",
+    "04-artifacts/impl/M6.2O/app/measurement/evidence/pack_assembler.py"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator/analyst: register the out-of-band B1 + F2-6 change-set (M6.2O) as a governance row (slice defs / SMOKE_REGISTER / ledger) so it is tracked; ANALYST/PM merge INVARIANTS_M5_RUNTIME_CONTROLS.md (C7) into the canonical Scale-Gate/go-live checklist + _OWNER_RISK_ACCEPTANCE.md (map ENTRY-004 DEBT-1..4); owner provision the real M6_PSID_HASH_PEPPER via secret_ref at deploy (production fail-closes if unset); route M6.2O through the TESTER (official smokes for the psid one-way-hash + the duck-.recorded hardening; re-bless the realigned SMK-013 psid companions) + BOUNDARY + SECURITY_PII + slice-gate JUDGE. Posture unchanged: production_flag=OFF, global_gateway_state=BLOCKED, external_send=OFF; external_send must NOT be enabled until the 4 M5 controls close + owner sign; M6-P1000/M6-P1309 stay BLOCKED. No readiness/Pass declared."
+}
