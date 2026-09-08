@@ -1,0 +1,44 @@
+{
+  "prompt_id": "M6-P2301",
+  "status": "PASS",
+  "summary": "M6_2O_CODER_PLAN (CODER, plan_only). Produced 04-artifacts/impl/M6.2O/PLAN.md -- the official ledger plan for slice M6.2O (Out-of-band Backfill: retroactive ledger/judge certification of two already-shipped, self-disclosed off-ledger changes -- B1 psid_hash landed in impl/M6.2N + carried forward, F2-6 duck-coerce landed in impl/M6.2O). This coder leg RECORDS the shipped code (points at 04-artifacts/impl/M6.2O/); NO re-implementation, NO new code (the slice adds no features). PRECONDITION verified: ledger M6-P2301=RUNNING (row 221), dependency M6-P2300=SIGNED (entry gate PASS); IMPLEMENTATION_TARGET_LOCKED status=LOCKED + M6-OD-011 DECIDED; single in-scope contract M6-CTR-025 DRAFT_LOCKED. THE PLAN maps the shipped change-set to the two exit-gate legs + smokes with rollback per item: LEG 1 = B1 psid_hash -> SMK-026 (RULE-014 / FAIL-008): identity/psid_hash.py (new; hash_psid = psid_hash: + base64url(HMAC-SHA256(pepper-as-key, psid)); resolve_pepper env M6_PSID_HASH_PEPPER secret_ref, fail-closed production when unset -> PsidHashPolicyError; labelled non-secret dev mock), attribution_context psid->psid_hash (to_public/as_stored emit the hash, no mask, no raw-keep), resolver hash-at-ingest (raw psid RAM-only), funnel/funnel.py+funnel/models.py thread psid_hash, migration 0013 rename (append-only), 0006 comment-only; LEG 2 = F2-6 duck-coerce -> SMK-027 (RULE-015 / FAIL-007): pack_assembler._smokes rebuilds every provided object into a canonical frozen SmokeResult from its fields so recorded is recomputed (caller .recorded never trusted) + tests/test_duck_smoke_recorded.py; legs 3-4 SMK-026/027 executed-or-waived (TESTER), 5 evidence schema-valid, 6 judge PASS, 7 rollback documented. VERIFIED (this record, real code): config.py sha256 911b3238... byte-identical to M6.2M (posture BLOCKED/OFF/OFF untouched); grep app/ for a raw .psid field/[\"psid\"] key (excl psid_hash) -> NONE (as_stored()/to_public() carry only psid_hash); the hash is one-way (pepper as HMAC key) + deterministic; resolve_pepper(production=True) with the env unset raises; the only pepper literal is the labelled non-secret dev mock; _smokes coerces (caller .recorded not trusted); the B2/B3/B4 fix-logic files are whole-file byte-identical to M6.2M and the A3/A4/B2/B3 fix LOGIC inside the touched files is unchanged (diff-verified: no A3/A4 marker in attribution_context.py/resolver.py; no B2/B3 marker in pack_assembler.py); migrations 0001-0013; full suite 584 passed (PYTHONDONTWRITEBYTECODE=1 python -B), no skips, no regress. HARD FORWARD CONDITION (from the M6-P2300 entry judge; recorded, NOT a blocker): M6-OD-003 (privacy/legal hash-policy review) must be DECIDED before any REAL psid_hash deploy/send/join (real pepper provisioning, the cross-module join C7, or external send of hashed data) -- the in-scope B1 is internal PII-minimization only (external_send immutably OFF, nothing sent), so it does not block this backfill; the exit judge M6-P2309 must scrutinize whether the internal HMAC/pepper scheme itself needs M6-OD-003 sign-off before B1 is deemed closed. SCOPE/GOVERNANCE: in scope = exactly the shipped B1 + F2-6 (no NEW code); out of scope = the real per-M6 pepper secret_ref (owner-provisioned), the cross-module psid_hash join (C7 owner+chief), DB/HTTP bind (M6-OD-011), registry runtime (B5), any flag flip. Posture immutable and NOT flipped; M6-P1000/M6-P1309 stay BLOCKED; no raw secrets/PII in code or evidence (pepper secret_ref only; raw psid nowhere). Doc-sync flag (non-blocking, carried): register M6-OD-013 + M6-OD-014 in DECISION_REGISTER.md. No self-certification; the runner gate + JUDGE (M6-P2309) decide.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2O.md",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/evidence/prompts/M6-P2300.json",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/impl/M6.2O/app/measurement/identity/psid_hash.py",
+    "04-artifacts/impl/M6.2O/app/measurement/evidence/pack_assembler.py",
+    "04-artifacts/impl/M6.2O/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/evidence/prompts/M6-B1-PSID-HASH.json",
+    "04-artifacts/evidence/prompts/M6-F2-6-DUCK-SMOKE.json"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2O/PLAN.md"
+  ],
+  "commands_run": [
+    "Read (read-only): CLAUDE_CONTEXT_BRIEF, IMPLEMENTATION_TARGET_LOCKED.json (LOCKED, OD-011 DECIDED), slice M6.2O.md (objective/legs/in-out-scope), M6-P2300.json (entry PASS + the M6-OD-003 forward condition), SMOKE_REGISTER (SMK-026/027 verbatim), FAIL_GATE_REGISTER (FAIL-008 = raw PII/secret exposure)",
+    "Read (read-only): PROMPT_EXECUTION_LEDGER_LOCKED.csv rows 220-229 -> M6-P2301=RUNNING, M6-P2300=SIGNED, M6.2O band M6-P2302..2309 TODO",
+    "python (verify, real M6.2O code -- carried from the record step): config.py sha256 911b3238... identical to M6.2M; grep app/ raw .psid -> NONE (only psid_hash); B2/B3/B4 fix-logic files byte-identical to M6.2M; A3/A4/B2/B3 markers unchanged inside the touched files; migrations 0001-0013; suite 584 passed",
+    "Write: 04-artifacts/impl/M6.2O/PLAN.md (official M6-P2301 record plan, mapped to legs 1-2 + SMK-026/027 + rollback per item)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2O/PLAN.md",
+    "00-spec/slices/M6.2O.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "00-spec/registers/FAIL_GATE_REGISTER.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/evidence/prompts/M6-P2300.json",
+    "04-artifacts/impl/M6.2O/app/measurement/identity/psid_hash.py",
+    "04-artifacts/impl/M6.2O/app/measurement/evidence/pack_assembler.py",
+    "04-artifacts/impl/M6.2O/IMPLEMENTATION_NOTES.md"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P2301; on PASS the sequence proceeds to M6-P2302 (M6_2O_CODER_IMPLEMENT) which RECORDS the shipped impl/M6.2O code (NO re-implementation): write IMPLEMENTATION_NOTES.md pointing at the B1 + F2-6 change-set of the plan, re-verify the suite is green (584 passed, no regress) + the acceptance greps (0 raw psid; fail-closed pepper; _smokes coerce; config.py sha256 identical to M6.2M; migrations 0001-0013), and confirm no code is changed by the record step. Then M6-P2303/2304 (TESTER) author + run the official smokes tests/smoke/test_smk_026_*.py (B1) + test_smk_027_*.py (F2-6) and record correlation_id + evidence_id; M6-P2305 (BOUNDARY), M6-P2306 (SECURITY_PII -- the natural home to scrutinize the psid_hash/pepper surface + M6-OD-003), M6-P2307 (PM), M6-P2308 (DOCS), and the exit gate M6-P2309 (SLICE_GATE_JUDGE) which checks the 7 M6.2O exit legs AND (per the entry judge) scrutinizes whether the internal HMAC/pepper scheme needs M6-OD-003 privacy/legal sign-off before B1 is deemed closed. HARD FORWARD CONDITION: M6-OD-003 must be DECIDED before any REAL psid_hash deploy/send/join; owner provisions the real M6_PSID_HASH_PEPPER via secret_ref (production fail-closes if unset). Posture stays BLOCKED/OFF/OFF; no flag flip; M6-P1000/M6-P1309 stay BLOCKED. Operator hygiene (non-blocking): register M6-OD-013 + M6-OD-014 in DECISION_REGISTER.md."
+}

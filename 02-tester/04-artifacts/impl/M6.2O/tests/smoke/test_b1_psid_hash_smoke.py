@@ -1,6 +1,17 @@
-"""Official smoke — slice M6.2O — B1 (PSID hash policy: M6-OD-003 / M5 PSID_HASH_POLICY_M5_TMP).
+"""Official smoke — slice M6.2O — M6-SMK-026 (proposed — HARDENING, owner review): B1 PSID hash policy
+(M6-OD-003 / M5 PSID_HASH_POLICY_M5_TMP).
 
-Operator-directed out-of-band change-set (B1 landed under M6.2N, carried into M6.2O); no ledger row / slice-spec yet.
+Authored by TESTER, now formalized on the ledger (M6-P2303 build / M6-P2304 run). B1 landed out-of-band in
+impl/M6.2N, carried into impl/M6.2O; slice M6.2O retro-certifies the shipped code. EXECUTED + recorded in M6-P2304
+(-> 04-artifacts/test-reports/M6.2O/SMOKE_RESULTS.md).
+
+Scenario / expected are quoted VERBATIM from 00-spec/registers/SMOKE_REGISTER.md (proposed additions row M6-SMK-026):
+
+    Scenario (verbatim):   "A raw PSID supplied at the resolve seam is stored/exported (B1 psid_hash)"
+    Expected (verbatim):   "no raw psid on any durable/export surface — as_stored() carries only a one-way `psid_hash:`
+                           HMAC value (deterministic per pepper, collision-sensitive); production with the pepper env
+                           unset fails closed (PsidHashPolicyError)"
+
 Governance is immutable here: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF — nothing below
 flips a flag (the fail-closed case injects `production=True` as a call argument; the immutable posture is untouched).
 

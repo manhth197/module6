@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-09-08T00:22:47Z",
+  "claimed_fail_gate_tripped": false,
+  "classification": "test",
+  "computed_fail_gate_tripped": false,
+  "computed_status": "CLEAN",
+  "evidence_present": true,
+  "evidence_sha256": {
+    "04-artifacts/evidence/prompts/M6-P2303.json": "87df126a41395e974badf76697fce1ad9d3940be5c06a956cc96b5c626554262"
+  },
+  "failures": [],
+  "integrity_violations": [],
+  "mode": "gate",
+  "prompt_id": "M6-P2303",
+  "rules_version": "M6-SGV-1.0",
+  "warnings": []
+}

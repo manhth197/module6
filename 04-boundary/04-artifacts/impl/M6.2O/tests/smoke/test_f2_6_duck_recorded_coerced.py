@@ -1,6 +1,18 @@
-"""Official smoke — slice M6.2O — F2-6 (evidence-pack: caller `.recorded` is never trusted).
+"""Official smoke — slice M6.2O — M6-SMK-027 (proposed — HARDENING, owner review): F2-6 duck-coerce
+(evidence-pack: caller `.recorded` is never trusted).
 
-Operator-directed out-of-band change-set (F2-6 under M6.2O); no ledger row / slice-spec yet. Governance is immutable
+Authored by TESTER, now formalized on the ledger (M6-P2303 build / M6-P2304 run). F2-6 landed out-of-band in
+impl/M6.2O; slice M6.2O retro-certifies the shipped code. EXECUTED + recorded in M6-P2304
+(-> 04-artifacts/test-reports/M6.2O/SMOKE_RESULTS.md).
+
+Scenario / expected are quoted VERBATIM from 00-spec/registers/SMOKE_REGISTER.md (proposed additions row M6-SMK-027):
+
+    Scenario (verbatim):   "A duck smoke object with a fake .recorded=True + blank status/correlation_id/evidence_id
+                           for a mandatory owner smoke (F2-6)"
+    Expected (verbatim):   "_smokes coerces it to a canonical SmokeResult, recomputes recorded=False → UNRUN_SMOKE gap
+                           → pack NOT_READY (caller .recorded never trusted)"
+
+Governance is immutable
 here: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF — nothing below flips a flag; the pack
 self-certifies nothing (RULE-015).
 

@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-09-08T01:59:26Z",
+  "claimed_fail_gate_tripped": false,
+  "classification": "judge",
+  "computed_fail_gate_tripped": false,
+  "computed_status": "CLEAN",
+  "evidence_present": true,
+  "evidence_sha256": {
+    "04-artifacts/evidence/prompts/M6-P2309.json": "f17e2c999d617a740c3e10fef1d42c8016afaf24008d2fedcbcf6bf3f9794f9d"
+  },
+  "failures": [],
+  "integrity_violations": [],
+  "mode": "gate",
+  "prompt_id": "M6-P2309",
+  "rules_version": "M6-SGV-1.0",
+  "warnings": []
+}

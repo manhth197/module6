@@ -1,0 +1,44 @@
+{
+  "prompt_id": "M6-P2300",
+  "status": "PASS",
+  "summary": "M6_2O_ENTRY_GATE_JUDGE (JUDGE, gate_review, fresh session, evidence-only) -- RE-JUDGMENT. My prior verdict this session was BLOCKED (correct then: the required slice spec 00-spec/slices/M6.2O.md did not exist). The operator applied the exact remediation I named -- ran scripts/gen_slices.py, which reported 'wrote ...M6.2O.md' -- so the spec now EXISTS and matches the canonical slice_definitions.json M6.2O block. I re-verified on real source and re-judge: verdict PASS -- opens slice M6.2O (Out-of-band Backfill: retroactive ledger/judge certification of two already-shipped, self-disclosed-off-ledger changes -- B1 psid_hash in impl/M6.2N carried forward, F2-6 duck-coerce in impl/M6.2O -- as a cumulative superset of M6.2M under 04-artifacts/impl/M6.2O/, NO re-implementation). Full reasoning in 04-artifacts/evidence/judge/M6-P2300_JUDGE_FINAL_SIGN_OFF.json. Posture BLOCKED/OFF/OFF unchanged and NOT flipped. || PRECONDITION (ledger row 220): M6-P2300=RUNNING, DependsOn=M6-P2209; band M6-P2301..2309 all TODO (Attempt=0). || CHECK 1 previous gate: M6-P2209 ledger=SIGNED, sign-off verdict=PASS/fail_gate=false/open_blockers=[] -> SATISFIED. || CHECK 2 target+OD-011: IMPLEMENTATION_TARGET_LOCKED status=LOCKED, M6-OD-011 DECIDED (2026-09-04 note: FastAPI+uvicorn+psycopg standalone module6 repo; STAGED_ONLY + live_migrations=false; posture immutable) -> SATISFIED. || CHECK 3 contracts: M6.2O needs only M6-CTR-025 = DRAFT_LOCKED -> resolved-for-entry -> SATISFIED. || CHECK 4 entry evidence: M6.2O.md has no 'Entry evidence required'; slice_definitions.json entry_evidence=[]; no M6.2O in ENTRY_EVIDENCE_REGISTER 'Checked at' -> N/A -> SATISFIED. || OPEN OWNER DECISIONS enumerated: grep DECISION_REGISTER for M6.2O / M6.2N / M6-OD-003 / M6-OD-013..019 -> only M6-OD-003 + M6-OD-012 OPEN; NO row names M6.2O/M6.2N as a precondition. M6-OD-003 (OPEN, hash policy + fields allowed to be SENT to Pixel/CAPI/Offline; privacy/legal review) is the sharpest -- weighed hard because B1=psid_hash is PII/secret-sensitive and was historically 'waits on M6-OD-003'. ADJUDICATION: M6-OD-003 does NOT block the ENTRY but IS a hard forward condition. It governs external SEND to ad platforms + the cross-module join -- exactly what M6.2O puts OUT OF SCOPE (real pepper secret_ref owner-provisioned; cross-module join C7 owner+chief; external_send stays OFF immutable). The IN-SCOPE B1 is internal PII-MINIMIZATION (raw PSID never stored on any durable/export surface, only one-way HMAC-SHA256(pepper); pepper env unset -> fail-closed PsidHashPolicyError; pepper is a secret_ref) -- strictly MORE protective, enables nothing, sends nothing; and the slice is a retroactive certification of already-shipped code that flips no flag and only ADDS gate scrutiny. Same design-altitude pattern as every prior entry gate (an OPEN owner decision governing out-of-scope forward send/scale/join work is a forward condition, not an entry precondition, when the in-scope work is staged + fail-closed + owner-gated substance out-of-scope). HONESTY GUARD (not waved through): M6-OD-003 must be DECIDED before any REAL psid_hash deploy/send/join, and the EXIT judge M6-P2309 must scrutinize whether the internal HMAC/pepper hashing scheme ITSELF needs M6-OD-003 privacy/legal sign-off before B1 is deemed closed. M6-OD-012 (evidence masking) is an in-force pack-hardening recommendation, not an M6.2O precondition. || IN-SCOPE RULES/FAIL GATES: RULE-009/014/015 + FAIL-007 (no-evidence) + FAIL-008 (off-ledger/process debt -- the very condition this slice REMEDIATES). Opening the slice trips none; it hardens PII-minimization + evidence-authenticity and closes the FAIL-008 process debt. || WHY PASS: 4 checks satisfied on real (now-present) source; previous gate real judge PASS/SIGNED; target LOCKED + OD-011 DECIDED; contract DRAFT_LOCKED; no entry evidence required; the only sharp OPEN owner decision (M6-OD-003) governs out-of-scope forward work with external_send immutably OFF -> forward condition, flagged + routed to the exit judge, not an entry precondition. My prior BLOCKED was the correct fail-closed call on a genuinely missing spec; this PASS is correct now that it is regenerated -- verified on real source, not clinging to a stale verdict.",
+  "files_read": [
+    "00-spec/slices/M6.2O.md",
+    "00-spec/slices/slice_definitions.json",
+    "00-spec/prompts/0218_M6-P2300_M6_2O_ENTRY_GATE_JUDGE.xml.md",
+    "scripts-win/Check-PromptGateLocked.ps1",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/evidence/prompts/M6-P2209.json",
+    "04-artifacts/evidence/judge/M6-P2209_JUDGE_FINAL_SIGN_OFF.json"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/judge/M6-P2300_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/prompts/M6-P2300.json"
+  ],
+  "commands_run": [
+    "Read (read-only): 00-spec/slices/M6.2O.md (now EXISTS after the operator ran scripts/gen_slices.py) -> matches slice_definitions.json M6.2O block (contracts [M6-CTR-025]; entry_evidence none; pepper secret_ref + cross-module join C7 + flag flips out-of-scope)",
+    "Read (read-only): state ledger row 220 (M6-P2300=RUNNING, band TODO), IMPLEMENTATION_TARGET_LOCKED.json (LOCKED, OD-011 DECIDED), scripts-win/Check-PromptGateLocked.ps1 (to understand the 6 GATE FAIL reasons = all consequences of the prior BLOCKED status/verdict/open_blockers), M6-P2209 evidence + sign-off (PASS/SIGNED)",
+    "Grep (read-only): DECISION_REGISTER -> M6-OD-003 OPEN (hash policy / external send to Pixel/CAPI/Offline; privacy/legal) + M6-OD-012 OPEN (masking); NO row names M6.2O/M6.2N as a precondition. CONTRACT_REGISTER -> M6-CTR-025 DRAFT_LOCKED",
+    "Glob (read-only, prior turn): 00-spec/slices/*.md -> confirmed M6.2O.md was absent before gen_slices.py (basis for the prior BLOCKED), now regenerated"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/judge/M6-P2300_JUDGE_FINAL_SIGN_OFF.json",
+    "00-spec/slices/M6.2O.md",
+    "00-spec/slices/slice_definitions.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "04-artifacts/evidence/prompts/M6-P2209.json",
+    "04-artifacts/evidence/judge/M6-P2209_JUDGE_FINAL_SIGN_OFF.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator re-runs scripts-win\\Check-PromptGateLocked.ps1 -PromptId M6-P2300 -- now expected to GATE PASS on this PASS evidence (the earlier 6-reason GATE FAIL was entirely the machine gate correctly refusing to lock my prior BLOCKED evidence: status/verdict not pass-like + non-empty open_blockers + the substance verifier) -- then Mark-PromptPassLocked.ps1 to advance. The sequence proceeds to M6-P2301 (M6_2O_CODER_PLAN) which RECORDS the already-shipped impl/M6.2O code (B1 psid_hash: identity/psid_hash.py + attribution_context psid->psid_hash + migration 0013_psid_to_psid_hash; F2-6: pack_assembler._smokes duck-coerce to canonical SmokeResult) with NO re-implementation, then tester/boundary/security/judge legs VERIFY it. HARD FORWARD CONDITION carried to the exit gate + owner: M6-OD-003 (privacy/legal hash-policy review) must be DECIDED before any REAL psid_hash deployment -- real pepper provisioning, the cross-module psid_hash join (C7), or any external send of hashed data; the exit judge M6-P2309 must scrutinize whether the internal HMAC/pepper hashing scheme itself needs M6-OD-003 sign-off before B1 is deemed closed, and must weigh the psid_hash PII/secret_ref surface (RULE-014, no raw PSID on any durable/export surface; pepper as secret_ref only) + migration 0013 + the F2-6 duck-coerce hardening against SMK-026/027 + the boundary/security reports. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF and all posture flags remain in force; M6-P1000 + M6-P1309 remain BLOCKED (not converted); nothing here authorizes scale, external send, auto-publish, join, or a readiness/Pass declaration. OPERATOR HYGIENE (non-blocking, still outstanding): register M6-OD-013 + M6-OD-014 in DECISION_REGISTER.md."
+}

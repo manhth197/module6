@@ -1,19 +1,24 @@
 {
   "decision_id": "M6-OD-011",
   "decided_at": "2026-07-23",
+  "updated_at": "2026-09-04",
   "decided_by": "Nguyen Duc Manh (owner)",
   "mode": "GREENFIELD",
-  "decision": "M6.2A implementation builds staged in work-root/target-repo (scaffold), stdlib-first Python tooling. Integrating into the real platform repo (candidate: ginsengfood-business-platform) is a later owner-controlled step per the slice design; the implementation target is a read-only convention reference and all impl stays staged under 04-artifacts/impl/.",
+  "decision": "M6 integrates in place in the standalone `module6` repo (NOT merged into ginsengfood-business-platform: 4/12 M6 tables collide by name with business-platform V22/V39 and differ in schema). Runtime: Python 3.12 + FastAPI + uvicorn + psycopg. Pack tooling stays stdlib-only; the runtime dependency is opened only through this M6-OD-011 gate (SCHEMA_CHANGELOG + New-M6RoleVenvs.ps1). DB: a SEPARATE Postgres, namespace m6 (test server /home/ssv/m6, ports 6600-6699, compose -p m6). Apply migrations 0001-0012 in order + write 0014_enforcement (append-only / immutability / worker-only REVOKE-GRANT; 0013 is already 0013_psid_to_psid_hash) and smoke-apply on the real test Postgres before declaring the bind done. HTTP: thin FastAPI adapters over the existing pure handlers. Worker: 1 replica (or FOR UPDATE SKIP LOCKED), the loop gates on is_external_send_enabled() and idles when OFF. Scope opened by this decision: B6 (admin auth) + B8/B9 (DB/HTTP/worker bind) only.",
   "stack": {
     "language": "python",
     "language_version": "3.12",
+    "framework": "fastapi",
+    "database": "postgresql",
+    "queue": "",
     "test_command": "pytest -q",
-    "run_command": "python -m app"
+    "run_command": "uvicorn app.main:app"
   },
   "conditions": [
-    "global_gateway_state stays BLOCKED and production_flag stays OFF",
-    "impl stays staged under 04-artifacts/impl/<slice>/ until an owner-controlled integration step",
-    "stack is revisable at the real-repo integration decision"
+    "global_gateway_state stays BLOCKED, production_flag stays OFF, external_send stays OFF (Final constant) — immutable",
+    "live migrations ONLY on the separate test Postgres (namespace m6, ports 6600-6699); never the shared M3 DB, never production",
+    "the import-scan gate (tests/test_no_http_client_import.py) + test_no_direct_external_send.py stay green after FastAPI/psycopg are opened",
+    "A5/A6/B5/B7 stay blocked on their own signatures (spend source, registry branch, M6-OD-003); this decision does NOT unblock them"
   ],
-  "note": "Ratifies the DECISION_REGISTER M6-OD-011 pack recommendation (staged, stdlib-first) as GREENFIELD. Recorded per owner instruction 2026-07-23."
+  "note": "Updated 2026-09-04 per the owner signature on the corrected M6-OD-011 sign-off (TRA_LOI_BRIEF appendix, post-adversarial + code-verified 2026-09-05). Resolves framework/DB/queue left empty in the 2026-07-23 record. Recorded by the operator after the owner dated the sign-off."
 }
