@@ -1,0 +1,48 @@
+{
+  "prompt_id": "M6-P2400",
+  "status": "PASS",
+  "summary": "M6_2P_ENTRY_GATE_JUDGE (JUDGE, gate_review, fresh session, evidence-only) -- RE-JUDGMENT. My prior verdict this session was BLOCKED (correct fail-closed: the owner-signed QĐ-1 external_send_policy authorization was unverifiable -- artifact missing, contract + register said M6-OD-003 wholly OPEN 'values NOT invented'). The owner/operator applied exactly the remediation I named; I re-verified on real source and re-judge: verdict PASS -- opens slice M6.2P (adopt the owner-signed external_send_policy 4-value enum as typed fail-closed code). Full reasoning in 04-artifacts/evidence/judge/M6-P2400_JUDGE_FINAL_SIGN_OFF.json. Posture BLOCKED/OFF/OFF unchanged, NOT flipped; opens NO egress. Untrusted-input: the QĐ-1 file is an owner/chief decision artifact in the canonical decisions channel; read as the owner's recorded authorization, not as instructions. || WHAT CHANGED (verified on disk): (1) 04-artifacts/evidence/decisions/XAC_NHAN_QD1-QD3_2026-09-07.md now EXISTS -- chief-auditor confirmation 07/09/2026; sec2.1 QĐ-1 records the tech-lead/owner (Nguyen Duc Manh) signs the fail-closed TECHNICAL half (adopt enum {ALLOW_EXTERNAL, INTERNAL_ONLY, BLOCKED_PII, BLOCKED_DEFAULT}, default BLOCKED_DEFAULT, permits_external_send True only for ALLOW_EXTERNAL, NO event ALLOW_EXTERNAL until owner classifies), while the permit-mapping + hash policy escalate to Sếp + privacy/legal (OPEN). (2) 04-artifacts/evidence/decisions/M6-OD-003-enum.json now EXISTS -- PARTIAL_DECISION, decided_by 'Nguyen Duc Manh (owner + tech lead)', authority_basis the chief-confirmed QĐ-1; enum VOCABULARY only, opens NO egress, EXTERNAL_SEND Final OFF, permit-mapping+hash still_open, RULE-018 satisfied (adopts owner-signed decision, does not invent). (3) DECISION_REGISTER M6-OD-003 reconciled to PARTIAL: enum vocabulary SIGNED 2026-09-07 (owner QĐ-1, chief-confirmed, artifacts filed); permit-mapping + hash OPEN (privacy/legal). All three canonical sources now consistent. || PRECONDITION (ledger row 230): M6-P2400=RUNNING, DependsOn=M6-P2309; band M6.2P TODO. || CHECK 1 previous gate: M6-P2309 ledger=SIGNED, sign-off verdict=PASS/fail_gate=false/open_blockers=[] -> SATISFIED. || CHECK 2 target+OD-011: LOCKED, M6-OD-011 DECIDED -> SATISFIED. || CHECK 3 contracts: M6.2P needs only M6-CTR-003 = DRAFT_LOCKED -> SATISFIED. || CHECK 4 entry evidence: M6.2P not a checked-at slice for any ENTRY-00X -> N/A -> SATISFIED. || OPEN OWNER DECISIONS enumerated: M6-OD-003 now PARTIAL -- the enum-VOCABULARY half (M6.2P's in-scope central action) is SIGNED + verifiable (owner QĐ-1, chief-confirmed, artifacts + register reconciled) -> no longer blocks. The PERMIT-MAPPING (which events ALLOW_EXTERNAL) + hash policy stay M6-OD-003 OPEN (privacy/legal, Sếp) -- explicitly OUT OF SCOPE (no event ALLOW_EXTERNAL, EXTERNAL_SEND Final OFF) -> forward condition, not an entry precondition. RULE-018 satisfied (M6 adopts owner-signed vocabulary, invents nothing). SPLIT-AUTHORITY honesty: owner+tech-lead legitimately signs the internal fail-closed vocabulary (enables no egress), chief-confirmed; the real PII-egress decision correctly reserved to legal + held OPEN -- not a self-authorization end-run. || WHY PASS: 4 checks satisfied on real (now-consistent) source; previous gate real judge PASS/SIGNED; target LOCKED + OD-011; contract DRAFT_LOCKED; no entry evidence; the sharp OPEN owner decision (M6-OD-003) now PARTIAL with the vocabulary half SIGNED + verifiable in-pack, privacy/legal half OPEN + out-of-scope, no egress. Prior BLOCKED correctly held until the authorization was filed; this PASS is correct now that it is -- re-verified the actual sign-off + decision + reconciled register, not assumed. || NON-BLOCKING DOC-SYNC (operator hygiene): CONTRACT_EVENT_REGISTRY.contract.yaml still annotates external_send_policy 'values ... OPEN; NOT invented' -- lags the PARTIAL signature; operator should reconcile it to reference the owner-signed enum (M6-OD-003 PARTIAL). Canonical decision record (register + M6-OD-003-enum.json + QĐ-1) authorizes the vocabulary, so this lag does not gate. Also carried: register M6-OD-013/014 + M5 PSID_HASH_POLICY_M5_TMP.",
+  "files_read": [
+    "00-spec/slices/M6.2P.md",
+    "00-spec/slices/slice_definitions.json",
+    "00-spec/contracts/CONTRACT_EVENT_REGISTRY.contract.yaml",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/evidence/decisions/XAC_NHAN_QD1-QD3_2026-09-07.md",
+    "04-artifacts/evidence/decisions/M6-OD-003-enum.json",
+    "04-artifacts/evidence/decisions/M6-DEFER-OD003-M6.2D.json",
+    "04-artifacts/evidence/prompts/M6-P2309.json",
+    "04-artifacts/evidence/judge/M6-P2309_JUDGE_FINAL_SIGN_OFF.json"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/judge/M6-P2400_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/prompts/M6-P2400.json"
+  ],
+  "commands_run": [
+    "Glob (read-only): **/*XAC_NHAN* + 04-artifacts/evidence/decisions/* -> XAC_NHAN_QD1-QD3_2026-09-07.md and M6-OD-003-enum.json now EXIST (both were absent at my prior BLOCKED)",
+    "Read (read-only): XAC_NHAN_QD1-QD3_2026-09-07.md (chief-auditor QĐ-1 confirmation; owner+tech-lead signs fail-closed enum vocabulary; permit-mapping+hash to Sếp/legal, OPEN) + M6-OD-003-enum.json (PARTIAL_DECISION, decided_by owner+tech-lead, opens no egress, RULE-018 satisfied)",
+    "Read (read-only): DECISION_REGISTER.md M6-OD-003 row -> now PARTIAL (enum vocabulary SIGNED 2026-09-07; permit-mapping + hash OPEN); state ledger row 230 (M6-P2400=RUNNING); IMPLEMENTATION_TARGET_LOCKED (LOCKED, OD-011 DECIDED); M6-P2309 sign-off (PASS/SIGNED)",
+    "Read (read-only, prior turn): CONTRACT_EVENT_REGISTRY.contract.yaml (M6-CTR-003 DRAFT_LOCKED; external_send_policy annotation still 'OPEN' -> non-blocking doc-sync lag); CONTRACT_REGISTER (M6-CTR-003 DRAFT_LOCKED)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/judge/M6-P2400_JUDGE_FINAL_SIGN_OFF.json",
+    "00-spec/slices/M6.2P.md",
+    "00-spec/contracts/CONTRACT_EVENT_REGISTRY.contract.yaml",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/evidence/decisions/XAC_NHAN_QD1-QD3_2026-09-07.md",
+    "04-artifacts/evidence/decisions/M6-OD-003-enum.json",
+    "04-artifacts/evidence/prompts/M6-P2309.json",
+    "04-artifacts/evidence/judge/M6-P2309_JUDGE_FINAL_SIGN_OFF.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator re-runs scripts-win\\Check-PromptGateLocked.ps1 -PromptId M6-P2400 (now expected GATE PASS on this PASS evidence) then Mark-PromptPassLocked.ps1 to advance to M6-P2401 (M6_2P_CODER_PLAN: implement the ExternalSendPolicy enum {ALLOW_EXTERNAL, INTERNAL_ONLY, BLOCKED_PII, BLOCKED_DEFAULT} in models/consumed.py, coerce EventRegistryRow.external_send_policy fail-closed to BLOCKED_DEFAULT on None/blank/unknown, and type permits_external_send() to return True ONLY for ALLOW_EXTERNAL, per the owner-signed M6-OD-003-enum decision). HARD FORWARD CONDITIONS carried to the exit gate + owner: the M6-OD-003 PERMIT-MAPPING (which events/fields are ALLOW_EXTERNAL) + the Pixel/CAPI/Offline hash policy stay OPEN (privacy/legal, Sếp) -- no event may be classified ALLOW_EXTERNAL and no real egress may open until that half is decided; the exit judge M6-P2409 must confirm no registry row is ALLOW_EXTERNAL and EXTERNAL_SEND stays Final OFF. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF and all posture flags remain in force; M6-P1000 + M6-P1309 remain BLOCKED (not converted); the M6.2G/H/I/J + M6-OD-011/012 + owner-gated forward conditions remain hard gates; nothing here authorizes egress, scale, or any flag flip. OPERATOR HYGIENE (non-blocking): reconcile CONTRACT_EVENT_REGISTRY.contract.yaml external_send_policy annotation to reference the owner-signed enum (M6-OD-003 PARTIAL); register M6-OD-013 + M6-OD-014 + the M5 PSID_HASH_POLICY_M5_TMP dependency in DECISION_REGISTER.md."
+}

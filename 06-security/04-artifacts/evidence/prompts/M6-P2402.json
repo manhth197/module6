@@ -1,0 +1,46 @@
+{
+  "prompt_id": "M6-P2402",
+  "status": "PASS",
+  "summary": "M6_2P_CODER_IMPLEMENT (CODER, implement). Implemented PLAN.md item-by-item as a cumulative superset of M6.2O under 04-artifacts/impl/M6.2P/: adopted the owner-signed (QĐ-1, 2026-09-07) ExternalSendPolicy 4-value enum as typed, fail-closed code. NO plan-deltas. OPENS NO EGRESS. PRECONDITION verified: ledger M6-P2402=RUNNING (row 232), dependency M6-P2401=PASS; IMPLEMENTATION_TARGET_LOCKED status=LOCKED + M6-OD-011 DECIDED. STAGING: carried M6.2O byte-identical (caches + M6.2O-scoped docs excluded; the C7 INVARIANTS doc stays in M6.2O and is referenced as this slice's forward condition in PLAN §0); baseline 593 passed BEFORE any patch (parity with M6.2O). THE FIX (2 app files, leg 1 / SMK-028): (1) app/measurement/models/consumed.py -- added class ExternalSendPolicy(str, Enum) {ALLOW_EXTERNAL, INTERNAL_ONLY, BLOCKED_PII, BLOCKED_DEFAULT}, retyped EventRegistryRow.external_send_policy: Optional[ExternalSendPolicy]=None (mirrors data_sensitivity: Optional[DataSensitivity]); (2) app/measurement/registry/validator.py -- added _resolve_send_policy(raw)->ExternalSendPolicy mirroring _resolve_sensitivity (real member/valid token -> member; None/blank/whitespace/unknown/non-coercible -> BLOCKED_DEFAULT, never crash, never auto-allow), retyped permits_external_send(policy: ExternalSendPolicy)->bool returning True ONLY for ALLOW_EXTERNAL, and validate() coerces then gates. FINAL SUITE: 599 passed (593 carried + 6 CODER regressions), no skips, no regress. VERIFIED SCOPE: config.py sha256 911b3238... byte-identical to M6.2O (posture BLOCKED/OFF/OFF + EXTERNAL_SEND OFF untouched); app byte-diff M6.2O->M6.2P = ONLY consumed.py + validator.py; migrations 0001-0013 (none added); no new config flag; the ONLY app reader of external_send_policy is validator.py:140 (grep-verified) so the field retype has no ripple; no PII in the changed files. EGRESS-SAFETY (crown-jewel invariant, verified airtight): permits_external_send True ONLY for ALLOW_EXTERNAL; no registry row is ALLOW_EXTERNAL (conftest seeds only None -> coerced BLOCKED_DEFAULT; permit-mapping OPEN/out-of-scope) so every real ACCEPTED event stays send_permitted=False; independent second gate EXTERNAL_SEND Final OFF (staged transport still raises ExternalSendBlocked) so even an ALLOW_EXTERNAL row opens no real send; the fail-closed DIRECTION is airtight (nothing that is not the value ALLOW_EXTERNAL ever becomes ALLOW_EXTERNAL). ADVERSARIAL SELF-REVIEW (ultracode): the plan red-team (2 agents, prototyped the exact coercion/gate) returned 0 findings; a follow-up egress-bypass hunt on the SHIPPED code found 1 candidate -> 0 surviving -- a str-subclass/custom-__eq__ object whose VALUE equals ALLOW_EXTERNAL coerces to the ALLOW_EXTERNAL member, verified NONE (not exploitable): it is the INTENDED coercion of a genuine ALLOW_EXTERNAL token (fail-closed direction unaffected), the registry source hands plain tokens (no hostile subclass path), no row is ALLOW_EXTERNAL, and EXTERNAL_SEND stays OFF; no code change warranted (a str-exact-type guard would wrongly reject a valid ALLOW_EXTERNAL token). HARD FORWARD CONDITION (carried from entry judge): the M6-OD-003 permit-mapping + hash policy stay OPEN (privacy/legal, Sếp) -- no event may be classified ALLOW_EXTERNAL and no real egress may open until decided; the exit judge M6-P2409 must confirm no registry row is ALLOW_EXTERNAL and EXTERNAL_SEND stays Final OFF. Rules RULE-014 (PII-egress governance explicit + fail-closed) / RULE-015 (no self-cert); FAIL-007 (proven by the SMK-028 regression). M6 adopts the owner-signed vocabulary, invents nothing (RULE-018); M6-P1000/M6-P1309 stay BLOCKED; no raw secrets/PII. Doc-sync flag (non-blocking): reconcile CONTRACT_EVENT_REGISTRY.contract.yaml external_send_policy annotation to the owner-signed enum. No self-certification; the runner gate + JUDGE (M6-P2409) decide.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2P.md",
+    "04-artifacts/impl/M6.2P/PLAN.md",
+    "04-artifacts/evidence/prompts/M6-P2401.json",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/impl/M6.2P/app/measurement/models/consumed.py",
+    "04-artifacts/impl/M6.2P/app/measurement/registry/validator.py",
+    "04-artifacts/impl/M6.2P/tests/conftest.py",
+    "04-artifacts/impl/M6.2P/tests/test_event_registry_validation.py"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2P/app/measurement/models/consumed.py",
+    "04-artifacts/impl/M6.2P/app/measurement/registry/validator.py",
+    "04-artifacts/impl/M6.2P/tests/test_m6_2p_external_send_policy.py",
+    "04-artifacts/impl/M6.2P/IMPLEMENTATION_NOTES.md"
+  ],
+  "commands_run": [
+    "python (carry): copytree M6.2O -> M6.2P byte-identical, excluding caches + M6.2O-scoped docs (PLAN/NOTES/INVARIANTS)",
+    "PYTHONDONTWRITEBYTECODE=1 python -B -m pytest -p no:cacheprovider (baseline BEFORE patch): 593 passed; parity with M6.2O",
+    "Edit x6: consumed.py (ExternalSendPolicy enum + retype field); validator.py (import + _resolve_send_policy + typed permits_external_send + validate() coerce); Write tests/test_m6_2p_external_send_policy.py",
+    "PYTHONDONTWRITEBYTECODE=1 python -B -m pytest (after patch): 599 passed, no skips, no regress",
+    "python (verify): config.py sha256 911b3238... identical to M6.2O; app byte-diff M6.2O->M6.2P = ONLY consumed.py + validator.py; migrations 0001-0013; PII scan changed files -> none",
+    "grep (verify): external_send_policy sole app reader is validator.py:140 (field retype has no ripple)",
+    "Workflow x2 (ultracode adversarial): plan red-team (2 agents prototyping the coercion/gate) -> 0 findings; egress-bypass hunt on the SHIPPED code -> 1 candidate, 0 surviving (str-subclass value-equal-to-ALLOW_EXTERNAL coercion graded NONE/not-exploitable)",
+    "clean caches (0)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2P/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2P/PLAN.md",
+    "00-spec/slices/M6.2P.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/impl/M6.2P/app/measurement/models/consumed.py",
+    "04-artifacts/impl/M6.2P/app/measurement/registry/validator.py",
+    "04-artifacts/impl/M6.2P/tests/test_m6_2p_external_send_policy.py"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P2402; on PASS the sequence proceeds to M6-P2403 (M6_2P_TESTER_BUILD) + M6-P2404 (TESTER_RUN) to author + run + record the official SMK-028 smoke (external_send_policy = each of the 4 values + None/blank/unknown -> typed enum; permits_external_send True only for ALLOW_EXTERNAL; every real ACCEPTED event send_permitted=False; EXTERNAL_SEND stays OFF) with correlation_id + evidence_id, then M6-P2405 (BOUNDARY), M6-P2406 (SECURITY_PII), M6-P2407 (PM), M6-P2408 (DOCS), and the exit gate M6-P2409 (SLICE_GATE_JUDGE) which checks the M6.2P exit legs AND (per the entry judge) confirms no registry row is ALLOW_EXTERNAL and EXTERNAL_SEND stays Final OFF. HARD FORWARD CONDITION: the M6-OD-003 permit-mapping + hash policy must be DECIDED (privacy/legal, Sếp) before any event is classified ALLOW_EXTERNAL or any real egress opens. Posture stays BLOCKED/OFF/OFF; no flag flip; M6-P1000/M6-P1309 stay BLOCKED. Operator hygiene (non-blocking): reconcile CONTRACT_EVENT_REGISTRY.contract.yaml external_send_policy annotation to the owner-signed enum; register M6-OD-013 + M6-OD-014 in DECISION_REGISTER.md."
+}

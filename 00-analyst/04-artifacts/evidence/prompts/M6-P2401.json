@@ -1,0 +1,42 @@
+{
+  "prompt_id": "M6-P2401",
+  "status": "PASS",
+  "summary": "M6_2P_CODER_PLAN (CODER, plan_only). Produced 04-artifacts/impl/M6.2P/PLAN.md -- a minimal, mapped, rollback-per-item plan (NO code) to adopt the owner-signed (QĐ-1, 2026-09-07) external_send_policy 4-value enum as typed, fail-closed code, as a cumulative superset of M6.2O. PRECONDITION verified: ledger M6-P2401=RUNNING (row 231), dependency M6-P2400=SIGNED (entry gate PASS); IMPLEMENTATION_TARGET_LOCKED status=LOCKED + M6-OD-011 DECIDED; in-scope contract M6-CTR-003 DRAFT_LOCKED. OWNER AUTHORIZATION (verified on the canonical record): M6-OD-003 is PARTIAL -- the enum VOCABULARY half is SIGNED (owner+tech-lead QĐ-1, chief-confirmed; 04-artifacts/evidence/decisions/M6-OD-003-enum.json PARTIAL_DECISION + XAC_NHAN_QD1-QD3_2026-09-07.md; DECISION_REGISTER reconciled); this slice ADOPTS that vocabulary and invents nothing (RULE-018). THE FIX (one item -> exit-gate leg 1 / SMK-028): (1) app/measurement/models/consumed.py -- add class ExternalSendPolicy(str, Enum) {ALLOW_EXTERNAL, INTERNAL_ONLY, BLOCKED_PII, BLOCKED_DEFAULT}, retype EventRegistryRow.external_send_policy: Optional[ExternalSendPolicy]=None (mirrors data_sensitivity: Optional[DataSensitivity]); (2) app/measurement/registry/validator.py -- add _resolve_send_policy(raw)->ExternalSendPolicy mirroring the existing _resolve_sensitivity (None/blank/unknown/raw -> BLOCKED_DEFAULT, never crash, never auto-allow), retype permits_external_send(policy: ExternalSendPolicy)->bool returning True ONLY for ALLOW_EXTERNAL, and coerce+call in validate(). EGRESS-SAFETY (the load-bearing axis): the slice opens NO egress -- permits_external_send is True only for ALLOW_EXTERNAL, no registry row carries ALLOW_EXTERNAL (conftest seeds only None -> coerced fail-closed to BLOCKED_DEFAULT; the permit-mapping that could set ALLOW_EXTERNAL is OWNER-OPEN, out of scope) so every real ACCEPTED event still yields send_permitted=False; and even a hypothetical ALLOW_EXTERNAL row does not egress because EXTERNAL_SEND is Final OFF (independent defense-in-depth, unchanged). BACKWARD-COMPAT (verified): every carried registry row seeds external_send_policy=None (conftest.py:79) -> BLOCKED_DEFAULT -> permits False; the 3 carried assertions test_event_registry_validation.py:13/21/39 (external_send_permitted is False) still hold; no carried test passes a raw string to the field; permits_external_send is called ONLY by validate() (grep-verified) so the signature swap breaks nothing. ADVERSARIAL SELF-REVIEW (ultracode): a 2-dimension plan red-team (egress-safety + fail-closed; backward-compat + scope + mirror-fidelity), each finding re-verified by an independent skeptic PROTOTYPING the planned _resolve_send_policy/permits_external_send against the real M6.2O code, returned ZERO findings -- no egress/auto-allow path opens, the fail-closed coercion is airtight (None/blank/unknown/raw -> BLOCKED_DEFAULT, no crash), permits is True only for ALLOW_EXTERNAL, and the typed swap breaks no carried test. HARD FORWARD CONDITION (from the entry judge; recorded, NOT a blocker): the M6-OD-003 PERMIT-MAPPING (which events/fields are ALLOW_EXTERNAL) + the Pixel/CAPI/Offline hash policy stay OPEN (privacy/legal, Sếp) -- no event may be classified ALLOW_EXTERNAL and no real egress may open until decided; the exit judge M6-P2409 must confirm no registry row is ALLOW_EXTERNAL and EXTERNAL_SEND stays Final OFF. SCOPE: in scope = the enum + the fail-closed coercion + the typed gate (2 files); out of scope = the M3 registry-runtime source/reader adapter, the data_sensitivity enum reconciliation, the Sếp permit-mapping + hash policy, any flag flip / real egress. No new migration/flag; migrations 0001-0013; config.py unchanged. Posture immutable and NOT flipped; M6-P1000/M6-P1309 stay BLOCKED; no raw secrets/PII (the policy token is an enum value). Doc-sync flag (non-blocking, from the entry judge): CONTRACT_EVENT_REGISTRY.contract.yaml still annotates external_send_policy 'values OPEN; NOT invented' -- operator/analyst should reconcile it to the owner-signed enum (M6-OD-003 PARTIAL); 00-spec is read-only to the coder. No self-certification; the runner gate + JUDGE (M6-P2409) decide.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2P.md",
+    "04-artifacts/analysis/design/ARCH_BASELINE.md",
+    "04-artifacts/evidence/prompts/M6-P2400.json",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/impl/M6.2O/app/measurement/models/consumed.py",
+    "04-artifacts/impl/M6.2O/app/measurement/registry/validator.py",
+    "04-artifacts/impl/M6.2O/tests/conftest.py",
+    "04-artifacts/impl/M6.2O/tests/test_event_registry_validation.py"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2P/PLAN.md"
+  ],
+  "commands_run": [
+    "Read (read-only): CLAUDE_CONTEXT_BRIEF, IMPLEMENTATION_TARGET_LOCKED.json (LOCKED, OD-011 DECIDED), slice M6.2P.md (objective/legs/in-out-scope), M6-P2400.json (entry PASS + M6-OD-003 PARTIAL authorization + the permit-mapping forward condition), SMOKE_REGISTER (SMK-028 verbatim)",
+    "Read (read-only): PROMPT_EXECUTION_LEDGER_LOCKED.csv rows 230-239 -> M6-P2401=RUNNING, M6-P2400=SIGNED, M6.2P band M6-P2402..2409 TODO",
+    "Read (read-only): M6.2O consumed.py (EventRegistryRow.external_send_policy Optional[str]; DataSensitivity + _resolve_sensitivity precedent) + validator.py (permits_external_send hard-False; _resolve_sensitivity fail-closed pattern) + the blast-radius (conftest.py:79 external_send_policy=None; test_event_registry_validation.py 3x external_send_permitted is False)",
+    "Write: 04-artifacts/impl/M6.2P/PLAN.md (official M6-P2401 plan, mapped to leg 1 + SMK-028 + rollback per item)",
+    "Workflow (ultracode adversarial plan red-team, 2 dimensions, per-finding verify prototyping the planned design against the real M6.2O code) -> 0 findings (no egress/auto-allow opens; fail-closed airtight; backward-compat holds)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2P/PLAN.md",
+    "00-spec/slices/M6.2P.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/evidence/prompts/M6-P2400.json",
+    "04-artifacts/impl/M6.2O/app/measurement/models/consumed.py",
+    "04-artifacts/impl/M6.2O/app/measurement/registry/validator.py",
+    "04-artifacts/impl/M6.2O/tests/test_event_registry_validation.py"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P2401; on PASS the sequence proceeds to M6-P2402 (M6_2P_CODER_IMPLEMENT) to implement PLAN.md as a cumulative superset of M6.2O under 04-artifacts/impl/M6.2P/: carry M6.2O byte-identical (verify baseline green + parity BEFORE any patch), add ExternalSendPolicy enum in consumed.py + retype EventRegistryRow.external_send_policy, add _resolve_send_policy fail-closed coercion + type permits_external_send in validator.py, add the CODER regression tests/test_m6_2p_external_send_policy.py (each enum value + None/blank/unknown -> BLOCKED_DEFAULT; permits True only ALLOW_EXTERNAL; a real ACCEPTED event still send_permitted=False; EXTERNAL_SEND stays OFF), reach green with no skips, confirm no new migration/flag and config.py unchanged. Then M6-P2403/2404 (TESTER) author + run the official SMK-028 smoke, M6-P2405 (BOUNDARY), M6-P2406 (SECURITY_PII), M6-P2407 (PM), M6-P2408 (DOCS), and the exit gate M6-P2409 (SLICE_GATE_JUDGE) which checks the M6.2P exit legs AND (per the entry judge) confirms no registry row is ALLOW_EXTERNAL and EXTERNAL_SEND stays Final OFF. HARD FORWARD CONDITION: the M6-OD-003 permit-mapping + hash policy must be DECIDED (privacy/legal, Sếp) before any event is classified ALLOW_EXTERNAL or any real egress opens. Posture stays BLOCKED/OFF/OFF; no flag flip; M6-P1000/M6-P1309 stay BLOCKED. Operator hygiene (non-blocking): reconcile CONTRACT_EVENT_REGISTRY.contract.yaml external_send_policy annotation to the owner-signed enum; register M6-OD-013 + M6-OD-014 in DECISION_REGISTER.md."
+}

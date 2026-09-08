@@ -1,0 +1,24 @@
+{
+  "decision_id": "M6-OD-003-ENUM",
+  "parent_decision": "M6-OD-003",
+  "kind": "PARTIAL_DECISION",
+  "decided_at": "2026-09-07",
+  "recorded_at": "2026-09-08",
+  "decided_by": "Nguyen Duc Manh (owner + tech lead)",
+  "authority_basis": "chief-auditor confirmation QĐ-1 (XAC_NHAN_QD1-QD3_2026-09-07.md, filed alongside this file) which splits M6-OD-003: the fail-closed enum VOCABULARY is the owner/tech-lead technical decision; the permit-mapping + hash policy remain privacy/legal. Owner confirmed authority + directed recording 2026-09-08.",
+  "decision": "Adopt external_send_policy as a typed enum with VOCABULARY {ALLOW_EXTERNAL, INTERNAL_ONLY, BLOCKED_PII, BLOCKED_DEFAULT}, default BLOCKED_DEFAULT; permits_external_send() returns True ONLY for ALLOW_EXTERNAL. This is the fail-closed CLASSIFICATION SCHEMA only. It opens NO egress: no event is classified ALLOW_EXTERNAL by this decision, and EXTERNAL_SEND stays Final OFF regardless.",
+  "scope": "enum VOCABULARY only. This decision does NOT map any event/field to ALLOW_EXTERNAL and does NOT decide the hash policy.",
+  "still_open": "The PERMIT-MAPPING (which events/fields are ALLOW_EXTERNAL) and the Pixel/CAPI hash policy remain M6-OD-003 OPEN — privacy/legal (Sếp). No PII egress is authorized by this decision.",
+  "conditions": [
+    "no event is classified ALLOW_EXTERNAL by this decision; permits_external_send() is therefore False for every real registry row until the permit-mapping is decided",
+    "EXTERNAL_SEND stays Final OFF; global_gateway_state=BLOCKED; production_flag=OFF (immutable)",
+    "RULE-018 satisfied: M6 does not invent the vocabulary — it adopts this owner/tech-lead-signed decision (recorded here), rather than defining values in code without authorization",
+    "M6-OD-003 stays PARTIAL (permit-mapping + hash OPEN); M6.2D exit / M6-SMK-017 / M6-P1306 stay gated on the OPEN half"
+  ],
+  "unblocks": "M6.2P (M6-P2400 entry gate) — the enum-vocabulary adoption now has an in-pack, verifiable authorization; the fail-closed entry gate correctly held pending this record.",
+  "source_refs": [
+    "04-artifacts/evidence/decisions/XAC_NHAN_QD1-QD3_2026-09-07.md (chief-auditor QĐ-1 confirmation)",
+    "00-spec/contracts/CONTRACT_EVENT_REGISTRY.contract.yaml (M6-CTR-003) external_send_policy",
+    "00-spec/registers/DECISION_REGISTER.md M6-OD-003 (PARTIAL)"
+  ]
+}
