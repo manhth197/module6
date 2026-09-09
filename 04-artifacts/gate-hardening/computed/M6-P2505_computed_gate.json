@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-09-09T06:00:39Z",
+  "claimed_fail_gate_tripped": false,
+  "classification": "standard",
+  "computed_fail_gate_tripped": false,
+  "computed_status": "CLEAN",
+  "evidence_present": true,
+  "evidence_sha256": {
+    "04-artifacts/evidence/prompts/M6-P2505.json": "451499037c4f68fea178d2a36b7808824852fedb2e67b3916d20316810130238"
+  },
+  "failures": [],
+  "integrity_violations": [],
+  "mode": "gate",
+  "prompt_id": "M6-P2505",
+  "rules_version": "M6-SGV-1.0",
+  "warnings": []
+}

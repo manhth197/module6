@@ -1,0 +1,62 @@
+{
+  "prompt_id": "M6-P2509",
+  "status": "PASS",
+  "summary": "M6_2Q_SLICE_GATE_JUDGE (JUDGE, gate_review, fresh session, evidence-only) -- the M6.2Q slice-EXIT gate (A5 'đường-tới-tiền' money leg). Verdict PASS at DESIGN/STAGED altitude: M6.2Q built the ads-spend ingest (maker-checker four-eyes) + live-session-ads-binding + CPA/ROAS-by-live_session from mock-in-test APPROVED spend, under the RULE-003 verified lock. Full reasoning + 7-leg map in 04-artifacts/evidence/judge/M6-P2509_JUDGE_FINAL_SIGN_OFF.json. This PASS certifies STAGED capability only; ROAS is MOCK, not real, and NOT certified (thresholds M6-OD-002 + scale-authoritative model M6-OD-005 stay OPEN); no ROAS Pass / Scale Ready; no real spend / Meta network / egress / flag flip. Posture BLOCKED/OFF/OFF; config.py byte-identical M6.2P (sha256 911b3238). || PRECONDITION (ledger row 249): M6-P2509=RUNNING, DependsOn=M6-P2508=PASS; band M6-P2500=SIGNED + M6-P2501..2508 all PASS Attempt=1; previous M6.2P judge M6-P2409=SIGNED. || 7 EXIT LEGS all MET on real source + staged code: (1) ads_spend_import + maker-checker MET (staged) -- SMK-029 (self-approve rejected); code import_gate.py:83-88 (four-eyes fail-closed before APPROVED; canon strip+casefold; blank checker refused), only APPROVED materializes (set-once record store), no network verb; migrations 0014/0015; FORWARD: structural-not-authenticated -> M6-OD-011 server-bind/authN (DECIDED but not-yet-implemented, a forward step not an open decision); edges MC9/N4 armed-not-fired (refuter: API blocks blank-maker at :90-93; N4 unreachable via request); latent CODER note gate.propose-assert-PROPOSED (no caller today); (2) binding + primary_campaign_id MET -- SMK-029 (out-of-window->daily_total); campaign-binding gate (not .mapped); set-once; migration 0016; (3) CPA/ROAS-by-session (RULE-003) MET -- SMK-029 (zero-verified->CPA None/ROAS 0.0); code session_roas.py:105-109 (_verified ANDs event_code==ORDER_VERIFIED on CPA denom + ROAS num), :124-125 only 2 division sites via _safe_div (divide-by-zero impossible, no fabricated 0); FORWARD: ROAS INFLATABLE (N1/F-SEC-2I-1 -- revenue grouped by event's own live_session_id while spend authenticated; NOT a RULE-003 breach, revenue is genuinely ORDER_VERIFIED; standing M6.2I-FUNNEL, A5 made it a money number) -> owner bind revenue provenance; CODER: order_code dedup (N3, optimistic CPA bias) + value-sanity (N2/RO10 finite/non-negative); (4) SMK-029 EXECUTED PASS 5/5 (masked ids), suite 631 rc 0; (5) band M6-P2500..2508 evidence all schema-valid/PASS/fail_gate=false/no raw PII-secret (independent workflow sweep all_clean=true); (6) this sign-off PASS; (7) rollback documented RUNBOOK sec4 (13 new .py + 3 additive edits + migrations 0014-0016 down-DDL never-applied + tests; config none; refuter confirmed diff = 8 new + 3 edited + 3 migrations, config byte-identical). || IN-SCOPE NOT TRIPPED: FAIL-007 (maker-checker refuses self-approve, only APPROVED materializes, pack tops at OWNER_REVIEW_REQUIRED), RULE-003 (ROAS counts revenue only from ORDER_VERIFIED, held under attack), RULE-015. Boundary M6-P2505 fail_gate=false (30 recorded, 0 in-scope breach); security M6-P2506 fail_gate=false (0 raw PII / 0 secrets / 274 files; ad spend campaign-level, actors masked, no Meta token). No unresolved BLOCKER. || WHY PASS: 7 legs verified on real source + staged code; both independent adversaries fail_gate=false 0-breach; I personally verified the maker-checker (import_gate.py) + RULE-003 lock/fail-closed CPA/ROAS (session_roas.py) in actual files; a fresh 4-agent read-only workflow re-derived band-cleanliness + 3 dimensions (maker-checker, RULE-003/CPA, posture/egress/PII/rollback) all SOUND / grounds_to_block=false with file:line evidence. HONEST FRAMING: 'CPA/ROAS compute' != 'ROAS is real' -- ROAS is mock, maker-checker is structural until M6-OD-011 identity, ROAS inflatable until F-SEC-2I-1 provenance bound. || WHY NOT BLOCKED: no missing/contradictory input; M6-OD-016 + M6-OD-011 + M6-OD-015 DECIDED authorize the slice; OPEN M6-OD-002/005 govern forward scale (out-of-scope; slice computes numbers, declares no Pass); residuals armed-not-fired, forward/CODER-routed, none channel-reachable (no HTTP/durable-export wired, events from trusted store, external_send Final OFF). || GOVERNANCE unchanged: M6-P1000 + M6-P1309 remain BLOCKED (not converted); M6.2G/H/I/J + M6-OD-011 authN + M6-OD-002/005 + M6-OD-012 + M6-OD-003 + F-SEC-2I-1 forward conditions remain hard gates before any real spend/scale/egress; no self-cert; no application code/migration/flag change; module boundary intact; no raw secrets/PII.",
+  "files_read": [
+    "00-spec/slices/M6.2Q.md",
+    "00-spec/prompts/0247_M6-P2509_M6_2Q_SLICE_GATE_JUDGE.xml.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P2500.json",
+    "04-artifacts/evidence/prompts/M6-P2501.json",
+    "04-artifacts/evidence/prompts/M6-P2502.json",
+    "04-artifacts/evidence/prompts/M6-P2503.json",
+    "04-artifacts/evidence/prompts/M6-P2504.json",
+    "04-artifacts/evidence/prompts/M6-P2505.json",
+    "04-artifacts/evidence/prompts/M6-P2506.json",
+    "04-artifacts/evidence/prompts/M6-P2507.json",
+    "04-artifacts/evidence/prompts/M6-P2508.json",
+    "04-artifacts/evidence/judge/M6-P2500_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/boundary-reports/M6.2Q_boundary.md",
+    "04-artifacts/security-reports/M6.2Q_security.md",
+    "04-artifacts/test-reports/M6.2Q/SMOKE_RESULTS.md",
+    "04-artifacts/analysis/slices/M6_2Q_RUNBOOK.md",
+    "04-artifacts/impl/M6.2Q/app/measurement/ads_spend/import_gate.py",
+    "04-artifacts/impl/M6.2Q/app/measurement/dashboard/session_roas.py",
+    "04-artifacts/evidence/decisions/M6-OD-016.json"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/judge/M6-P2509_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/prompts/M6-P2509.json"
+  ],
+  "commands_run": [
+    "Read (read-only): M6-P2509 prompt, slice M6.2Q.md (7 exit legs), state ledger rows 239-249 (M6-P2509=RUNNING, band all PASS/SIGNED Attempt=1), M6-P2500 entry evidence + sign-off, M6-OD-016.json",
+    "Read (read-only): boundary M6.2Q_boundary.md (M6-P2505, 30 recorded, 0 in-scope FAIL-007/RULE-003 breach) + security M6.2Q_security.md (M6-P2506, 0 raw PII/secret / 274 files, RULE-003 lock held, maker-checker structural) + SMOKE_RESULTS.md (SMK-029 5/5, suite 631 rc 0) + M6_2Q_RUNBOOK.md (rollback sec4)",
+    "Read (read-only): load-bearing code -- ads_spend/import_gate.py (maker-checker four-eyes fail-closed, canon strip+casefold, only APPROVED materialize, no network verb) + dashboard/session_roas.py (RULE-003 _verified ORDER_VERIFIED filter on CPA denom + ROAS num; _safe_div fail-closed; campaign-binding + window gate; daily_total)",
+    "Workflow (4-agent read-only adversarial verification, ultracode): band-evidence sweep M6-P2501..2508 -> all_clean=true; refuter maker-checker -> SOUND grounds_to_block=false; refuter RULE-003/CPA fail-closed -> SOUND grounds_to_block=false (no non-verified revenue reaches ROAS, divide-by-zero impossible, N1 not a RULE-003 breach); refuter posture/egress/PII/rollback -> SOUND grounds_to_block=false (config byte-identical, no network call site, spend campaign-level not PII, MC-09 armed-not-fired, migrations never-applied, rollback covers diff)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/judge/M6-P2509_JUDGE_FINAL_SIGN_OFF.json",
+    "00-spec/slices/M6.2Q.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P2500.json",
+    "04-artifacts/evidence/prompts/M6-P2501.json",
+    "04-artifacts/evidence/prompts/M6-P2502.json",
+    "04-artifacts/evidence/prompts/M6-P2503.json",
+    "04-artifacts/evidence/prompts/M6-P2504.json",
+    "04-artifacts/evidence/prompts/M6-P2505.json",
+    "04-artifacts/evidence/prompts/M6-P2506.json",
+    "04-artifacts/evidence/prompts/M6-P2507.json",
+    "04-artifacts/evidence/prompts/M6-P2508.json",
+    "04-artifacts/boundary-reports/M6.2Q_boundary.md",
+    "04-artifacts/security-reports/M6.2Q_security.md",
+    "04-artifacts/test-reports/M6.2Q/SMOKE_RESULTS.md",
+    "04-artifacts/analysis/slices/M6_2Q_RUNBOOK.md",
+    "04-artifacts/impl/M6.2Q/app/measurement/ads_spend/import_gate.py",
+    "04-artifacts/impl/M6.2Q/app/measurement/dashboard/session_roas.py",
+    "04-artifacts/evidence/decisions/M6-OD-016.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine JUDGE_GATE for M6-P2509 (scripts-win\\Check-PromptGateLocked.ps1 -PromptId M6-P2509, then Mark-PromptPassLocked); on this PASS sign-off the M6.2Q slice-exit gate closes -- the A5 ads-spend ingest (maker-checker four-eyes, fail-closed, only APPROVED materializes, set-once) + live-session-ads-binding + CPA/ROAS-by-live_session (RULE-003 verified lock held, fail-closed CPA/ROAS) are proven STAGED from mock approved spend. NOTHING here authorizes real spend data, real Meta network / Marketing API, external send, scale, a ROAS Pass, or a flag flip; ROAS is mock, not real, and not certified. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF and all flags remain in force; M6-P1000 + M6-P1309 remain BLOCKED (not converted). OWNER (the load-bearing forward steps before any real spend/scale/egress): M6-OD-011 authenticated-identity binding for the maker-checker actors (the four-eyes is STRUCTURAL, not authenticated, until then); F-SEC-2I-1 revenue-provenance bind (the ROAS number is INFLATABLE until then -- the highest-value finding); M6-OD-002 thresholds; M6-OD-005 scale-authoritative attribution model; M6-OD-012 durable-export masking (MC-09 reason/audit_ref + carried trace-id family); M6-OD-003 real psid pepper + privacy/legal (carried); the order_code-uniqueness question; and whether the A5 reader needs a P0-registry floor (EVID-10). CODER: NFKC-normalize + require non-blank maker in the four-eyes gate (MC9/N4); assert PROPOSED in gate.propose (defense-in-depth); math.isfinite && >=0 on the spend + verified-revenue writes (N2/RO10); dedup verified count by order_code (N3); run reason/audit_ref through the raw-PII tripwire (MC-09); tz-normalize (ROAS-15); reject blank primary_campaign_id at bind (BIND-07). OPERATOR (doc-sync, non-blocking, carried): register M6-OD-013 + M6-OD-014 + the M5 PSID_HASH_POLICY_M5_TMP dependency in DECISION_REGISTER.md; reconcile the stale ENTRY-004 row. This is the terminal gate of the M6.2Q slice; do not advance beyond M6-P2509 unless the operator pastes a further prompt."
+}

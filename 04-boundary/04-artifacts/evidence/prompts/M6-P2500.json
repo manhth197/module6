@@ -1,0 +1,44 @@
+{
+  "prompt_id": "M6-P2500",
+  "status": "PASS",
+  "summary": "M6_2Q_ENTRY_GATE_JUDGE (JUDGE, gate_review, fresh session, evidence-only). Verdict PASS -- opens slice M6.2Q (A5: ads-spend ingest + live-session-ads-binding.v1 + CPA/ROAS-by-live_session, so ROAS/CPA compute from real (mock-in-test) ad spend; STAGED, mock CSV, no real Meta network, no flag flipped) for STAGED implementation; full reasoning in 04-artifacts/evidence/judge/M6-P2500_JUDGE_FINAL_SIGN_OFF.json. ENTRY gate: only the four acceptance checks + owner-decision enumeration judged; the M6.2Q exit legs (ads_spend_import+maker-checker, binding+primary_campaign_id, CPA/ROAS-by-session under RULE-003, SMK-029, rollback) are checked at M6-P2509. Posture BLOCKED/OFF/OFF unchanged and NOT flipped. || PRECONDITION (ledger row 240): M6-P2500=RUNNING, DependsOn=M6-P2409; band M6-P2501..2509 all TODO. || CHECK 1 previous gate: M6-P2409 ledger=SIGNED, sign-off verdict=PASS/fail_gate=false/open_blockers=[] -> SATISFIED. || CHECK 2 target+OD-011: IMPLEMENTATION_TARGET_LOCKED status=LOCKED, M6-OD-011 DECIDED, safety all false -> SATISFIED. || CHECK 3 contracts: M6.2Q needs M6-CTR-015 + M6-CTR-002; both DRAFT_LOCKED (CTR-015 formulas locked, only thresholds OPEN via M6-OD-002 -- the slice computes the numbers, not thresholds) -> resolved-for-entry -> SATISFIED. || CHECK 4 entry evidence: M6.2Q.md has no 'Entry evidence required'; ENTRY_EVIDENCE_REGISTER lists no M6.2Q in any 'Checked at' (ENTRY-001 P3 verified-revenue re-check is at Scale Gate; slice preserves the carried ORDER_VERIFIED lock) -> N/A -> SATISFIED. || OPEN OWNER DECISIONS enumerated (verified on canonical DECISION_REGISTER + filed artifacts, not slice self-assertion): M6-OD-016 (ads spend source, A5) = DECIDED 2026-09-09 by owner; artifact 04-artifacts/evidence/decisions/M6-OD-016.json EXISTS and I read it -- authorizes exactly the slice: phase-1 CSV export from Meta Ads Manager + maker-checker (uploader != approver; only APPROVED materialize), no Marketing API/App Review/new secret, spend keyed by campaign_id cut to live_session window, 'no flag flipped: authorizes building the ingest path STAGED; real spend + go-live stay gated on M6-OD-011 server-bind + production go-live'. M6-OD-011 (binding direction) = DECIDED. M6-OD-015 (psid-no-join, option-b) = DECIDED 2026-09-07 -> supports binding-by-live_session_id. NONE blocks. M6-OD-002 (thresholds) OPEN -> governs Scale-Gate/dashboard-alert thresholds, NOT the CPA/ROAS computation -> forward condition, not a precondition. M6-OD-005 (attribution model) OPEN -> governs the scale-authoritative revenue-attribution model, NOT the deterministic spend->live_session binding -> forward condition. So NO OPEN owner decision blocks the entry. || IN-SCOPE RULES/FAIL: RULE-003 (verified-only revenue -- slice keeps the ORDER_VERIFIED lock: ROAS=verified_revenue/spend; spend+zero-verified-orders -> CPA fail-closed/None, ROAS=0), RULE-015, FAIL-007. Slice STAGED (mock CSV, in-memory + migration >=0014, no real Meta network/spend), opens no egress; opening it trips nothing. Maker-checker (self-approve rejected) is a load-bearing exit-gate item for M6-P2509. || WHY PASS: 4 checks satisfied on real source; previous gate real judge PASS/SIGNED; target LOCKED + OD-011; both contracts DRAFT_LOCKED; no entry evidence; slice's central action authorized by DECIDED+FILED M6-OD-016 + M6-OD-011 + M6-OD-015, OPEN M6-OD-002/005 govern forward scale decisions (out-of-scope). Contrasts with M6.2P entry (BLOCKED on a missing QĐ-1 artifact contradicting the register); here I read the actual M6-OD-016.json + canonical register row and both consistently authorize the slice. GOVERNANCE unchanged: M6-P1000 + M6-P1309 stay BLOCKED (not converted); M6.2G/H/I/J + M6-OD-002/005 + M6-OD-011 server-bind/go-live + M6-OD-003 forward conditions remain hard gates before any real spend/scale/egress; production/gateway/external_send stay BLOCKED/OFF/OFF. No self-cert; no application code/migration/flag change; module boundary intact; ad spend is campaign-level (campaign_id), not user PII.",
+  "files_read": [
+    "00-spec/slices/M6.2Q.md",
+    "00-spec/slices/slice_definitions.json",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/evidence/decisions/M6-OD-016.json",
+    "04-artifacts/evidence/prompts/M6-P2409.json",
+    "04-artifacts/evidence/judge/M6-P2409_JUDGE_FINAL_SIGN_OFF.json"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/judge/M6-P2500_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/prompts/M6-P2500.json"
+  ],
+  "commands_run": [
+    "Read (read-only): slice M6.2Q.md (A5 scope: ads_spend_import+maker-checker+binding+CPA/ROAS-by-session; owner-decided inputs M6-OD-016 + M6-OD-011; out-of-scope real CSV/Meta network/server-bind), IMPLEMENTATION_TARGET_LOCKED.json (LOCKED, OD-011 DECIDED), state ledger rows 239-249 (M6-P2500=RUNNING, band TODO)",
+    "Grep (read-only): CONTRACT_REGISTER -> M6-CTR-002 DRAFT_LOCKED + M6-CTR-015 DRAFT_LOCKED (thresholds OPEN via M6-OD-002); DECISION_REGISTER -> M6-OD-016 DECIDED 2026-09-09, M6-OD-011 DECIDED, M6-OD-015 DECIDED, M6-OD-002 OPEN, M6-OD-005 OPEN; ENTRY_EVIDENCE_REGISTER -> no M6.2Q checked-at",
+    "Glob + Read (read-only): decisions dir -> M6-OD-016.json EXISTS; read it -> DECIDED 2026-09-09 by owner, phase-1 CSV + maker-checker, no new secret, staged, no flag flipped, unblocks M6.2Q",
+    "Read (read-only): M6-P2409 evidence + JUDGE_FINAL_SIGN_OFF -> verdict=PASS, fail_gate=false, open_blockers=[] (CHECK 1)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/judge/M6-P2500_JUDGE_FINAL_SIGN_OFF.json",
+    "00-spec/slices/M6.2Q.md",
+    "00-spec/registers/CONTRACT_REGISTER.md",
+    "00-spec/registers/DECISION_REGISTER.md",
+    "00-spec/registers/ENTRY_EVIDENCE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "04-artifacts/evidence/decisions/M6-OD-016.json",
+    "04-artifacts/evidence/decisions/M6-OD-015.json",
+    "04-artifacts/evidence/prompts/M6-P2409.json",
+    "04-artifacts/evidence/judge/M6-P2409_JUDGE_FINAL_SIGN_OFF.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine JUDGE_GATE for M6-P2500; on this PASS sign-off the slice M6.2Q entry opens (STAGED) and the sequence proceeds to M6-P2501 (M6_2Q_CODER_PLAN) to build the A5 ads-spend path as a cumulative superset of M6.2P under 04-artifacts/impl/M6.2Q/: (1) ads_spend_import table (migration >=0014) + import API + maker-checker approve state (uploader != approver; only APPROVED imports materialize; self-approve rejected) + materialize worker, per the DECIDED M6-OD-016 (mock CSV in tests, no real Meta network / Marketing API / new secret); (2) primary_campaign_id first-class + live-session-ads-binding.v1 {live_session_id, primary_campaign_id, adset_id?, ad_id?, bound_at, bound_by} + attribution of spend to a live_session by campaign_id x session-window (spend outside any session window -> daily total, not session-attributed); (3) CPA/ROAS-by-live_session in the dashboard/KPI (M6-CTR-015 formulas), computed from APPROVED imported spend only, with verified revenue keeping the ORDER_VERIFIED lock (RULE-003) -- a session with spend but zero verified orders -> CPA fail-closed (guarded None), ROAS = 0; no spend -> no CPA number. Each proven by regression smoke SMK-029. DESIGN CONSTRAINTS (out of scope, not entry blockers): real CSV source / Meta network / Marketing API (phase 2 go-live); real spend data + external send; board_id/segment_id (C1, M7 contract); DB/HTTP server-bind (B9 / M6-OD-011 -- separate session). Before the M6.2Q EXIT gate (M6-P2509): the 3 fix legs proven by regression + SMK-029 recorded + rollback documented + posture unchanged. global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF and all posture flags remain in force; M6-P1000 + M6-P1309 verdicts remain BLOCKED (not converted); the M6.2G/H/I/J + M6-OD-002/005 (Scale-Gate thresholds + attribution model) + M6-OD-011 server-bind/go-live + M6-OD-003 forward conditions remain hard gates before any real spend, scale, or egress. Nothing here authorizes real spend data, real Meta network, scale, external send, or a flag flip. OPERATOR HYGIENE (non-blocking, carried): register M6-OD-013 + M6-OD-014 + the M5 PSID_HASH_POLICY_M5_TMP dependency in DECISION_REGISTER.md; reconcile the stale CONTRACT_EVENT_REGISTRY line-137 note + the stale ENTRY-004 row."
+}
