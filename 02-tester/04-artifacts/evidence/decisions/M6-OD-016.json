@@ -1,0 +1,20 @@
+{
+  "decision_id": "M6-OD-016",
+  "kind": "DECISION",
+  "decided_at": "2026-09-09",
+  "decided_by": "Nguyen Duc Manh (owner + tech lead)",
+  "title": "Ads spend source (A5) — phase 1: CSV export from Meta Ads Manager + maker-checker approve",
+  "decision": "Phase 1 ads-spend source = a CSV file exported from Meta Ads Manager, uploaded through an import API with a maker-checker approve step (the uploader is not the approver). No Meta Marketing API token, no App Review, no new secret in phase 1. Phase 2 (after the system runs stably) may consider the Marketing API — a separate later decision.",
+  "spend_attribution_rule": "Spend is keyed by campaign_id and cut to each live_session's start/end window (via live-session-ads-binding.v1: live_session_id + primary_campaign_id). Spend outside any session window is NOT attributed to a session (it goes to the daily total). The word 'live/session' stays in the CPA contract.",
+  "authority_basis": "owner ops decision (spend data source + approval flow), proposed by chief in TRA_LOI_BRIEF 04/09 (A5, 'chốt') and confirmed by owner 2026-09-09.",
+  "conditions": [
+    "phase 1 uses uploaded CSV only — no external network / Marketing API / new secret",
+    "maker-checker: uploader != approver; only APPROVED imports materialize into spend records",
+    "no flag flipped: this decision authorizes building the ingest path (staged); real spend data + go-live stay gated on M6-OD-011 server-bind + production go-live"
+  ],
+  "unblocks": "A5 slice (M6.2Q): ads_spend_import + live-session-ads-binding.v1 + CPA/ROAS-by-live_session, built staged (mock CSV in tests).",
+  "source_refs": [
+    "Y:/.../yêu cầu của m6/04-09/TRA_LOI_BRIEF_Owner_decisions.md (A5 'chốt')",
+    "00-spec/slices/slice_definitions.json M6.2Q"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "decision_id": "M6-OD-015",
+  "kind": "DECISION",
+  "decided_at": "2026-09-07",
+  "recorded_at": "2026-09-09",
+  "decided_by": "Nguyen Duc Manh (owner + tech lead)",
+  "title": "psid_hash cross-module join policy (C7) — option (b): NO join by psid",
+  "decision": "M6 does NOT join data across modules by psid_hash. Cross-module join keys are live_session_id, comment_id, messenger_thread_id (and attribution_id when M3 emits it). M6's psid_hash stays internal to M6 (M6-own pepper, identity/psid_hash.py); it is never used as a cross-module identity key.",
+  "rejected_alternative": "Option (a) shared system-wide pepper via secret_ref (M5-own, M6-read) to join by psid_hash — REJECTED for now: it increases cross-module re-identification exposure and would need privacy/legal (Sếp). If ever adopted, M6's existing psid_hash values must be re-hashed or dropped.",
+  "authority_basis": "chief-auditor confirmation QĐ-3(b) (XAC_NHAN_QD1-QD3_2026-09-07.md): option (b) does not expand re-identification, so it is within chief/tech-lead authority. Owner confirmed 2026-09-09.",
+  "conditions": [
+    "no code path joins M6 data to another module by psid_hash",
+    "switching to option (a) requires privacy/legal (Sếp) + re-hash/drop of existing psid_hash",
+    "recorded in PII_POLICY.md"
+  ],
+  "source_refs": [
+    "04-artifacts/evidence/decisions/XAC_NHAN_QD1-QD3_2026-09-07.md (QĐ-3b)",
+    "04-artifacts/impl/M6.2O/app/measurement/identity/psid_hash.py (M6-own pepper)",
+    "00-spec/registers/PII_POLICY.md"
+  ]
+}

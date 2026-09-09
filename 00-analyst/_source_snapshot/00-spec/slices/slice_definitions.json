@@ -369,6 +369,37 @@
       "fail_gates_in_scope": ["M6-FAIL-007"],
       "entry_evidence": [],
       "source_ref": "chief-auditor 2026-09-07 item B5; M6-OD-003 enum half signed 2026-09-07 (QĐ-1, XAC_NHAN_QD1-QD3_2026-09-07.md)"
+    },
+    {
+      "id": "M6.2Q",
+      "name": "Ads spend import + live-session binding + CPA/ROAS-by-session (A5)",
+      "ads_phase": "post-pilot",
+      "depends_on": "M6.2P",
+      "scope_doc": "chief-auditor 2026-09-07 item A3 (=old A5, spend import) + C4 (binding). Owner-decided inputs: M6-OD-016 (spend source = CSV Ads Manager + maker-checker approve) + M6-OD-011 binding direction (reuse live_session_id + primary_campaign_id, live-session-ads-binding.v1). Build the M6-side spend-ingest + attribution + CPA/ROAS-by-live_session so real ROAS can be computed — the đường-tới-tiền piece. STAGED (mock CSV in tests; production OFF); no real Meta network / Marketing API.",
+      "done_gate_doc": "CPA/ROAS per live_session computed from APPROVED spend imports; maker-checker enforced; no PII, no egress, posture unchanged",
+      "done_gate_legs": [
+        "ads_spend_import + maker-checker (M6-OD-016): a spend import (CSV rows keyed by campaign_id, with spend_value/currency + a time window) enters as PROPOSED; a DISTINCT approver (maker != checker) moves it to APPROVED; ONLY APPROVED imports materialize into spend records (a worker); a self-approve / single-actor approve is rejected. Staged in-memory store + a migration-defined table (next free number, >=0014 after 0013_psid_to_psid_hash); tests use mock CSV — no real network / Marketing API.",
+        "live-session-ads-binding.v1 + primary_campaign_id: primary_campaign_id is a first-class field on the attribution + binding models; a binding {live_session_id, primary_campaign_id, adset_id?, ad_id?, bound_at, bound_by}; spend is attributed to a live_session by campaign_id cut to the session start/end window; spend OUTSIDE any session window is NOT attributed to a session (it goes to the daily total).",
+        "CPA/ROAS-by-live_session: the dashboard computes, per live_session, CPA = imported spend / count(ORDER_VERIFIED in session) and ROAS = verified_revenue / spend, from APPROVED imported spend only (verified revenue keeps the ORDER_VERIFIED lock, RULE-003); a session with spend but ZERO verified orders → CPA fail-closed (no divide-by-zero; guarded None) and ROAS = 0; no spend → no CPA number."
+      ],
+      "objective": "Build the M6-side ads-spend ingest + live-session binding + CPA/ROAS-by-session as a cumulative superset of M6.2P under 04-artifacts/impl/M6.2Q/, so ROAS/CPA compute from real (mock-in-test) ad spend. Everything STAGED (in-memory stores + migration-defined tables; mock CSV); no real Meta network, no real spend data, no flag flipped. Production/scale stays BLOCKED.",
+      "in_scope": [
+        "ads_spend_import table + import API + maker-checker approve state + materialize worker (M6-OD-016)",
+        "primary_campaign_id (first-class) + live-session-ads-binding.v1 binding + attribution to session by campaign_id x session-window",
+        "CPA/ROAS-by-live_session in the dashboard/KPI (M6-CTR-015)"
+      ],
+      "out_of_scope": [
+        "real CSV source / Meta network / Marketing API — phase 2 (go-live); tests use mock CSV only",
+        "real spend data + external send; production_flag/global_gateway_state/external_send stay OFF/BLOCKED/OFF",
+        "board_id/segment_id (C1 — M7 contract); DB/HTTP server-bind (B9/M6-OD-011 — separate session)"
+      ],
+      "contracts": ["M6-CTR-015", "M6-CTR-002"],
+      "smoke_ids": [],
+      "proposed_smoke_ids": ["M6-SMK-029"],
+      "rules_in_scope": ["M6-RULE-003", "M6-RULE-015"],
+      "fail_gates_in_scope": ["M6-FAIL-007"],
+      "entry_evidence": [],
+      "source_ref": "chief-auditor 2026-09-07 items A3/A5 + C4; owner M6-OD-016 (spend source) + M6-OD-011 (binding direction)"
     }
   ]
 }
