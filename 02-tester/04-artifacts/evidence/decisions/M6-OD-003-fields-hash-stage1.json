@@ -1,0 +1,22 @@
+{
+  "decision_id": "M6-OD-003-FIELDS-HASH-STAGE1",
+  "parent_decision": "M6-OD-003",
+  "kind": "PARTIAL_DECISION",
+  "decided_at": "2026-09-08",
+  "recorded_at": "2026-09-09",
+  "decided_by": "Nguyen Duc Manh (owner + tech lead)",
+  "authority_note": "Owner chose 'cách 1' (option 1): stage-1 sends NO identifier fields — only non-PII event-level fields. Because stage-1 emits NO personal data to any external platform, this is a fail-closed MEASUREMENT-CONFIG decision, NOT a PII-egress decision, so no privacy/legal (Sếp) sign-off is required for stage-1. Opening ANY identifier field (email/phone/external_id) to Meta later is a SEPARATE decision that DOES require privacy/legal — see still_open.",
+  "decision": "Stage-1 external-send FIELD policy: when an event is (later) classified ALLOW_EXTERNAL, ONLY non-PII event-level fields may be sent — event_name, event_time, event_id, value, currency, content_ids/SKU, action_source. NO identifier field (em/ph/external_id/psid) is sent in stage-1. HASH method RESERVED for a future identifier-field opening: normalize (lowercase, trim, phone E.164 without +) then SHA-256 hex; external_id would be M6's existing psid_hash (HMAC + M6 pepper); no raw PII ever. Offline conversion follows the same rule and only when opened.",
+  "still_open": "Opening ANY identifier field (em/ph/external_id) to Meta = a future explicit decision requiring privacy/legal (Sếp). Until then identifier fields stay closed (not sent).",
+  "conditions": [
+    "stage-1 emits NO PII externally; no identifier field is sent",
+    "no field opening flips a flag: external_send stays Final OFF; production_flag OFF; global_gateway_state BLOCKED",
+    "no event is ALLOW_EXTERNAL yet (permit-mapping is a separate item); this decision only bounds WHICH FIELDS may be sent when an event is eventually opened",
+    "when identifier fields are later opened, that decision goes to privacy/legal (Sếp) and this reserved Meta-CAPI hash method applies"
+  ],
+  "source_refs": [
+    "04-artifacts/evidence/decisions/XAC_NHAN_QD1-QD3_2026-09-07.md (chief QĐ-1 section 2.1 proposal)",
+    "D:/M6/fix/2026-09-08/PHIEU_TRINH_SEP_OD003-registry_conlai.md (QĐ-A signed = option 1, 2026-09-08)",
+    "00-spec/registers/DECISION_REGISTER.md M6-OD-003; 00-spec/contracts/CONTRACT_EVENT_REGISTRY.contract.yaml"
+  ]
+}
