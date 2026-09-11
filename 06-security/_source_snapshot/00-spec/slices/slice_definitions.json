@@ -400,6 +400,70 @@
       "fail_gates_in_scope": ["M6-FAIL-007"],
       "entry_evidence": [],
       "source_ref": "chief-auditor 2026-09-07 items A3/A5 + C4; owner M6-OD-016 (spend source) + M6-OD-011 (binding direction)"
+    },
+    {
+      "id": "M6.2R",
+      "name": "Recall-risk mapper: ops-core availability -> risk_flags (E2 §3, S1b)",
+      "ads_phase": "post-pilot",
+      "depends_on": "M6.2Q",
+      "scope_doc": "chief E2_BLOCK_REASON_V1 2026-09-10 §3/§5 + recall-lock decision (ops-core response 2026-09-09, pin ginsengfood-contracts@a413f1f, bumped from 79f73d2 on 2026-09-10). Build the M6-side mapper from an ops-core /v1/availability/check response to the existing Scale-Gate risk_flags per E2 §3; STAGED (mock response object in tests; the live HTTP client is the S1b seam / go-live). M6-OD-017.",
+      "done_gate_doc": "risk_flags mapped per E2 §3; Scale-Gate Risk row FAILs on any presence-flag true even when decision=SELLABLE; fail-closed on pull error; posture unchanged",
+      "done_gate_legs": [
+        "E2 mapping (M6-OD-017): a mapper turns an ops-core availability response into risk_flags with risk_flags['recall'] = recall_hold OR recall_case_open, risk_flags['sale_lock'] = sale_lock, risk_flags['quality_hold'] = quality_hold; recall_case_open is additive (absent -> treated false, other flags unaffected); no other risk lock is fabricated; the mapper reads the presence booleans only, never decision/block_reasons.",
+        "presence-flag FAIL even when SELLABLE: when any of recall_hold/sale_lock/quality_hold/recall_case_open is true, feeding the mapped risk_flags to the existing Scale Gate makes the Risk row FAIL even if decision == SELLABLE (clean-lot case); a test proves FAIL-despite-SELLABLE for recall_hold and for recall_case_open.",
+        "fail-closed on pull error: a pull error/timeout/429 (or a None/absent response) produces an INCOMPLETE risk read, so the Scale Gate's existing fail-closed re-check (RULE-017) does not clear -> gate FAIL; the mapper never defaults an unknown flag to false-clear."
+      ],
+      "objective": "Build the M6-side recall-risk mapper (chief E2 §3/§5) as a cumulative superset of M6.2Q under 04-artifacts/impl/M6.2R/. The mapper takes an ops-core availability response (a value object / dict - NOT a live HTTP call) and produces the three ops-core-sourced risk_flags that feed the EXISTING Scale Gate (no gate-logic change: the gate already FAILs on active locks and on incomplete reads). STAGED: mock response in tests; no live HTTP yet (S1b; ops-core account is live on .61 since 2026-09-09, gated on secret handover, not a date), no flag flipped. Production/scale stays BLOCKED.",
+      "in_scope": [
+        "availability-response -> risk_flags mapper per E2 §3 (recall = recall_hold OR recall_case_open; sale_lock; quality_hold), reading booleans only",
+        "fail-closed mapping on pull error/timeout/429/absent response (unknown risk read -> gate does not clear)",
+        "wiring the mapper output into ScaleContext.risk_flags feeding the existing Scale Gate (no gate-logic change)"
+      ],
+      "out_of_scope": [
+        "the live HTTP client to ops-core POST /v1/availability/check (S1b seam; ops-core account live on .61 since 2026-09-09, gated on receiving the client_secret) - tests use a mock response object only",
+        "the campaign->SKU join needed to enumerate which running campaigns advertise a recalled SKU (chief-flagged; separate data-source decision) - this slice maps a single SKU response, it does not enumerate campaigns",
+        "M3-side block_reason vocabulary / decision gating (M3 owns); the pause SLA + M3 stop-sale on newly-opened cases (Sep-pending, FIX_OWNER_CORE §38)",
+        "flipping any flag; production_flag/global_gateway_state/external_send stay OFF/BLOCKED/OFF"
+      ],
+      "contracts": ["M6-CTR-026"],
+      "smoke_ids": [],
+      "proposed_smoke_ids": ["M6-SMK-030"],
+      "rules_in_scope": ["M6-RULE-017", "M6-RULE-015"],
+      "fail_gates_in_scope": ["M6-FAIL-006"],
+      "entry_evidence": [],
+      "source_ref": "chief E2_BLOCK_REASON_V1 2026-09-10 §3/§5; recall-lock decision (ops-core response 2026-09-09, pin a413f1f); M6-OD-017"
+    },
+    {
+      "id": "M6.2S",
+      "name": "Registry-feed reader (event-registry-feed.v1, TODO(contract), fail-closed)",
+      "ads_phase": "post-pilot",
+      "depends_on": "M6.2R",
+      "scope_doc": "chief RELAY_V221_M3_2026-09-10 §2.4 + QĐ-B registry branch (PhucApu canonical, V221, signed 2026-09-08). Build the M6-side reader for the PROPOSED event-registry-feed.v1 (GET /api/v1/internal/event-registry?since_version={n} -> {registry_version, events:[{event_code,event_group,domain,data_sensitivity,external_send_policy,is_active,updated_at}]}); staleness-safe + fail-closed; TODO(contract) on the proposed name/shape; NO live call (M3 endpoint pending) - mock feed in tests. M6-OD-018.",
+      "done_gate_doc": "reader parses the proposed feed into typed rows (reusing the M6.2P ExternalSendPolicy enum), staleness-safe by registry_version, fail-closed on error/unknown token, no live call, no egress; posture unchanged",
+      "done_gate_legs": [
+        "proposed-shape parse + TODO(contract) (M6-OD-018): the reader parses a feed {registry_version, events:[{event_code,event_group,domain,data_sensitivity,external_send_policy,is_active,updated_at}]} into typed rows, reusing the M6.2P ExternalSendPolicy enum for external_send_policy; the proposed endpoint name/shape carry a TODO(contract) marker (final = chief-issued); the reader does not invent fields the feed omits.",
+        "staleness-safe by registry_version: the reader tracks the monotonic registry_version and exposes the current one; a feed whose registry_version <= the last applied is NOT applied (no downgrade), so a consumer reads staleness-safe.",
+        "fail-closed + no live call + no egress: a feed error / missing field / unknown external_send_policy token resolves to BLOCKED_DEFAULT, an unknown or SENSITIVE data_sensitivity resolves to PII (never auto-allow); the reader NEVER calls a live endpoint (mock/staged feed in tests); no event becomes ALLOW_EXTERNAL and EXTERNAL_SEND stays OFF (reading the registry opens no egress)."
+      ],
+      "objective": "Build the M6-side registry-feed reader adapter (chief RELAY_V221 §2.4) as a cumulative superset of M6.2R under 04-artifacts/impl/M6.2S/. The reader consumes a PROPOSED event-registry-feed.v1 feed (a value object / mock in tests - NOT a live HTTP call), staleness-safe by registry_version and fail-closed on every unknown, reusing the M6.2P ExternalSendPolicy enum. TODO(contract) marks the proposed shape until chief finalizes it. STAGED: mock feed in tests; no live endpoint (M3 ENTRY-003 V221 pending), no flag flipped. Reading the registry opens NO egress. Production/scale stays BLOCKED.",
+      "in_scope": [
+        "reader/parser for the proposed event-registry-feed.v1 shape into typed rows, reusing the M6.2P ExternalSendPolicy enum + a data_sensitivity mapping",
+        "staleness tracking by monotonic registry_version (ignore a version <= last applied; expose current version)",
+        "fail-closed resolution: unknown external_send_policy -> BLOCKED_DEFAULT; unknown/SENSITIVE data_sensitivity -> PII; feed error/missing field -> not applied; TODO(contract) markers on the proposed name/shape"
+      ],
+      "out_of_scope": [
+        "a live HTTP client to the M3 endpoint (M3 ENTRY-003 V221 pending) - tests use a mock/staged feed only",
+        "the canonical two-enum reconciliation (M6 {PUBLIC,INTERNAL,PII} vs M3 {SENSITIVE,INTERNAL}) - Sếp/Core registry-branch decision; the reader only consumes fail-closed",
+        "Sếp permit-mapping (which events are ALLOW_EXTERNAL) / hash policy - M6-OD-003 privacy/legal half stays OPEN; the reader classifies but opens no egress",
+        "flipping any flag; production_flag/global_gateway_state/external_send stay OFF/BLOCKED/OFF"
+      ],
+      "contracts": ["M6-CTR-003"],
+      "smoke_ids": [],
+      "proposed_smoke_ids": ["M6-SMK-031"],
+      "rules_in_scope": ["M6-RULE-001", "M6-RULE-014", "M6-RULE-015"],
+      "fail_gates_in_scope": ["M6-FAIL-007", "M6-FAIL-008"],
+      "entry_evidence": [],
+      "source_ref": "chief RELAY_V221_M3_2026-09-10 §2.4; QĐ-B registry branch (2026-09-08); M6.2P ExternalSendPolicy enum; M6-OD-018"
     }
   ]
 }

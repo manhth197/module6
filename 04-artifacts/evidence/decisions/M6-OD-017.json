@@ -1,0 +1,24 @@
+{
+  "decision_id": "M6-OD-017",
+  "kind": "DECISION",
+  "decided_at": "2026-09-10",
+  "decided_by": "Nguyen Duc Manh (owner + tech lead), on chief E2 issuance 2026-09-10 + recall-lock decision 2026-09-09",
+  "title": "Recall-risk consumer (M6 side): pull ops-core availability (A), map to risk_flags per E2 §3, recall_case_open folded into recall, fail-closed",
+  "decision": "M6 consumes ops-core recall / sale-lock / quality risk via the PULL path (POST /v1/availability/check, the authoritative source; event-stream is advisory only). A mapper translates the availability response into the existing Scale-Gate risk_flags: risk_flags['recall'] = recall_hold OR recall_case_open; risk_flags['sale_lock'] = sale_lock; risk_flags['quality_hold'] = quality_hold. M6 reads the presence BOOLEANS only, never decision / block_reasons (those answer M3's sales question). Any presence-flag true makes the Scale-Gate Risk row FAIL even when decision == SELLABLE (clean-lot case) - advertising a SKU with a held lot is a legal/reputational risk distinct from selling the remaining clean lot. A pull error / timeout / 429 yields an INCOMPLETE (unknown) risk read, so the gate's existing fail-closed re-check (RULE-017) refuses to clear -> FAIL; a running campaign reads 'khong xac minh duoc', never auto-clear, never auto-pause.",
+  "availability_response_shape_consumed": "from ops-core contract pin ginsengfood-contracts@a413f1f (POST /v1/availability/check; pin bumped from 79f73d2 on 2026-09-10 for the recall_case_open field) + E2_BLOCK_REASON_V1 2026-09-10 §1/§2: data.decision in {SELLABLE, NOT_SELLABLE}; presence booleans data.recall_hold / data.sale_lock / data.quality_hold; additive data.recall_case_open (absent until ops-core ships it -> treated false; other flags unaffected). M6 uses recall_hold / sale_lock / quality_hold / recall_case_open only.",
+  "authority_basis": "E2 block_reason vocabulary + M6 gate rule issued by chief 2026-09-10 (canonical, E2_BLOCK_REASON_V1.md §3/§5); recall-lock Q1=A (pull) + Q2=(b) recall_case_open decided by owner/tech-lead 2026-09-09 (ops-core response PHAN_HOI_ket-noi-M6-opscore_09-09.md); ops-core contract pin ginsengfood-contracts@a413f1f (was 79f73d2; bumped 2026-09-10 when recall_case_open shipped).",
+  "conditions": [
+    "STAGED: tests use a mock availability response object; the LIVE HTTP client to /v1/availability/check is the S1b seam / go-live (ops-core account is LIVE on .61 since 2026-09-09 per the 2026-09-10 apply-report; the live call is gated on receiving the client_secret, not a calendar date - the earlier 2026-09-11 date is withdrawn) - OUT of this decision",
+    "recall_case_open shipped live on .61 2026-09-10 (pin a413f1f); the mapper still treats it additively (absent -> false) for resilience; presence never fabricated",
+    "M6 posture unchanged: FAIL gate only, no auto-pause of running campaigns (pause is owner-side, Sep-pending SLA)",
+    "no flag flipped: production_flag/global_gateway_state/external_send stay OFF/BLOCKED/OFF",
+    "SEPARATE, not in this decision: the campaign->SKU join to enumerate running campaigns on a recalled SKU (chief-flagged, needs a source); the pause SLA + M3 stop-sale on newly-opened cases (Sep-pending, FIX_OWNER_CORE §38)"
+  ],
+  "unblocks": "slice M6.2R (recall-risk mapper: availability response -> risk_flags, wired to the existing Scale Gate; STAGED, mock response in tests).",
+  "source_refs": [
+    "E2_BLOCK_REASON_V1.md 2026-09-10 §3/§5 (chief, canonical block_reason vocabulary + M6 gate rule)",
+    "PHAN_HOI_ket-noi-M6-opscore_09-09.md (M6 recall-lock answers: A + recall_case_open)",
+    "ops-core doc 09-09-13-56-chot-ket-noi-module-6.md §3/§5.3 (availability response shape)",
+    "00-spec/slices/slice_definitions.json M6.2R"
+  ]
+}

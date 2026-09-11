@@ -1,0 +1,66 @@
+........................................................................ [ 10%]
+........................................................................ [ 20%]
+........................................................................ [ 31%]
+........................................................................ [ 41%]
+........................................................................ [ 52%]
+........................................................................ [ 62%]
+........................................................................ [ 73%]
+FF...................................................................... [ 83%]
+........................................................................ [ 94%]
+........................................                                 [100%]
+================================== FAILURES ===================================
+___________ test_feed_error_not_applied_state_unchanged[bad_feed9] ____________
+
+bad_feed = {'events': [{'data_sensitivity': 'PII'}], 'registry_version': 1}
+
+    @pytest.mark.parametrize("bad_feed", [
+        None, [1, 2, 3], "registry", 42,                                  # not a Mapping
+        {"events": [_row("X")]},                                          # missing registry_version
+        {"registry_version": 1},                                         # missing events
+        {"registry_version": "1", "events": []},                        # non-int version
+        {"registry_version": 6.0, "events": []},                        # float version
+        {"registry_version": 1, "events": {"not": "a list"}},          # events not a list
+        {"registry_version": 1, "events": [{"data_sensitivity": "PII"}]},  # row missing event_code
+        {"registry_version": 1, "events": [{"event_code": "  "}]},      # blank event_code
+    ])
+    def test_feed_error_not_applied_state_unchanged(bad_feed):
+        r = RegistryFeedReader()
+        r.apply(_feed(3, [_row("SEED")]))              # a prior valid apply (version 3)
+        res = r.apply(bad_feed)
+>       assert res.applied is False and res.reason.startswith("feed_error:")
+E       AssertionError: assert (False is False and False)
+E        +  where False = RegistryFeedApplyResult(applied=False, registry_version=3, rows_applied=0, reason='stale').applied
+E        +  and   False = <built-in method startswith of str object at 0x0000019B5F177F70>('feed_error:')
+E        +    where <built-in method startswith of str object at 0x0000019B5F177F70> = 'stale'.startswith
+E        +      where 'stale' = RegistryFeedApplyResult(applied=False, registry_version=3, rows_applied=0, reason='stale').reason
+
+tests\test_m6_2s_registry_feed_reader.py:123: AssertionError
+___________ test_feed_error_not_applied_state_unchanged[bad_feed10] ___________
+
+bad_feed = {'events': [{'event_code': '  '}], 'registry_version': 1}
+
+    @pytest.mark.parametrize("bad_feed", [
+        None, [1, 2, 3], "registry", 42,                                  # not a Mapping
+        {"events": [_row("X")]},                                          # missing registry_version
+        {"registry_version": 1},                                         # missing events
+        {"registry_version": "1", "events": []},                        # non-int version
+        {"registry_version": 6.0, "events": []},                        # float version
+        {"registry_version": 1, "events": {"not": "a list"}},          # events not a list
+        {"registry_version": 1, "events": [{"data_sensitivity": "PII"}]},  # row missing event_code
+        {"registry_version": 1, "events": [{"event_code": "  "}]},      # blank event_code
+    ])
+    def test_feed_error_not_applied_state_unchanged(bad_feed):
+        r = RegistryFeedReader()
+        r.apply(_feed(3, [_row("SEED")]))              # a prior valid apply (version 3)
+        res = r.apply(bad_feed)
+>       assert res.applied is False and res.reason.startswith("feed_error:")
+E       AssertionError: assert (False is False and False)
+E        +  where False = RegistryFeedApplyResult(applied=False, registry_version=3, rows_applied=0, reason='stale').applied
+E        +  and   False = <built-in method startswith of str object at 0x0000019B5F177F70>('feed_error:')
+E        +    where <built-in method startswith of str object at 0x0000019B5F177F70> = 'stale'.startswith
+E        +      where 'stale' = RegistryFeedApplyResult(applied=False, registry_version=3, rows_applied=0, reason='stale').reason
+
+tests\test_m6_2s_registry_feed_reader.py:123: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_m6_2s_registry_feed_reader.py::test_feed_error_not_applied_state_unchanged[bad_feed9]
+FAILED tests/test_m6_2s_registry_feed_reader.py::test_feed_error_not_applied_state_unchanged[bad_feed10]

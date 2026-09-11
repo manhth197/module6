@@ -1,0 +1,21 @@
+{
+  "decision_id": "M6-OD-018",
+  "kind": "DECISION",
+  "decided_at": "2026-09-10",
+  "decided_by": "Nguyen Duc Manh (owner + tech lead), on chief RELAY_V221 §2.4 issuance 2026-09-10",
+  "title": "Registry-feed reader (M6 side): build against the PROPOSED event-registry-feed.v1 with TODO(contract), fail-closed, no live call",
+  "decision": "M6 builds the registry-feed READER adapter against the PROPOSED contract event-registry-feed.v1 (GET /api/v1/internal/event-registry?since_version={n} -> { registry_version, events: [ { event_code, event_group, domain, data_sensitivity, external_send_policy, is_active, updated_at } ] }), per chief RELAY_V221 §2.4. The proposed name/shape carry a TODO(contract) marker (final name/shape chief-issued). The reader is staleness-safe (monotonic registry_version; a version <= the last applied is not applied - no downgrade), fail-closed (a feed error / missing field / unknown external_send_policy token -> BLOCKED_DEFAULT; unknown/SENSITIVE data_sensitivity -> PII; never auto-allow), reuses the M6.2P ExternalSendPolicy enum, and does NOT call the live endpoint (M3 ENTRY-003 V221 endpoint does not exist yet) - tests use a mock/staged feed. Reading the registry opens NO egress: permit-mapping stays OPEN (M6-OD-003), no event becomes ALLOW_EXTERNAL, external_send stays OFF.",
+  "authority_basis": "chief RELAY_V221 §2.4 (2026-09-10, proposed endpoint shape + 'M6 build reader with TODO(contract), do not wait for M3'); QD-B registry branch signed 2026-09-08 (PhucApu canonical, V221; DECISION_REGISTER M6-OD-003 partial + CONFLICT_MATRIX M6-CONF-008); M6.2P external_send_policy enum already typed.",
+  "conditions": [
+    "TODO(contract): the proposed name/shape/field names are marked TODO(contract) until chief publishes the final endpoint contract; only the marked bits change on finalization",
+    "no live call: the reader NEVER calls a live endpoint (M3 ENTRY-003 V221 pending); tests use a mock/staged feed only",
+    "fail-closed consumption: unknown external_send_policy -> BLOCKED_DEFAULT; unknown/SENSITIVE data_sensitivity -> PII; feed error/stale -> not applied; this is defensive CONSUMPTION, NOT the canonical two-enum reconciliation (that stays a Sep/Core registry-branch decision, out of scope)",
+    "no egress opened: no event becomes ALLOW_EXTERNAL; production_flag/global_gateway_state/external_send stay OFF/BLOCKED/OFF"
+  ],
+  "unblocks": "slice M6.2S (registry-feed reader against the proposed event-registry-feed.v1, staleness-safe + fail-closed, mock feed in tests).",
+  "source_refs": [
+    "RELAY_V221_M3_2026-09-10.md §2.4 (chief, proposed event-registry-feed.v1 shape)",
+    "00-spec/registers/DECISION_REGISTER.md M6-OD-003 (QD-B registry branch) + CONFLICT_MATRIX M6-CONF-008",
+    "00-spec/slices/slice_definitions.json M6.2P (ExternalSendPolicy enum) + M6.2S"
+  ]
+}

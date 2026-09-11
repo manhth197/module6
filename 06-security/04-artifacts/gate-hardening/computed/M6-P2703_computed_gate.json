@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-09-10T08:23:56Z",
+  "claimed_fail_gate_tripped": false,
+  "classification": "test",
+  "computed_fail_gate_tripped": false,
+  "computed_status": "CLEAN",
+  "evidence_present": true,
+  "evidence_sha256": {
+    "04-artifacts/evidence/prompts/M6-P2703.json": "3af9f0d9f9586c474bc624cfb1b681e00d9cac319aa7b4973000351d57c8470f"
+  },
+  "failures": [],
+  "integrity_violations": [],
+  "mode": "gate",
+  "prompt_id": "M6-P2703",
+  "rules_version": "M6-SGV-1.0",
+  "warnings": []
+}

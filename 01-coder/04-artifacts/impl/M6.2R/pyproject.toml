@@ -1,0 +1,17 @@
+# M6.2A staged implementation — greenfield Python baseline (target manifest: python 3.12, pytest -q).
+# STAGED under 04-artifacts/impl/M6.2A/. Not installed into any live repo; convention reference only.
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "m6-measurement-foundation"
+version = "0.0.0"           # staged; global_gateway_state=BLOCKED, production_flag=OFF
+description = "Module 6 slice M6.2A — clean measurement foundation (valid events, correct identity, fail-closed consent). STAGED."
+requires-python = ">=3.11"  # target is 3.12; code stays 3.11-compatible so the staged tests run in the verify env too
+dependencies = []           # M6.2A adds no third-party dependency (fail-closed in-memory foundation)
+
+[tool.pytest.ini_options]
+pythonpath = ["."]          # make the `app` package importable without installation
+testpaths = ["tests"]
+addopts = "-q"

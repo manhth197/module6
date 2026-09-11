@@ -1,0 +1,60 @@
+{
+  "prompt_id": "M6-P2609",
+  "status": "PASS",
+  "summary": "M6_2R_SLICE_GATE_JUDGE (JUDGE, gate_review, fresh session, evidence-only) -- the M6.2R slice-EXIT gate (recall-risk mapper, E2 §3/§5, M6-OD-017). Verdict PASS at DESIGN/STAGED altitude: M6.2R built the M6-side recall-risk mapper (ops-core availability value-object -> 3 risk_flags recall/sale_lock/quality_hold that CAN feed the EXISTING Scale Gate), fail-closed by construction, NO gate-logic change. Full reasoning + 7-leg map in 04-artifacts/evidence/judge/M6-P2609_JUDGE_FINAL_SIGN_OFF.json. This PASS certifies the mapper MECHANISM only; it does NOT make recall gate scale live (the mapper is UNWIRED), declares no ROAS Pass / Scale Ready, no live ops-core HTTP, no flag flip, no egress. Posture BLOCKED/OFF/OFF; config.py/conditions.py/scale_gate.py byte-identical to M6.2Q (sha256 911b3238/c0eb4138/0a25bea1). || PRECONDITION (ledger row 259): M6-P2609=RUNNING, DependsOn=M6-P2608=PASS; band M6-P2600=SIGNED + M6-P2601..2608 all PASS Attempt=1; previous entry judge M6-P2600=SIGNED, M6.2Q judge M6-P2509=SIGNED. || 7 EXIT LEGS all MET on real source + staged code: (1) E2 mapping MET -- SMK-030 + code recall_risk_mapper.py (booleans-only, decision/block_reasons NEVER read; recall=recall_hold OR recall_case_open additive; output exactly 3 keys, strict subset of RISK_LOCKS, no fabrication); (2) presence-flag FAIL even SELLABLE MET -- SMK-030 i/ii, mapped lock -> existing gate Risk FAIL despite SELLABLE + approve refused (RULE-017 veto), no gate change; (3) fail-closed on pull error MET -- SMK-030 iii x5 + code (_as_bool strict isinstance(bool) rejects 0/1/int/str/None -> INCOMPLETE; map_pull_outcome no-HTTP; recall_risk_contribution incomplete/bare-clean -> {}) -> gate HOLD/does-not-clear (realized HOLD = correct fail-closed does-not-clear semantics; SMOKE_REGISTER 'gate FAIL' wording nit, honest, non-blocking); (4) SMK-030 EXECUTED PASS 11/11 (masked ids), suite 658 rc 0; (5) band M6-P2600..2608 evidence all schema-valid/PASS/fail_gate=false/no raw PII-secret (independent workflow sweep all_clean=true); (6) this sign-off PASS; (7) rollback documented RUNBOOK sec4 (exactly 2 new files + smoke + TEST_MANIFEST delta; NO carried gate/app edit -- byte-identical; refuter confirmed diff). || IN-SCOPE NOT TRIPPED: FAIL-006 (mapper cannot enable auto-scale -- present lock->FAIL, incomplete->HOLD, holds no executor/budget handle), RULE-017 (hard veto held), RULE-015 (pack tops at OWNER_REVIEW_REQUIRED; runbook does NOT overclaim). Boundary M6-P2605 fail_gate=false (42 outcomes, 0 in-scope breach); security M6-P2606 fail_gate=false (0 raw PII / 0 secrets incl 0 client_secret / 277 files; recall data product-level not PII). No unresolved BLOCKER. || THREE HONESTY POINTS (load-bearing framing, weighed over the green count): (1) mapper is UNWIRED (N8) -- no app/ importer, only tests; proves a MECHANISM not live recall-gating; (2) live FAIL-006 containment is the STRUCTURAL overall-HOLD floor + no-executor (N1), FRAGILE -- a future PASS branch on _funnel/_dashboard (N1) or approval-time overall-recompute (N4) flips every armed-not-fired residual live at once; lock the floor with a regression; (3) pre-existing conditions._risk partial/junk-falsy false-clear (G4/N2) -- NOT introduced by M6.2R, NOT fixable here (no-gate-change scope); the mapper's fail-closed-by-construction contribution never emits such a partial; owner must harden _risk to require all-6 RISK_LOCKS + validate bool-ness before any live scale clear (sharpest residual). || WHY PASS: 7 legs verified on real source + staged code; both independent adversaries fail_gate=false 0-breach; I personally verified the mapper in the actual file; a fresh 3-agent workflow re-derived band-cleanliness + mapper-fail-closed/RULE-017 + posture/no-gate-change/no-HTTP/no-secret/unwired-honesty/rollback -> SOUND / grounds_to_block=false with sha256 byte-identity + grep-confirmed unwiring + no-overclaim. || WHY NOT BLOCKED: no missing/contradictory input; M6-OD-017 DECIDED authorizes the mapper; OPEN M6-OD-002/005 govern forward Scale-Gate (out-of-scope; no gate-logic change, no scale declared); residuals armed-not-fired, forward/CODER/owner-routed, none channel-reachable (mapper unwired + product-level booleans + no HTTP + is_scale_authorized structurally unreachable + external_send Final OFF). || BOUNDED RESIDUALS (routed): F-SEC-2R-1 (carried OwnerDecision.to_public unmasked reason/audit_ref, two-instance with M6.2Q MC-09 -> M6-OD-012 + CODER); N3 (recall_risk_contribution base-key overwrite -> CODER); N9 (from_mapping non-iterable block_reasons TypeError, fail-closed-loud -> CODER); N6 (observability -> CODER); S1b secret handover (ops-core client_secret as secret_ref + import-gate allow-list before live client -> owner M6-OD-011). || GOVERNANCE unchanged: M6-P1000 + M6-P1309 remain BLOCKED (not converted); M6.2G/H/I/J + M6-OD-002/005 + M6-OD-011 server-bind/go-live/secret-handover + M6-OD-012 + M6-OD-003 + S1b live-HTTP + campaign-join + M3 pause-SLA + G4/N2 _risk-hardening + N1 floor-lock + N8 wiring forward conditions remain hard gates before any live recall pull / real scale / egress; no self-cert; no application code/migration/flag/gate-logic change; module boundary intact (M6 consumes ops-core booleans for its own gate; does not own recall decision, pause campaigns, change M3 gating); no raw secrets/PII.",
+  "files_read": [
+    "00-spec/slices/M6.2R.md",
+    "00-spec/prompts/0257_M6-P2609_M6_2R_SLICE_GATE_JUDGE.xml.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P2600.json",
+    "04-artifacts/evidence/prompts/M6-P2601.json",
+    "04-artifacts/evidence/prompts/M6-P2602.json",
+    "04-artifacts/evidence/prompts/M6-P2603.json",
+    "04-artifacts/evidence/prompts/M6-P2604.json",
+    "04-artifacts/evidence/prompts/M6-P2605.json",
+    "04-artifacts/evidence/prompts/M6-P2606.json",
+    "04-artifacts/evidence/prompts/M6-P2607.json",
+    "04-artifacts/evidence/prompts/M6-P2608.json",
+    "04-artifacts/evidence/judge/M6-P2600_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/boundary-reports/M6.2R_boundary.md",
+    "04-artifacts/security-reports/M6.2R_security.md",
+    "04-artifacts/test-reports/M6.2R/SMOKE_RESULTS.md",
+    "04-artifacts/analysis/slices/M6_2R_RUNBOOK.md",
+    "04-artifacts/impl/M6.2R/app/measurement/scale/recall_risk_mapper.py",
+    "04-artifacts/evidence/decisions/M6-OD-017.json"
+  ],
+  "files_changed": [
+    "04-artifacts/evidence/judge/M6-P2609_JUDGE_FINAL_SIGN_OFF.json",
+    "04-artifacts/evidence/prompts/M6-P2609.json"
+  ],
+  "commands_run": [
+    "Read (read-only): M6-P2609 prompt, slice M6.2R.md (7 exit legs), state ledger rows 249-260 (M6-P2609=RUNNING, band all PASS/SIGNED Attempt=1), M6-P2600 entry evidence + sign-off, M6-OD-017.json",
+    "Read (read-only): boundary M6.2R_boundary.md (M6-P2605, 42 outcomes, 0 in-scope FAIL-006/RULE-017 breach, structural HOLD floor crown jewel) + security M6.2R_security.md (M6-P2606, 0 raw PII/secret incl 0 client_secret / 277 files, mapper fail-closed + unwired N8) + SMOKE_RESULTS.md (SMK-030 11/11, suite 658 rc 0, traceability HOLD note) + M6_2R_RUNBOOK.md (3 honesty points + rollback sec4)",
+    "Read (read-only): load-bearing code -- scale/recall_risk_mapper.py (_as_bool strict isinstance bool; map_risk_flags booleans-only + any non-bool->INCOMPLETE; map_pull_outcome no-HTTP; recall_risk_contribution fail-closed-by-construction incomplete/bare->{}; RECALL_RISK_KEYS strict subset + import drift guard; docstring 'touches no gate code')",
+    "Workflow (3-agent read-only adversarial verification, ultracode): band-evidence sweep M6-P2601..2608 -> all_clean=true; refuter mapper-fail-closed/FAIL-006/RULE-017 -> SOUND grounds_to_block=false (no false-clear/fabricated-lock/veto-bypass; G4/N2/N3 armed-not-fired, not mapper-introduced); refuter posture/no-gate-change/no-HTTP/no-secret/unwired-honesty/rollback -> SOUND grounds_to_block=false (config 911b3238 + conditions c0eb4138 + scale_gate 0a25bea1 byte-identical Q->R; no HTTP import; no committed secret; mapper unwired only tests import; no overclaim; rollback covers diff)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/evidence/judge/M6-P2609_JUDGE_FINAL_SIGN_OFF.json",
+    "00-spec/slices/M6.2R.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/evidence/prompts/M6-P2600.json",
+    "04-artifacts/evidence/prompts/M6-P2601.json",
+    "04-artifacts/evidence/prompts/M6-P2602.json",
+    "04-artifacts/evidence/prompts/M6-P2603.json",
+    "04-artifacts/evidence/prompts/M6-P2604.json",
+    "04-artifacts/evidence/prompts/M6-P2605.json",
+    "04-artifacts/evidence/prompts/M6-P2606.json",
+    "04-artifacts/evidence/prompts/M6-P2607.json",
+    "04-artifacts/evidence/prompts/M6-P2608.json",
+    "04-artifacts/boundary-reports/M6.2R_boundary.md",
+    "04-artifacts/security-reports/M6.2R_security.md",
+    "04-artifacts/test-reports/M6.2R/SMOKE_RESULTS.md",
+    "04-artifacts/analysis/slices/M6_2R_RUNBOOK.md",
+    "04-artifacts/impl/M6.2R/app/measurement/scale/recall_risk_mapper.py",
+    "04-artifacts/evidence/decisions/M6-OD-017.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine JUDGE_GATE for M6-P2609 (scripts-win\\Check-PromptGateLocked.ps1 -PromptId M6-P2609, then Mark-PromptPassLocked); on this PASS sign-off the M6.2R slice-exit gate closes -- the recall-risk mapper MECHANISM (ops-core availability booleans -> 3 risk_flags, fail-closed by construction: strict-bool read, incomplete->{} HOLD, booleans-only no fabricated lock, present lock -> existing Scale-Gate Risk FAIL even when SELLABLE via RULE-017 veto) is proven STAGED, with NO gate-logic change. NOTHING here makes recall gate scale live, authorizes a live ops-core HTTP call, real scale, external send, or a flag flip; the mapper is UNWIRED (proves a mechanism, not live recall-gating). global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF and all flags remain in force; M6-P1000 + M6-P1309 remain BLOCKED (not converted). OWNER (the load-bearing forward steps, before any live recall pull / real scale): harden conditions._risk to require all-6 RISK_LOCKS present + validate bool-ness at the approval all-6 guard (G4/N2, the sharpest); lock the structural overall-HOLD floor with a regression before any wiring (N1/N4); force a future risk-flags caller through recall_risk_contribution + risk_picture_complete (N8); M6-OD-012 durable-export masking (OwnerDecision + the M6.2Q AdsSpendImportDecision reason/audit_ref two-instance pattern -- mirror the audit-sink drop); M6-OD-011 ops-core client_secret handover as a secret_ref + the M6.2O AST import-scan gate allow-list updated deliberately + scale-endpoint authN before the S1b live client; M6-OD-002/005 thresholds + attribution model; the campaign->SKU join + the M3 block_reason/pause-SLA. CODER: recall_risk_contribution base-key guard (N3); from_mapping non-iterable block_reasons guard (N9); malformed-sibling observability (N6); mirror the audit-sink drop on OwnerDecision.to_public. OPERATOR (doc-sync, non-blocking, carried): register M6-OD-013 + M6-OD-014 + the M5 PSID_HASH_POLICY_M5_TMP dependency in DECISION_REGISTER.md; reconcile the stale ENTRY-004 row. This is the terminal gate of the M6.2R slice; do not advance beyond M6-P2609 unless the operator pastes a further prompt (the next queued is M6-P2700, the M6.2S entry gate)."
+}
