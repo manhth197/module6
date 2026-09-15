@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-09-15T00:08:15Z",
+  "claimed_fail_gate_tripped": false,
+  "classification": "judge",
+  "computed_fail_gate_tripped": false,
+  "computed_status": "CLEAN",
+  "evidence_present": true,
+  "evidence_sha256": {
+    "04-artifacts/evidence/prompts/M6-P2800.json": "e462fa9002a62e8f4a94d8d3116ee37fa1ea001ee260bcc25af99a3a4750124d"
+  },
+  "failures": [],
+  "integrity_violations": [],
+  "mode": "gate",
+  "prompt_id": "M6-P2800",
+  "rules_version": "M6-SGV-1.0",
+  "warnings": []
+}

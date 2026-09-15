@@ -1,0 +1,28 @@
+{
+  "decision_id": "M6-OD-019",
+  "kind": "DECISION",
+  "decided_at": "2026-09-10",
+  "decided_by": "Nguyen Duc Manh (owner + tech lead)",
+  "title": "Pre-wiring hardening of the staged recall/registry mechanism + the Scale-Gate clear-path, before any live wiring",
+  "decision": "The owner authorizes a pre-wiring HARDENING slice (M6.2T) that closes the four armed-not-fired forward findings surfaced by the M6.2R (P2609) and M6.2S (P2709) judge sign-offs, NOW that the ops-core account is live (2026-09-10, pin 54eb5f5) and the S1b wiring / server-bind is near. All four changes are STRICTER / fail-closed-direction ONLY; no flag is flipped; no egress is opened; everything stays STAGED. Explicitly authorized: (1) a change to the SHARED Scale-Gate clear-path (conditions._risk propose-time + scale_gate._assert_risk_clear_at_approval) — the first gate-logic change since M6.2Q — in the tightening direction only.",
+  "legs": [
+    "LEG 1 (G4/N2 gate clear-path): conditions._risk PASSes ONLY a COMPLETE risk read (all 6 RISK_LOCKS observed AND none active); a partial no-active map -> HOLD (not PASS). scale_gate._assert_risk_clear_at_approval additionally validates BOOL-NESS: a falsy non-bool lock value (0 / '' / None-as-value) does NOT clear a lock — only a real bool False clears. Stricter/fail-closed only. Existing tests that relied on partial-clear are reconciled HONESTLY (the new HOLD is the correct behavior), NEVER nerfed to stay green.",
+    "LEG 2 (N1 HOLD-floor lock): a regression test pins that is_scale_authorized is structurally unreachable while M6-OD-002/005 are OPEN, so a future refactor that adds a PASS branch on _funnel/_dashboard FAILs the regression loudly instead of silently arming every armed-not-fired residual.",
+    "LEG 3 (F-FEED-PII input-side reject): the registry-feed reader REJECTS fail-closed (feed_error) a feed row whose governance metadata carries a customer-PII shape (email/phone/psid-like value in event_code/event_group/domain) AT PARSE. Governance identifiers export as-is, so this is an INPUT-side reject, NOT export masking — do NOT conflate with the M6-OD-012 decision-export masking family.",
+    "LEG 4 (small in-process CODER residuals): recall_risk_contribution rejects a base_flags that carries a RECALL_RISK_KEY (N3 no silent overwrite); OpsCoreAvailabilityResponse.from_mapping handles a non-iterable block_reasons fail-closed-loud (N9); the registry reader guards isinstance(str) before the enum value-lookup (carried M6.2P N5/BND-01); a malformed-sibling observability note (N6)."
+  ],
+  "authority_basis": "owner instruction 2026-09-10 ('4 viec con lai plan roi lam not') greenlighting the M6.2R/M6.2S judge-routed forward findings; the ops-core account went live 2026-09-10 (pin 54eb5f5) so the pre-wiring hardening is correctly-timed (judges: 'lock the HOLD floor + harden _risk BEFORE any wiring').",
+  "conditions": [
+    "STRICTER / fail-closed direction ONLY: leg 1 can only make the gate HOLD more, never clear more; no behavior is loosened",
+    "no flag flipped: production_flag/global_gateway_state/external_send stay OFF/BLOCKED/OFF; no egress opened",
+    "STAGED: mapper + reader remain UNWIRED (wiring is S1b/server-bind, separate); this slice hardens the staged mechanism, it does not wire it",
+    "leg 1 touches the SHARED gate (conditions.py/scale_gate.py) consumed by the certified M6.2G scale path — existing tests are reconciled honestly, the judge verifies no test is nerfed and no certified behavior is loosened"
+  ],
+  "unblocks": "slice M6.2T (pre-wiring hardening; cumulative superset of M6.2S).",
+  "source_refs": [
+    "04-artifacts/evidence/judge/M6-P2609_JUDGE_FINAL_SIGN_OFF.json (M6.2R forward findings: N8 unwired, N1 HOLD-floor, G4/N2 _risk, N3/N9/N6)",
+    "04-artifacts/evidence/judge/M6-P2709_JUDGE_FINAL_SIGN_OFF.json (M6.2S forward findings: F-FEED-PII input-side, N5 isinstance-str)",
+    "ops-core account handoff 10-09-15-16-ban-giao-tai-khoan-module-6.md (account live, pin 54eb5f5)",
+    "00-spec/slices/slice_definitions.json M6.2T"
+  ]
+}

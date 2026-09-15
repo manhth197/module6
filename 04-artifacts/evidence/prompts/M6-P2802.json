@@ -1,0 +1,63 @@
+{
+  "prompt_id": "M6-P2802",
+  "status": "PASS",
+  "summary": "M6_2T_CODER_IMPLEMENT (CODER, implement). Built the 4-leg PRE-WIRING HARDENING (owner M6-OD-019) STAGED as a cumulative superset of M6.2S under 04-artifacts/impl/M6.2T/, per the approved (red-team-corrected) PLAN.md item-by-item, plus IMPLEMENTATION_NOTES.md. All four legs are STRICTER/fail-closed-direction ONLY (leg 1 HOLDs more, never clears more, opens no PASS branch); mapper+reader stay UNWIRED; no flag flip, no egress. PRECONDITION verified: ledger M6-P2802=RUNNING (row 272), dependency M6-P2801=PASS (row 271); IMPLEMENTATION_TARGET_LOCKED status=LOCKED, live_migrations=false, M6-OD-011 DECIDED. CARRY + BASELINE: carried M6.2S byte-identical (251 .py = 251 .py, 16 .sql = 16 .sql); baseline + parity BEFORE any patch = M6.2S 716 passed == M6.2T carried 716 passed (0 fail/error/skip) -- the real SIGNED baseline (the plan's earlier 688 was M6.2S's implement-time count, corrected to 716 in the plan). NOTE: a mid-session power outage interrupted the implement after the leg-1/N3/N9 edits; the Edit tool had already written those to disk, so nothing was lost (re-verified all edits parse + markers present on resume) and the work continued. BUILT (4 stricter carried-file edits + the honest SMK-030:159 reconciliation + 3 regressions; NO migration, NO config change, NO wiring, NO new secret, NO PASS branch): LEG 1 = conditions._risk PASSes ONLY a COMPLETE read (all 6 RISK_LOCKS present AND none active; a partial no-active map -> HOLD, was PASS -- closes the M6.2R forward finding) + scale_gate._assert_risk_clear_at_approval adds isinstance(bool) to the clear predicate (a falsy non-bool lock value 0/''/None no longer clears via the fresh-read path). LEG 2 = a regression pinning is_scale_authorized structurally unreachable even with BOTH config floors (DASHBOARD_ALERT_THRESHOLDS_DEFINED, SCALE_MODEL_RATIFIED) monkeypatched True (no app change; _funnel/_dashboard have no PASS branch). LEG 3 = RegistryFeedReader adds _looks_like_pii + a parse-loop guard rejecting fail-closed (feed_error:pii_shape_in_governance_field, state UNCHANGED) a governance field (event_code/event_group/domain) carrying a customer-PII shape (email/phone/psid) -- input-side, NOT export masking. LEG 4 = recall_risk_contribution rejects a base_flags carrying any RECALL_RISK_KEY (N3, RecallRiskContributionError, no silent overwrite); from_mapping fail-closed on a non-iterable/bare-string block_reasons -> None (N9, prevents the tuple() crash); the reader _resolve_typed guards isinstance(str)/enum before the value-lookup (N5, non-str -> fail-closed default) + surfaces malformed_fields observability (N6). HONEST RECONCILIATION of the ONE carried break (the plan red-team prototyped leg 1 on the real SIGNED suite and found tests/smoke/test_smk_030_..._never_reads_decision_or_block_reasons line 159's non-vacuity control feeds the mapper's CLEAN 3-of-6 no-active map to _risk asserting PASS): re-pointed at a FULL all-6 no-active map (still asserts PASS -- the gate CAN reach PASS with a complete read) AND added a 3-of-6 -> HOLD assertion -- a STRENGTHENING, NOT a nerf (the gate-can-PASS proof preserved, not gutted). STRICTER-ONLY VERIFIED: a M6.2S->M6.2T diff of the 4 edited files shows only HOLD/reject/raise/more-fail-closed additions -- NO PASS/clear/allow branch added. ADVERSARIAL IMPL RED-TEAM (ultracode, 2 dimensions + independent skeptics): BOTH CLEAN (0 findings) -- the gate-stricter-no-nerf dimension confirmed on the running code that the _risk/_assert edits are stricter-only (no new PASS/clear branch) and the SMK-030 reconciliation is an honest strengthening (not a nerf); the legs-3/4 dimension confirmed the PII reject has no false-positive on legitimate governance codes (ORDER_VERIFIED/ads.core/v20260915/evt_123 do not trip), N5/N6 non-str handling is fail-closed + observable, and N3/N9 fail-closed without crashing. FINAL VERIFICATION: full suite 729 passed, 0 fail / 0 error / 0 skip (716 baseline + 13 new); gate invariant baseline<=final (716<=729) holds; the sole carried behavior change is the honestly-reconciled SMK-030:159; config.py sha256[:16]=911b32381368f355 UNCHANGED; consumed.py + validator.py byte-identical to M6.2S (reuse-only); migrations 0001..0016 unchanged; mapper+reader UNWIRED (no app/ import -- verified); caches cleaned (0 residual); no test skipped/relaxed/deleted. POSTURE: global_gateway_state=BLOCKED, production_flag=OFF, external_send=OFF, live_migrations=false -- nothing flipped, no migration applied, no config change, no wiring, no egress, no PASS branch opened, no certified M6.2G behavior loosened. BOUNDARY: leg 1 only makes the gate FAIL/HOLD more (never clears more, no scale executed, RULE-010/FAIL-006); mapper+reader UNWIRED; leg 3 input-side PII reject (RULE-014/FAIL-008), never storing/exporting PII; no CRM/egress/commission (RULE-018/019). M6-P1000/M6-P1309 stay BLOCKED. Forward conditions (recorded, NOT resolved): M6-OD-002/005 OPEN (leg 2 hardens around them); M6-OD-003 OPEN; the S1b wiring seam + live M3 endpoint + M6-OD-011 server-bind/go-live remain hard gates before any live wiring / real scale / egress. No self-certification; the runner gate + JUDGE (M6-P2809) decide.",
+  "files_read": [
+    "00-spec/CLAUDE_CONTEXT_BRIEF.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json",
+    "00-spec/slices/M6.2T.md",
+    "04-artifacts/impl/M6.2T/PLAN.md",
+    "04-artifacts/evidence/prompts/M6-P2801.json",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/state/PROMPT_EXECUTION_LEDGER_LOCKED.csv",
+    "04-artifacts/impl/M6.2S/app/measurement/scale/conditions.py",
+    "04-artifacts/impl/M6.2S/app/measurement/scale/scale_gate.py",
+    "04-artifacts/impl/M6.2S/app/measurement/scale/recall_risk_mapper.py",
+    "04-artifacts/impl/M6.2S/app/measurement/adapters/registry_feed_reader.py",
+    "04-artifacts/impl/M6.2S/tests/smoke/test_smk_030_recall_risk_mapper_to_scale_gate.py",
+    "04-artifacts/impl/M6.2S/tests/test_risk_recheck_at_approval.py",
+    "04-artifacts/impl/M6.2S/tests/test_scale_gate_risk_veto.py"
+  ],
+  "files_changed": [
+    "04-artifacts/impl/M6.2T/ (carried M6.2S byte-identical: 251 .py + 16 .sql)",
+    "04-artifacts/impl/M6.2T/app/measurement/scale/conditions.py",
+    "04-artifacts/impl/M6.2T/app/measurement/scale/scale_gate.py",
+    "04-artifacts/impl/M6.2T/app/measurement/scale/recall_risk_mapper.py",
+    "04-artifacts/impl/M6.2T/app/measurement/adapters/registry_feed_reader.py",
+    "04-artifacts/impl/M6.2T/tests/smoke/test_smk_030_recall_risk_mapper_to_scale_gate.py",
+    "04-artifacts/impl/M6.2T/tests/test_m6_2t_gate_clear_path_hardening.py",
+    "04-artifacts/impl/M6.2T/tests/test_m6_2t_hold_floor_lock.py",
+    "04-artifacts/impl/M6.2T/tests/test_m6_2t_residuals_hardening.py",
+    "04-artifacts/impl/M6.2T/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/evidence/prompts/M6-P2802.json"
+  ],
+  "commands_run": [
+    "Read (read-only): CLAUDE_CONTEXT_BRIEF, IMPLEMENTATION_TARGET_LOCKED.json (LOCKED, live_migrations=false), slice M6.2T.md, PLAN.md, M6-P2801 evidence; ledger rows 271-272 -> M6-P2802=RUNNING, M6-P2801=PASS; the real M6.2S gate + mapper + reader + the carried scale tests (test_risk_recheck_at_approval, test_scale_gate_risk_veto, smoke SMK-030) to plan the exact stricter edits + the leg-1 reconciliation",
+    "python -B work/carry_2t.py -> carried M6.2S -> M6.2T byte-identical (251 .py = 251 .py, 16 .sql = 16 .sql; excluded caches + prior PLAN/NOTES; kept M6.2T PLAN.md)",
+    "PYTHONDONTWRITEBYTECODE=1 python -B -m pytest -p no:cacheprovider -q (M6.2S + M6.2T carried) -> 716 passed == 716 passed, 0 fail/error/skip (baseline + parity BEFORE any patch)",
+    "Edit: conditions._risk (all-6 required to PASS) + scale_gate._assert_risk_clear_at_approval (isinstance(bool)) [LEG 1]; recall_risk_mapper from_mapping (N9 non-iterable block_reasons) + RecallRiskContributionError + recall_risk_contribution guard (N3) [LEG 4]; the honest SMK-030:159 reconciliation (re-point non-vacuity at full-6 + add 3-of-6->HOLD); registry_feed_reader _looks_like_pii + parse-loop PII reject [LEG 3] + _resolve_typed isinstance guard + malformed_fields [N5/N6] -- a mid-edit power outage did not lose any on-disk edit",
+    "Write: tests/test_m6_2t_gate_clear_path_hardening.py + tests/test_m6_2t_hold_floor_lock.py + tests/test_m6_2t_residuals_hardening.py (PII-shaped test values assembled at runtime, no literal PII in source)",
+    "PYTHONDONTWRITEBYTECODE=1 python -B -m pytest -p no:cacheprovider -q (M6.2T) -> 729 passed, 0 fail/error/skip (716 + 13 new)",
+    "Verify: a M6.2S->M6.2T diff of the 4 edited files shows only HOLD/reject/raise/more-fail-closed additions (no PASS/clear/allow) -> stricter-only; config.py + consumed.py + validator.py sha256[:16] identical M6.2S<->M6.2T (reuse-only; config 911b32381368f355); migrations 0001..0016 unchanged; mapper+reader UNWIRED (no app/ import); self-scan the edited files -> no enabling flag token, no secret, no literal PII",
+    "Workflow (ultracode adversarial impl red-team, 2 dimensions + independent skeptics running the real M6.2T code): gate-stricter-no-nerf CLEAN (0 findings; the _risk/_assert edits are stricter-only + the SMK-030 reconciliation is an honest strengthening, not a nerf) + legs-3/4-failclosed CLEAN (0 findings; no PII false-positive on governance codes, N5/N6/N3/N9 fail-closed)",
+    "python (clean): removed 24 __pycache__ + 1 .pytest_cache + 253 .pyc; 0 residual; final M6.2T 275 files (254 .py, 16 .sql)"
+  ],
+  "evidence_refs": [
+    "04-artifacts/impl/M6.2T/IMPLEMENTATION_NOTES.md",
+    "04-artifacts/impl/M6.2T/PLAN.md",
+    "04-artifacts/impl/M6.2T/app/measurement/scale/conditions.py",
+    "04-artifacts/impl/M6.2T/app/measurement/scale/scale_gate.py",
+    "04-artifacts/impl/M6.2T/app/measurement/adapters/registry_feed_reader.py",
+    "04-artifacts/impl/M6.2T/app/measurement/scale/recall_risk_mapper.py",
+    "04-artifacts/impl/M6.2T/tests/test_m6_2t_gate_clear_path_hardening.py",
+    "04-artifacts/impl/M6.2T/tests/test_m6_2t_hold_floor_lock.py",
+    "04-artifacts/impl/M6.2T/tests/test_m6_2t_residuals_hardening.py",
+    "00-spec/slices/M6.2T.md",
+    "00-spec/registers/SMOKE_REGISTER.md",
+    "04-artifacts/state/IMPLEMENTATION_TARGET_LOCKED.json"
+  ],
+  "open_blockers": [],
+  "fail_gate_tripped": false,
+  "fail_gate_lines": [],
+  "next_recommended_action": "Operator runs the machine EVIDENCE_GATE for M6-P2802; on PASS the sequence proceeds to M6-P2803 (M6_2T_TESTER_BUILD) to author the official SMK-032 smoke over the staged M6.2T tree, then M6-P2804 (TESTER_RUN) to execute + record it. TESTER coordination (from the 4 legs): SMK-032's four scenarios -- (i) a propose with a partial no-active risk map -> conditions._risk HOLD (all-6 required) + a falsy-non-bool lock value at approval does NOT clear (bool-ness); (ii) a monkeypatched PASS branch on _funnel/_dashboard makes the HOLD-floor regression FAIL loudly (structural unreachability pinned); (iii) a feed row with an email/phone-shaped governance field -> reader rejects fail-closed (feed_error, input-side, state unchanged); (iv) base_flags carrying a RECALL_RISK_KEY -> recall_risk_contribution rejects + from_mapping fail-closed-loud on a non-iterable block_reasons. The CODER regressions already cover these; the sole carried behavior change is the honestly-reconciled SMK-030:159 non-vacuity control (re-pointed at a full-6 map + a new 3-of-6->HOLD assertion -- a strengthening, not a nerf). Then M6-P2805 (BOUNDARY), M6-P2806 (SECURITY_PII -- leg 3 input-side PII reject, no PII stored/exported), M6-P2807 (PM), M6-P2808 (DOCS), and the exit gate M6-P2809 (SLICE_GATE_JUDGE) which verifies stricter-only, no certified M6.2G behavior loosened, no test nerfed, mapper+reader still UNWIRED, no flag flip / no egress / posture OFF-BLOCKED-OFF. HARD FORWARD CONDITIONS: M6-OD-002/005 OPEN (leg 2 hardens around them, opens no PASS branch); M6-OD-003 OPEN; the S1b wiring seam + live M3 endpoint + M6-OD-011 server-bind/go-live before any live wiring / real scale / egress. Posture stays BLOCKED/OFF/OFF; no flag flip; M6-P1000/M6-P1309 stay BLOCKED. Operator hygiene (non-blocking, carried): register M6-OD-013/014 + the M5 PSID_HASH_POLICY_M5_TMP dependency in DECISION_REGISTER.md; reconcile the stale ENTRY-004 row."
+}
