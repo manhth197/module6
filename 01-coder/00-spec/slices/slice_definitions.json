@@ -499,6 +499,39 @@
       "fail_gates_in_scope": ["M6-FAIL-006", "M6-FAIL-008"],
       "entry_evidence": [],
       "source_ref": "M6.2R P2609 + M6.2S P2709 judge forward findings; owner M6-OD-019 (2026-09-10); ops-core account live (pin 54eb5f5)"
+    },
+    {
+      "id": "M6.2U",
+      "name": "Recall E2 §3 conformance + migration renumber + docstring (M6-OD-020, chief 2026-09-16 fix)",
+      "ads_phase": "post-pilot",
+      "depends_on": "M6.2T",
+      "scope_doc": "chief auditor list 2026-09-16 items B3 + B1/B4 + D20. Conform the recall consumer to chief E2 §1/§3 (canonical): decision != SELLABLE -> no-scale + pull-error -> FAIL (M6-OD-020, superseding the M6-OD-017 'never read decision' narrowing); renumber the enforcement migration 0014 -> 0017 (0014-0016 taken by M6.2Q ads_spend) in migrations/README; conform the attribution_context psid_hash docstring to M6-OD-015. Cumulative superset of M6.2T under 04-artifacts/impl/M6.2U/. Stricter/fail-closed only; STAGED; mapper stays UNWIRED; no flag flip; no egress.",
+      "done_gate_doc": "recall path honors E2 §3 (NOT_SELLABLE + pull-error -> FAIL) without loosening; migration README consistent; docstring conforms; posture unchanged; no test nerfed",
+      "done_gate_legs": [
+        "LEG 1 (B3 E2 §3 conformance, M6-OD-020): a recall/availability response whose decision is NOT observed as SELLABLE (NOT_SELLABLE, or unknown/missing) makes the Scale-Gate Risk row FAIL -- a SELLABILITY no-scale signal DISTINCT from the recall-boolean derivation (so ops-core §4 'do not derive the recall booleans from decision' still holds: the recall/sale_lock/quality_hold booleans are unchanged); AND a pull error/timeout/429/incomplete read makes the Risk row FAIL (not HOLD) and surfaces a 'unverified' signal for a running campaign. Tests: NOT_SELLABLE + all flags false -> gate FAIL; unknown decision -> FAIL; pull-429 -> FAIL. Stricter/fail-closed only; a SELLABLE + no-active-flag response still clears exactly as before (no certified behavior loosened); no test nerfed.",
+        "LEG 2 (B1/B4 migration renumber): migrations/README lists 0001-0016 + 0017_enforcement with the apply order (enforcement renumbered from the taken 0014; the registry M6-OD-011.json / DECISION_REGISTER / SCHEMA_CHANGELOG already corrected to 0017); no new SQL file is written here (the enforcement migration is authored at server-bind).",
+        "LEG 3 (D20 docstring): the attribution_context psid_hash docstring ('Trace joins use psid_hash') is corrected to state the M6-OD-015 no-join policy (cross-module keys = live_session_id / comment_id / messenger_thread_id + attribution_id); code path unchanged (there is already no psid_hash join)."
+      ],
+      "objective": "Fix the three chief-auditor 2026-09-16 findings that are M6-self-doable (B3 E2 §3 conformance, B1/B4 migration renumber, D20 docstring) as a cumulative superset of M6.2T under 04-artifacts/impl/M6.2U/. Leg 1 ADDS FAIL conditions to the recall path (NOT_SELLABLE, pull-error) -- stricter/fail-closed only, it opens no PASS branch and loosens nothing; the mapper stays UNWIRED (wiring = S1b/server-bind, out of scope). No flag flipped, no egress. Production/scale stays BLOCKED. Existing M6.2R/M6.2T tests are reconciled honestly and the judge verifies no test is nerfed and no certified clear-path behavior is loosened.",
+      "in_scope": [
+        "recall path: decision not-SELLABLE (or unknown) -> Risk FAIL (sellability no-scale, distinct from the recall booleans); reading decision authorized for this check only (M6-OD-020)",
+        "recall path: pull error/timeout/429/incomplete -> Risk FAIL (not HOLD) + a running-campaign 'unverified' signal",
+        "migrations/README: list 0001-0016 + 0017_enforcement with apply order",
+        "attribution_context psid_hash docstring conforms to M6-OD-015 (no-join)"
+      ],
+      "out_of_scope": [
+        "WIRING the mapper into any live pull / app caller (S1b seam / server-bind)",
+        "the C7 session-window design (spend granularity by hour, session start/end from M7, multi-session binding rule) -- the cross-team part waits on Owner/M7; only its in-module sub-parts may follow in a later slice",
+        "writing the 0017_enforcement SQL (authored at server-bind); opening the Scale-Gate PASS path (M6-OD-002/005)",
+        "flipping any flag; production_flag/global_gateway_state/external_send stay OFF/BLOCKED/OFF"
+      ],
+      "contracts": ["M6-CTR-026"],
+      "smoke_ids": [],
+      "proposed_smoke_ids": ["M6-SMK-033"],
+      "rules_in_scope": ["M6-RULE-017", "M6-RULE-018", "M6-RULE-015"],
+      "fail_gates_in_scope": ["M6-FAIL-006"],
+      "entry_evidence": [],
+      "source_ref": "chief auditor list 2026-09-16 (B3/B1/B4/D20); E2_BLOCK_REASON_V1 §1/§3 canonical; M6-OD-020 (supersedes M6-OD-017 decision-exclusion)"
     }
   ]
 }

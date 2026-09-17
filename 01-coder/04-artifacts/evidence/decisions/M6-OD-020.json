@@ -1,0 +1,23 @@
+{
+  "decision_id": "M6-OD-020",
+  "kind": "DECISION",
+  "decided_at": "2026-09-17",
+  "decided_by": "Nguyen Duc Manh (owner + tech lead), conforming to chief auditor list 2026-09-16",
+  "title": "Recall consumer conforms to chief E2 §3 (canonical): decision != SELLABLE -> no-scale + pull-error -> FAIL; supersedes the M6-OD-017 decision-exclusion; enforcement migration renumbered 0014 -> 0017",
+  "decision": "M6 accepts chief E2_BLOCK_REASON_V1 §1/§3 as the canonical cross-module rule (it wins over the ops-core doc §4 'do not read decision' where they conflict). The M6-OD-017 'never read decision / block_reasons' clause is WITHDRAWN as a module-level narrowing of a chief-issued rule (flagged by the chief auditor 2026-09-16, B3). M6 conforms in slice M6.2U: (a) a recall/availability response whose decision is NOT observed as SELLABLE (NOT_SELLABLE, or an unknown / missing decision) makes the Scale-Gate Risk row FAIL -- a SELLABILITY no-scale signal that is DISTINCT from the recall-boolean derivation, so ops-core §4 'do not derive the recall booleans from decision' still holds while E2 §1/§3 'M6 does not scale when NOT_SELLABLE' is now honored; (b) a pull error / timeout / 429 / incomplete read makes the Risk row FAIL (not HOLD) and raises a 'khong xac minh duoc' signal for a running campaign (E2 §1 + ops-core gói chốt §6.3). SEPARATELY: the enforcement migration is renumbered 0014 -> 0017 (0014-0016 were taken by M6.2Q ads_spend); the OD-011 '0014_enforcement' is corrected in the registry and migrations/README.",
+  "supersedes": "M6-OD-017 (the 'never read decision' decision-exclusion clause ONLY; the boolean mapping recall = recall_hold OR recall_case_open / sale_lock / quality_hold, the additive recall_case_open, and the presence-flag -> FAIL stay in force).",
+  "authority_basis": "chief auditor 'Danh sach viec can lam 16/09' items B3 + B1/B4 (evidence file:line@9223c94); chief E2_BLOCK_REASON_V1 §1/§3 (canonical, wins conflicting docs); owner/tech-lead instruction 2026-09-17 to conform, not escalate.",
+  "conditions": [
+    "stricter / fail-closed direction ONLY: leg 1 ADDS FAIL conditions (NOT_SELLABLE, pull-error), never loosens; today the overall gate already HOLDs (M6-OD-002/005 OPEN) so this is armed-not-fired but conforms E2",
+    "reading `decision` is authorized ONLY for the sellability no-scale check; the recall booleans are STILL not derived from decision (ops-core §4 preserved)",
+    "no flag flipped: production_flag/global_gateway_state/external_send stay OFF/BLOCKED/OFF; mapper stays UNWIRED (wiring = S1b/server-bind)",
+    "enforcement migration is 0017 (not 0014); no new SQL is written by M6.2U (the enforcement file is authored at server-bind); only the registry + migrations/README are corrected"
+  ],
+  "unblocks": "slice M6.2U (recall E2 §3 conformance + migration renumber README + D20 docstring).",
+  "source_refs": [
+    "D:/M6/fix/2026-09-16/manh-viec-can-lam-m6-2026-09-16.docx (chief list: B3, B1, B4, C7, D20)",
+    "E2_BLOCK_REASON_V1.md §1/§3 (chief canonical)",
+    "04-artifacts/evidence/decisions/M6-OD-017.json (superseded clause) + M6-OD-011.json (enforcement number)",
+    "00-spec/slices/slice_definitions.json M6.2U"
+  ]
+}
