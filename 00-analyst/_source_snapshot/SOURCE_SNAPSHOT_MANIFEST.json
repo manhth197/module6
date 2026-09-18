@@ -1,6 +1,6 @@
 {
     "snapshot_of":  "00-spec",
-    "created":  "2026-09-17T10:09:52",
+    "created":  "2026-09-18T07:10:35",
     "files":  {
                   "prompts/0027_M6-PC0200_RESEARCH_REPO_AUDIT_PLAN_CRITIC.xml.md":  "4c4df654915d9658e5881fe98f5262b8d918cbc0afcce5be23fa7ac93264ae52",
                   "prompts/0269_M6-P2801_M6_2T_CODER_PLAN.xml.md":  "93b8623329f6726416e8b7b3d1ba8da059d3cb280006c6c819ad6aeb4ab615b0",
@@ -11,7 +11,7 @@
                   "slices/M6.2Q.md":  "94700079e81ac2e4e008349a02a8efbf3b4504abf7a61dd0b07fe0699ef954c9",
                   "prompts/0200_M6-P2102_M6_2L_CODER_IMPLEMENT.xml.md":  "b096dc74b89c01a0ae2ddb7e7aae2acca0ff5a32916bf26581412b822e965bbe",
                   "prompts/0245_M6-P2507_M6_2Q_EVIDENCE_COLLECT.xml.md":  "22431a6d33219c466a68c9e2604c741d86e3b5ee226d541ce8c23f1cc8eee6fc",
-                  "registers/SCHEMA_CHANGELOG.md":  "886eb32597dd1bd5cee270414915274460f14faf7a8e7810ecfe354e698a50a2",
+                  "registers/SCHEMA_CHANGELOG.md":  "b04d4c88bf02d7da6aa88cdc3d35178382ec7f3a7e8b8f0076d3195f2fe28bbe",
                   "prompts/0133_M6-P1507_M6_2F_EVIDENCE_COLLECT.xml.md":  "3f06bca8148b45856a7ea38c2e7504edcd663a632da798ca7ea1670a20414e5c",
                   "M6_FULL_DETAIL_EXTRACT.md":  "dadb2ce78428b816b788feb4bef44202d9fbe1d7264f97c85781004350bc22c7",
                   "prompts/0005_M6-P0005_RUNNER_STATE_INIT_VERIFY.xml.md":  "0695704d7b0657dfbc87fa000c780d1dc46f1673cb6dabbf30c58b9736fa00e8",
